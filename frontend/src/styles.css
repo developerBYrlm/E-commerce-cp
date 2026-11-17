@@ -1,0 +1,356 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap");
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  color: #243d33;
+  background: #f5f7f2;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+body {
+  margin: 0;
+  min-width: 320px;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+button, input, select, textarea { font: inherit; }
+::selection { background: #d2f36b; color: #244d3d; }
+.leaflet-container { z-index: 0; font-family: inherit; }
+.line-clamp-2 { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+
+.preserve-3d { transform-style: preserve-3d; }
+.perspective-1000 { perspective: 1000px; }
+canvas { outline: none; -webkit-tap-highlight-color: transparent; }
+
+/* ========================================================
+   LOCALSPHERE COMPREHENSIVE NIGHT / DARK MODE THEME SYSTEM
+   Supports both data-theme="dark" and .dark on <html>
+======================================================== */
+
+/* 1. Base Canvas & Page Background */
+html[data-theme="dark"],
+html.dark,
+[data-theme="dark"] body,
+html.dark body {
+  color: #e8eee9;
+  background-color: #0d1a14 !important;
+  color-scheme: dark;
+}
+
+[data-theme="dark"] #root,
+html.dark #root {
+  background-color: #0d1a14 !important;
+}
+
+/* 2. Surfaces & Containers */
+/* Page background tone (cream) */
+[data-theme="dark"] .bg-cream,
+[data-theme="dark"] [class*="bg-cream/"],
+html.dark .bg-cream,
+html.dark [class*="bg-cream/"] {
+  background-color: #0d1a14 !important;
+}
+
+/* Sticky Navbar & Header blur */
+[data-theme="dark"] header,
+[data-theme="dark"] header.bg-cream\/90,
+[data-theme="dark"] header[class*="bg-cream/"],
+html.dark header,
+html.dark header.bg-cream\/90,
+html.dark header[class*="bg-cream/"] {
+  background-color: rgba(13, 26, 20, 0.92) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Card, Dialog & Main elevated surface (white) */
+[data-theme="dark"] .bg-white,
+[data-theme="dark"] [class*="bg-white/"],
+html.dark .bg-white,
+html.dark [class*="bg-white/"] {
+  background-color: #14261d !important;
+}
+
+/* Secondary muted surfaces (slate-50) */
+[data-theme="dark"] .bg-slate-50,
+[data-theme="dark"] [class*="bg-slate-50/"],
+html.dark .bg-slate-50,
+html.dark [class*="bg-slate-50/"] {
+  background-color: #102119 !important;
+}
+
+/* Tertiary subtle surfaces (slate-100) */
+[data-theme="dark"] .bg-slate-100,
+[data-theme="dark"] [class*="bg-slate-100/"],
+html.dark .bg-slate-100,
+html.dark [class*="bg-slate-100/"] {
+  background-color: #1a3227 !important;
+}
+
+/* Specific hardcoded section backgrounds in Home & Collection */
+[data-theme="dark"] .bg-\[\#e9f0e3\],
+html.dark .bg-\[\#e9f0e3\],
+[data-theme="dark"] .bg-\[\#eaf0e4\],
+html.dark .bg-\[\#eaf0e4\] {
+  background-color: #102018 !important;
+}
+
+/* 3. Typography & High-Contrast Text */
+/* Primary Brand Heading text */
+[data-theme="dark"] .text-forest,
+html.dark .text-forest {
+  color: #e5f7d3 !important;
+}
+
+/* Deep titles and primary headings */
+[data-theme="dark"] .text-slate-900,
+[data-theme="dark"] .text-slate-800,
+html.dark .text-slate-900,
+html.dark .text-slate-800 {
+  color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .text-slate-700,
+html.dark .text-slate-700 {
+  color: #cbd5e1 !important;
+}
+
+/* Secondary text */
+[data-theme="dark"] .text-slate-600,
+[data-theme="dark"] .text-slate-500,
+html.dark .text-slate-600,
+html.dark .text-slate-500 {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .text-slate-400,
+html.dark .text-slate-400 {
+  color: #64748b !important;
+}
+
+/* Deep green text on light backgrounds -> luminous readable mint on dark */
+[data-theme="dark"] .text-emerald-900,
+[data-theme="dark"] .text-emerald-800,
+[data-theme="dark"] .text-emerald-700,
+html.dark .text-emerald-900,
+html.dark .text-emerald-800,
+html.dark .text-emerald-700 {
+  color: #6ee7b7 !important;
+}
+
+[data-theme="dark"] .text-sky-900,
+[data-theme="dark"] .text-sky-800,
+html.dark .text-sky-900,
+html.dark .text-sky-800 {
+  color: #7dd3fc !important;
+}
+
+[data-theme="dark"] .text-amber-900,
+[data-theme="dark"] .text-amber-800,
+html.dark .text-amber-900,
+html.dark .text-amber-800 {
+  color: #fde047 !important;
+}
+
+/* 4. Pastel Badges, Tags & Summary Boxes */
+/* Emerald / Green tints */
+[data-theme="dark"] .bg-emerald-50,
+[data-theme="dark"] [class*="bg-emerald-50/"],
+[data-theme="dark"] .bg-emerald-100,
+html.dark .bg-emerald-50,
+html.dark [class*="bg-emerald-50/"],
+html.dark .bg-emerald-100 {
+  background-color: rgba(16, 185, 129, 0.16) !important;
+  color: #6ee7b7 !important;
+  border-color: rgba(16, 185, 129, 0.35) !important;
+}
+
+/* Sky / Blue tints */
+[data-theme="dark"] .bg-sky-50,
+[data-theme="dark"] [class*="bg-sky-50/"],
+[data-theme="dark"] .bg-sky-100,
+html.dark .bg-sky-50,
+html.dark [class*="bg-sky-50/"],
+html.dark .bg-sky-100 {
+  background-color: rgba(14, 165, 233, 0.16) !important;
+  color: #7dd3fc !important;
+  border-color: rgba(14, 165, 233, 0.35) !important;
+}
+
+/* Amber / Yellow / Orange tints */
+[data-theme="dark"] .bg-amber-50,
+[data-theme="dark"] [class*="bg-amber-50/"],
+[data-theme="dark"] .bg-amber-100,
+html.dark .bg-amber-50,
+html.dark [class*="bg-amber-50/"],
+html.dark .bg-amber-100 {
+  background-color: rgba(245, 158, 11, 0.16) !important;
+  color: #fde047 !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+}
+
+/* Rose / Red tints */
+[data-theme="dark"] .bg-rose-50,
+[data-theme="dark"] .bg-rose-100,
+[data-theme="dark"] .bg-red-50,
+html.dark .bg-rose-50,
+html.dark .bg-rose-100,
+html.dark .bg-red-50 {
+  background-color: rgba(239, 68, 68, 0.16) !important;
+  color: #fca5a5 !important;
+  border-color: rgba(239, 68, 68, 0.35) !important;
+}
+
+/* 5. Borders, Dividers & Separators */
+[data-theme="dark"] .border-slate-100,
+[data-theme="dark"] .border-slate-200,
+[data-theme="dark"] .border-slate-300,
+html.dark .border-slate-100,
+html.dark .border-slate-200,
+html.dark .border-slate-300 {
+  border-color: #20392b !important;
+}
+
+[data-theme="dark"] [class*="border-forest/"],
+html.dark [class*="border-forest/"] {
+  border-color: rgba(210, 243, 107, 0.2) !important;
+}
+
+[data-theme="dark"] .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
+[data-theme="dark"] .divide-slate-200 > :not([hidden]) ~ :not([hidden]),
+html.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
+html.dark .divide-slate-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #20392b !important;
+}
+
+/* 6. Form Inputs, Selects & Textareas */
+[data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]),
+[data-theme="dark"] select,
+[data-theme="dark"] textarea,
+[data-theme="dark"] .input,
+[data-theme="dark"] .select,
+[data-theme="dark"] .textarea,
+html.dark input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]),
+html.dark select,
+html.dark textarea,
+html.dark .input,
+html.dark .select,
+html.dark .textarea {
+  background-color: #11221a !important;
+  color: #f1f5f9 !important;
+  border-color: #244131 !important;
+}
+
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder,
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #64748b !important;
+}
+
+[data-theme="dark"] input:focus,
+[data-theme="dark"] select:focus,
+[data-theme="dark"] textarea:focus,
+html.dark input:focus,
+html.dark select:focus,
+html.dark textarea:focus {
+  border-color: #d2f36b !important;
+  outline-color: #d2f36b !important;
+}
+
+/* 7. Dropdown Menus, Popups, Modals & Tooltips */
+[data-theme="dark"] .dropdown-content,
+[data-theme="dark"] .modal-box,
+html.dark .dropdown-content,
+html.dark .modal-box {
+  background-color: #15291f !important;
+  color: #f1f5f9 !important;
+  border: 1px solid #264434 !important;
+  box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.65) !important;
+}
+
+[data-theme="dark"] .menu li > a,
+[data-theme="dark"] .menu li > button,
+html.dark .menu li > a,
+html.dark .menu li > button {
+  color: #d9e6dc !important;
+}
+
+[data-theme="dark"] .menu li > a:hover,
+[data-theme="dark"] .menu li > button:hover,
+html.dark .menu li > a:hover,
+html.dark .menu li > button:hover {
+  background-color: #203b2c !important;
+  color: #f3f9f4 !important;
+}
+
+/* 8. Gradients that use white/cream */
+[data-theme="dark"] .from-white,
+html.dark .from-white {
+  --tw-gradient-from: #15291f var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgb(21 41 31 / 0) var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+[data-theme="dark"] .via-\[\#fcfdfa\],
+html.dark .via-\[\#fcfdfa\] {
+  --tw-gradient-stops: var(--tw-gradient-from), #112219 var(--tw-gradient-via-position), var(--tw-gradient-to) !important;
+}
+
+[data-theme="dark"] .to-emerald-50\/20,
+html.dark .to-emerald-50\/20 {
+  --tw-gradient-to: rgba(16, 185, 129, 0.08) var(--tw-gradient-to-position) !important;
+}
+
+/* 9. Cards, Elevations & Depth Shadows */
+[data-theme="dark"] .rounded-2xl.border,
+[data-theme="dark"] .rounded-3xl.border,
+[data-theme="dark"] .rounded-\[24px\].border,
+[data-theme="dark"] .rounded-\[30px\].border,
+html.dark .rounded-2xl.border,
+html.dark .rounded-3xl.border,
+html.dark .rounded-\[24px\].border,
+html.dark .rounded-\[30px\].border {
+  border-color: #20392b !important;
+}
+
+[data-theme="dark"] .shadow-xs,
+[data-theme="dark"] .shadow-sm,
+[data-theme="dark"] .shadow-md,
+[data-theme="dark"] .shadow-lg,
+[data-theme="dark"] .shadow-xl,
+[data-theme="dark"] .shadow-2xl,
+html.dark .shadow-xs,
+html.dark .shadow-sm,
+html.dark .shadow-md,
+html.dark .shadow-lg,
+html.dark .shadow-xl,
+html.dark .shadow-2xl {
+  box-shadow: 0 6px 24px -2px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* 10. Buttons & Interactive Elements */
+[data-theme="dark"] .btn-ghost:hover,
+html.dark .btn-ghost:hover {
+  background-color: #1a3226 !important;
+  color: #e5f7d3 !important;
+}
+
+/* Lime button stays vibrant with dark text */
+[data-theme="dark"] .bg-lime,
+html.dark .bg-lime {
+  background-color: #d2f36b !important;
+  color: #14251e !important;
+}
+
+/* Hover on cards & interactive elements */
+[data-theme="dark"] .hover\:bg-slate-50:hover,
+html.dark .hover\:bg-slate-50:hover {
+  background-color: #193125 !important;
+}
+
+[data-theme="dark"] .hover\:bg-slate-100:hover,
+html.dark .hover\:bg-slate-100:hover {
+  background-color: #203c2e !important;
+}
