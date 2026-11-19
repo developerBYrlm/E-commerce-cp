@@ -2,11 +2,15 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useForm, useWatch } from "react-hook-form";
 import { ArrowLeft, ArrowRight, Compass, Eye, EyeOff } from "lucide-react";
+import { AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import api from "../api/client";
 import { useAuth } from "../contexts/AuthContext";
 import { useCollection } from "../hooks/useApi";
 import LocationFields from "../components/LocationFields";
+import ModernAuthLoader from "../components/ModernAuthLoader";
+
+const MIN_LOADING_TIME = 1500;
 
 export default function AuthPage({ mode = "login" }) {
   const { login, googleLogin, register: createAccount } = useAuth();
@@ -14,6 +18,7 @@ export default function AuthPage({ mode = "login" }) {
   const [params] = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [loadingStep, setLoadingStep] = useState(1);
   const [notice, setNotice] = useState("");
   const [location, setLocation] = useState({});
   const [shopCategories, setShopCategories] = useState([]);
@@ -41,14 +46,23 @@ export default function AuthPage({ mode = "login" }) {
         client_id: googleClientId,
         callback: async ({ credential }) => {
           setBusy(true);
+          setLoadingStep(1);
+          const stepTimer = setTimeout(() => setLoadingStep(2), 750);
+          const minWait = new Promise((resolve) => setTimeout(resolve, MIN_LOADING_TIME));
           try {
-            await googleLogin({ credential });
+            const [result] = await Promise.all([
+              googleLogin({ credential }).catch((err) => ({ error: err })),
+              minWait,
+            ]);
+            if (result?.error) throw result.error;
             toast.success("Welcome to LocalSphere!");
             navigate(redirectTarget, { replace: true });
           } catch (error) {
             toast.error(error.message);
           } finally {
+            clearTimeout(stepTimer);
             setBusy(false);
+            setLoadingStep(1);
           }
         },
       });
@@ -78,30 +92,66 @@ export default function AuthPage({ mode = "login" }) {
   }, [googleClientId, googleLogin, mode, navigate, redirectTarget]);
 
   async function onSubmit(values) {
+    if (registerMode) {
+      if (!location.district || !location.subDistrict || !location.area?.trim()) {
+        toast.error("Choose your district, sub-district, and area");
+        return;
+      }
+      if (selectedRole === "owner" && (!shopCategories.length || shopCategories.length > 10)) {
+        toast.error("Choose between 1 and 10 business categories");
+        return;
+      }
+    }
+    if (mode === "reset" && !params.get("token")) {
+      toast.error("Reset link is missing its token");
+      return;
+    }
+
     setBusy(true);
+    setLoadingStep(1);
+    const stepTimer = setTimeout(() => setLoadingStep(2), 750);
+    const minWait = new Promise((resolve) => setTimeout(resolve, MIN_LOADING_TIME));
+
     try {
       if (mode === "login") {
-        const user = await login(values);
+        const [result] = await Promise.all([
+          login(values).catch((err) => ({ error: err })),
+          minWait,
+        ]);
+        if (result?.error) throw result.error;
         toast.success("Welcome back!");
         navigate(redirectTarget, { replace: true });
       } else if (registerMode) {
-        if (!location.district || !location.subDistrict || !location.area?.trim()) throw new Error("Choose your district, sub-district, and area");
-        if (selectedRole === "owner" && (!shopCategories.length || shopCategories.length > 10)) throw new Error("Choose between 1 and 10 business categories");
-        await createAccount({ ...values, ...location, shopCategories });
+        const [result] = await Promise.all([
+          createAccount({ ...values, ...location, shopCategories }).catch((err) => ({ error: err })),
+          minWait,
+        ]);
+        if (result?.error) throw result.error;
         toast.success("Your LocalSphere account is ready");
         navigate(redirectTarget, { replace: true });
       } else if (mode === "forgot") {
-        const { data } = await api.post("/auth/forgot-password", values);
-        setNotice(data.message);
+        const [result] = await Promise.all([
+          api.post("/auth/forgot-password", values).catch((err) => ({ error: err })),
+          minWait,
+        ]);
+        if (result?.error) throw result.error;
+        setNotice(result.data?.message || "Password reset instructions sent");
       } else if (mode === "reset") {
         const token = params.get("token");
-        if (!token) throw new Error("Reset link is missing its token");
-        const { data } = await api.post("/auth/reset-password", { token, password: values.password });
-        setNotice(data.message);
+        const [result] = await Promise.all([
+          api.post("/auth/reset-password", { token, password: values.password }).catch((err) => ({ error: err })),
+          minWait,
+        ]);
+        if (result?.error) throw result.error;
+        setNotice(result.data?.message || "Password updated successfully");
       }
     } catch (error) {
       toast.error(error.message);
-    } finally { setBusy(false); }
+    } finally {
+      clearTimeout(stepTimer);
+      setBusy(false);
+      setLoadingStep(1);
+    }
   }
 
   return <div className="mx-auto grid min-h-[75vh] max-w-7xl items-center gap-10 px-5 py-12 lg:grid-cols-2 lg:px-8">
@@ -110,7 +160,10 @@ export default function AuthPage({ mode = "login" }) {
       <div className="mt-20 max-w-lg"><p className="text-xs font-bold uppercase tracking-[.2em] text-lime">Good things are closer</p><h1 className="mt-4 text-5xl font-extrabold leading-tight tracking-tight">{registerMode ? "Your next chapter is just around the corner." : "Your neighborhood, right where you left it."}</h1><p className="mt-5 leading-7 text-white/65">Meet the people, places, and independent businesses that make your local community feel like home.</p></div>
       <div className="mt-16 rounded-2xl bg-white/10 p-5"><p className="text-sm leading-6 text-white/85">“Found my new favorite bakery and booked a bike tune-up in one afternoon. Love having the neighborhood in one place.”</p><p className="mt-3 text-xs font-semibold text-lime">— Maya, LocalSphere neighbor</p></div>
     </div>
-    <div className="mx-auto w-full max-w-md">
+    <div className="relative mx-auto w-full max-w-md min-h-[480px]">
+      <AnimatePresence>
+        {busy && <ModernAuthLoader mode={mode} step={loadingStep} />}
+      </AnimatePresence>
       <Link to="/" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500"><ArrowLeft size={16} /> Back to LocalSphere</Link>
       <p className="mt-8 text-xs font-bold uppercase tracking-[.18em] text-emerald-700">{resetMode ? "Account help" : registerMode ? "Join the neighborhood" : "Welcome back"}</p>
       <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-forest">{mode === "login" ? "Good to see you." : mode === "register" ? "Find your kind of local." : mode === "forgot" ? "Forgot your password?" : "Choose a new password"}</h2>
@@ -130,7 +183,39 @@ export default function AuthPage({ mode = "login" }) {
         {(mode === "login" || registerMode || mode === "forgot") && <label className="form-control gap-2"><span className="text-sm font-semibold text-forest">Email address</span><input type="email" className="input input-bordered w-full rounded-xl bg-white" placeholder="you@example.com" {...register("email", { required: "Email is required", pattern: { value: /^\S+@\S+\.\S+$/, message: "Enter a valid email" } })} />{errors.email && <span className="text-xs text-red-600">{errors.email.message}</span>}</label>}
         {(mode === "login" || registerMode || mode === "reset") && <label className="form-control gap-2"><span className="text-sm font-semibold text-forest">Password</span><span className="relative"><input type={showPassword ? "text" : "password"} className="input input-bordered w-full rounded-xl bg-white pr-12" placeholder={registerMode || mode === "reset" ? "At least 10 characters" : "Your password"} {...register("password", { required: "Password is required", minLength: { value: 10, message: "Password must be at least 10 characters" } })} /><button type="button" className="absolute right-3 top-3 text-slate-400" aria-label="Toggle password visibility" onClick={() => setShowPassword(!showPassword)}>{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button></span>{errors.password && <span className="text-xs text-red-600">{errors.password.message}</span>}</label>}
         {mode === "login" && <div className="text-right"><Link to="/forgot-password" className="text-xs font-semibold text-emerald-700">Forgot password?</Link></div>}
-        <button disabled={busy} className="btn w-full rounded-xl border-0 bg-forest text-white hover:bg-forest/90">{busy ? <span className="loading loading-spinner loading-sm" /> : <>{mode === "login" ? "Sign in" : mode === "register" ? "Create your account" : mode === "forgot" ? "Send reset instructions" : "Update password"}<ArrowRight size={17} /></>}</button>
+        <button
+          disabled={busy}
+          className="btn relative w-full overflow-hidden rounded-xl border-0 bg-forest text-white transition hover:bg-forest/90"
+        >
+          {busy ? (
+            <div className="flex items-center justify-center gap-2.5">
+              <div className="flex h-4 items-center gap-1">
+                <span className="inline-block h-3 w-1 rounded-full bg-lime animate-[pulse_0.6s_ease-in-out_infinite]" />
+                <span className="inline-block h-5 w-1 rounded-full bg-emerald-300 animate-[pulse_0.6s_ease-in-out_0.15s_infinite]" />
+                <span className="inline-block h-3.5 w-1 rounded-full bg-cyan-300 animate-[pulse_0.6s_ease-in-out_0.3s_infinite]" />
+                <span className="inline-block h-4.5 w-1 rounded-full bg-lime animate-[pulse_0.6s_ease-in-out_0.45s_infinite]" />
+              </div>
+              <span className="text-sm font-semibold tracking-wide text-white">
+                {mode === "login"
+                  ? "Signing you in..."
+                  : registerMode
+                    ? "Creating your account..."
+                    : "Processing..."}
+              </span>
+            </div>
+          ) : (
+            <>
+              {mode === "login"
+                ? "Sign in"
+                : registerMode
+                  ? "Create your account"
+                  : mode === "forgot"
+                    ? "Send reset instructions"
+                    : "Update password"}
+              <ArrowRight size={17} />
+            </>
+          )}
+        </button>
       </form>}
       {mode === "login" && <div className="mt-5">
         {googleClientId
