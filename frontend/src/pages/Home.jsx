@@ -83,6 +83,11 @@ const CATEGORIES_DATA = [
     badgeColor: "bg-emerald-100 text-emerald-900 border-emerald-200",
     keywords: [
       "Health & Beauty", "Medicine", "Pharmacy", "Healthcare", "Doctor Appointment",
+      "First Aid", "Vitamins", "Supplements", "Pain Relief", "Gastric Medicine",
+      "Cough Syrup", "Cold & Flu", "Antiseptic", "Oral Saline", "Diabetes Care",
+      "Blood Pressure Monitor", "Thermometer", "Nebulizer", "Surgical Mask",
+      "Medical Equipment", "Herbal Medicine", "Eye Drops", "Inhaler", "Baby Healthcare",
+      "Home Nursing", "Physiotherapy", "Diagnostic Test", "Ambulance Service",
       "Beauty", "Cosmetics", "Beauty Salon", "Hair Cutting", "Spa", "Skincare",
       "Fitness", "Yoga", "Personal Care", "Dental", "Herbal", "Wellness"
     ],
@@ -100,7 +105,9 @@ const CATEGORIES_DATA = [
       const matchWords = [
         "health", "beauty", "cosmetic", "medicine", "pharmacy", "doctor",
         "clinic", "salon", "hair", "spa", "skincare", "fitness", "gym", "yoga",
-        "wellness", "parlor", "massage", "dental", "care"
+        "wellness", "parlor", "massage", "dental", "care", "vitamin", "saline",
+        "first aid", "supplement", "fever", "cough", "gastric", "relief", "antiseptic",
+        "bandage", "mask", "inhaler", "nursing", "physio", "ambulance", "diagnostic"
       ];
       return matchWords.some((w) => text.includes(w));
     },

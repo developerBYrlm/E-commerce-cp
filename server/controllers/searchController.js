@@ -245,7 +245,8 @@ export const suggestions = asyncHandler(async (req, res) => {
     "clothing", "dress", "mens dress", "shirt", "pant", "fashion", "furniture", "table", "chair", "bed", "sofa",
     "electrician", "electric", "wiring", "repair", "tv repair", "fridge repair", "appliance", "plumbing",
     "cleaning", "beauty", "haircut", "salon", "groceries", "food", "bakery", "delivery", "carpentry", "maintenance",
-    "pet", "cat", "dog", "bird", "pigeon", "parrot", "cockatiel", "lovebird", "budgie", "quail"
+    "pet", "cat", "dog", "bird", "pigeon", "parrot", "cockatiel", "lovebird", "budgie", "quail",
+    "medicine", "pharmacy", "first aid", "vitamins", "supplements", "saline", "antiseptic", "gastric medicine", "cough syrup", "cold & flu", "inhaler"
   ];
   for (const kw of ALL_PRESET_KEYWORDS) {
     if (kw.toLowerCase().includes(q.toLowerCase()) || q.toLowerCase().includes(kw.toLowerCase())) {

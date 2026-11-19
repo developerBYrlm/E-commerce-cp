@@ -17,6 +17,10 @@ export const PRODUCT_KEYWORDS = [
   "Pigeon", "Parrot", "Cockatiel", "Lovebird", "Budgerigar", "Budgie",
   "Finch", "Canary", "Macaw", "Cockatoo", "Conure", "Dove",
   "Myna", "Quail", "Duck", "Chicken", "Bird Cage", "Bird Accessories",
+  "Pharmacy", "First Aid", "Vitamins", "Supplements", "Pain Relief", "Gastric Medicine",
+  "Cough Syrup", "Cold & Flu", "Antiseptic", "Oral Saline", "Diabetes Care",
+  "Blood Pressure Monitor", "Thermometer", "Nebulizer", "Surgical Mask",
+  "Medical Equipment", "Herbal Medicine", "Eye Drops", "Inhaler", "Baby Healthcare",
 ];
 
 export const SERVICE_KEYWORDS = [
@@ -27,6 +31,7 @@ export const SERVICE_KEYWORDS = [
   "Graphic Design", "Web Development", "Digital Marketing", "Tuition", "Coaching",
   "Healthcare", "Doctor Appointment",
   "Pet Care", "Veterinary", "Pet Grooming", "Pet Training", "Pet Sitting",
+  "Home Nursing", "Physiotherapy", "Diagnostic Test", "Ambulance Service",
 ];
 
 export const MAX_LISTING_IMAGES = 5;
