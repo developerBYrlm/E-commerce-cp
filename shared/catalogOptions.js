@@ -12,6 +12,8 @@ export const PRODUCT_KEYWORDS = [
   "Printer", "Camera", "TV", "Refrigerator", "AC", "Fan", "Electronics", "Grocery",
   "Food", "Fashion", "Shoes", "Watch", "Furniture", "Home Decor", "Beauty",
   "Cosmetics", "Medicine", "Accessories", "Art",
+  "Pet", "Cat", "Dog", "Bird", "Pet Food", "Cat Food", "Dog Food", "Bird Food",
+  "Pet Accessories", "Fish & Aquarium", "Pet Care",
 ];
 
 export const SERVICE_KEYWORDS = [
@@ -21,6 +23,7 @@ export const SERVICE_KEYWORDS = [
   "Electrician", "Home Cleaning", "Beauty Salon", "Hair Cutting", "Photography",
   "Graphic Design", "Web Development", "Digital Marketing", "Tuition", "Coaching",
   "Healthcare", "Doctor Appointment",
+  "Pet Care", "Veterinary", "Pet Grooming", "Pet Training", "Pet Sitting",
 ];
 
 export const MAX_LISTING_IMAGES = 5;

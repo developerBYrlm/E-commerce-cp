@@ -213,8 +213,9 @@ const CATEGORIES_DATA = [
     glowColor: "border-rose-300 shadow-rose-500/10",
     badgeColor: "bg-rose-100 text-rose-900 border-rose-200",
     keywords: [
-      "Pet Care", "Pet Food", "Veterinary", "Pet Grooming", "Education",
-      "Tuition", "Coaching", "Toys", "Baby Care", "Kids & Family", "Books",
+      "Pet", "Cat", "Dog", "Bird", "Pet Care", "Pet Food", "Cat Food", "Dog Food", "Bird Food",
+      "Pet Accessories", "Fish & Aquarium", "Veterinary", "Pet Grooming", "Pet Training", "Pet Sitting",
+      "Education", "Tuition", "Coaching", "Toys", "Baby Care", "Kids & Family", "Books",
       "Sports & Fitness", "Hotel Booking", "Resort Booking", "Travel Agency"
     ],
     matcher: (item) => {
@@ -229,7 +230,7 @@ const CATEGORIES_DATA = [
         .join(" ")
         .toLowerCase();
       const matchWords = [
-        "pet", "dog", "cat", "vet", "grooming", "education", "tuition", "coach",
+        "pet", "dog", "cat", "bird", "fish", "aquarium", "vet", "grooming", "education", "tuition", "coach",
         "toy", "baby", "kid", "child", "family", "book", "sport", "fitness",
         "hotel", "resort", "travel"
       ];
