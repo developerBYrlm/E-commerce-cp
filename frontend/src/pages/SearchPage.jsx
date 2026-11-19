@@ -245,8 +245,8 @@ export default function SearchPage() {
       </div>
 
       {query.isLoading ? (
-        <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {[1, 2, 3].map((n) => (
+        <div className="mt-5 grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          {[1, 2, 3, 4].map((n) => (
             <CardSkeleton key={n} />
           ))}
         </div>
@@ -259,7 +259,7 @@ export default function SearchPage() {
           {!!results.shops?.length && (
             <section className="mt-8">
               <h2 className="mb-4 text-xl font-bold text-forest">Local shops</h2>
-              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {results.shops.map((shop) => (
                   <ShopCard key={shop._id} shop={shop} />
                 ))}

@@ -44,29 +44,31 @@ export default function ShopCard({ shop }) {
       </div>
       <span className="absolute bottom-3 right-3 grid h-10 w-10 place-items-center rounded-2xl bg-white text-forest shadow-md overflow-hidden">{shop.logo ? <img src={getImageUrl(shop.logo)} alt="" className="h-full w-full object-cover" /> : <span className="font-bold">{shop.name?.slice(0, 1)}</span>}</span>
     </div>
-    <div className="p-5">
+    <div className="p-4 sm:p-5">
       <div className="flex items-center gap-1.5"><h3 className="truncate font-bold text-forest">{shop.name}</h3>{shop.verified && <BadgeCheck size={16} className="shrink-0 text-emerald-600" />}</div>
       <p className="mt-2 flex items-center gap-1.5 text-xs text-slate-500"><MapPin size={13} />{[shop.address?.city, shop.address?.region].filter(Boolean).join(", ") || "Around your neighborhood"}</p>
-      <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4 text-sm">
-        <div className="flex items-center gap-2">
-          <span className="flex items-center gap-1 font-semibold text-forest"><Star size={15} className="fill-amber-400 text-amber-400" />{Number(shop.rating || 0).toFixed(1)} <span className="font-normal text-slate-400">({shop.reviewCount || 0})</span></span>
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-1.5 border-t border-slate-100 pt-3.5 text-xs sm:text-sm">
+        <div className="flex items-center gap-1.5">
+          <span className="flex items-center gap-1 font-semibold text-forest"><Star size={14} className="fill-amber-400 text-amber-400" />{Number(shop.rating || 0).toFixed(1)} <span className="font-normal text-slate-400">({shop.reviewCount || 0})</span></span>
           {shop.followers?.length > 0 && (
-            <span className="text-[11px] font-bold text-sky-800 bg-sky-50 px-2 py-0.5 rounded-full border border-sky-100">
+            <span className="text-[10px] font-bold text-sky-800 bg-sky-50 px-1.5 py-0.5 rounded-full border border-sky-100">
               👥 {shop.followers.length}
             </span>
           )}
         </div>
-        {(!user || user.role === "customer") && (
-          <button
-            type="button"
-            onClick={handleMessageClick}
-            className="inline-flex items-center gap-1 rounded-full border border-forest/15 bg-cream/70 px-3 py-1 text-xs font-semibold text-forest shadow-sm transition hover:bg-forest hover:text-white"
-          >
-            <MessageSquare size={13} />
-            Message
-          </button>
-        )}
-        <span className="flex items-center gap-1 font-semibold text-emerald-700">Explore <ArrowUpRight size={15} /></span>
+        <div className="flex items-center gap-1.5 ml-auto">
+          {(!user || user.role === "customer") && (
+            <button
+              type="button"
+              onClick={handleMessageClick}
+              className="inline-flex items-center gap-1 rounded-full border border-forest/15 bg-cream/70 px-2.5 py-1 text-xs font-semibold text-forest shadow-sm transition hover:bg-forest hover:text-white"
+            >
+              <MessageSquare size={12} />
+              Message
+            </button>
+          )}
+          <span className="flex items-center gap-0.5 font-semibold text-emerald-700 text-xs sm:text-sm">Explore <ArrowUpRight size={14} /></span>
+        </div>
       </div>
     </div>
   </Link>;

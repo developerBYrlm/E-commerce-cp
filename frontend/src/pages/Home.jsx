@@ -270,7 +270,7 @@ function SectionHeading({ eyebrow, title, note, link, action = "Explore all" }) 
 export default function Home() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const shopsQuery = useCollection("/shops", { limit: 3, popular: true });
+  const shopsQuery = useCollection("/shops", { limit: 4, popular: true });
   const productsQuery = useCollection("/products", { limit: 4, trending: true });
   const servicesQuery = useCollection("/services", { limit: 4, trending: true });
   const postsQuery = useCollection("/posts", { limit: 3 });
@@ -817,13 +817,13 @@ export default function Home() {
         />
         {
           shopsQuery.isLoading ? (
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {[1, 2, 3].map((n) => (
+            <div className="grid gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+              {[1, 2, 3, 4].map((n) => (
                 <CardSkeleton key={n} />
               ))}
             </div>
           ) : shops.length ? (
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               {shops.map((shop) => (
                 <Card3DTilt key={shop._id} maxTilt={10} scale={1.02} className="rounded-3xl">
                   <ShopCard shop={shop} />

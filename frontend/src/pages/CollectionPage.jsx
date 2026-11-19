@@ -40,7 +40,34 @@ export default function CollectionPage({ kind }) {
     </div>
     <div className="mb-7 mt-9 flex flex-wrap items-center justify-between gap-4"><div><p className="font-bold text-forest">{query.isLoading ? "Finding the good stuff…" : `${query.data?.pagination?.total || items.length} nearby ${kind}`}</p><p className="mt-1 text-xs text-slate-500">Showing what's available on LocalSphere</p></div><div className="flex gap-2"><button onClick={() => setShowMap(!showMap)} className={`btn btn-sm rounded-full ${showMap ? "bg-forest text-white" : "border-slate-200 bg-white text-forest"}`}><MapPin size={15} /> {showMap ? "Hide map" : "Map view"}</button><button className="btn btn-sm rounded-full border-slate-200 bg-white text-forest"><SlidersHorizontal size={15} /> Filters</button></div></div>
     {showMap && <div className="mb-7"><MapView items={items} /></div>}
-    {query.isError ? <div className="rounded-2xl bg-red-50 p-6 text-sm text-red-700">{query.error.message}</div> : query.isLoading ? <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{[1, 2, 3, 4, 5, 6].map((n) => <CardSkeleton key={n} />)}</div> : items.length ? <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{items.map((item) => kind === "shops" ? <ShopCard key={item._id} shop={item} /> : <ItemCard key={item._id} item={item} kind={kind} />)}</div> : <div className="rounded-3xl border border-dashed border-forest/20 bg-white p-12 text-center"><Sparkles className="mx-auto text-emerald-700" /><h2 className="mt-4 font-bold text-forest">The neighborhood's still growing</h2><p className="mt-2 text-sm text-slate-500">{current.empty}</p><Link to="/register" className="btn mt-5 rounded-full border-0 bg-forest text-white">Help it grow</Link></div>}
+    {query.isError ? (
+      <div className="rounded-2xl bg-red-50 p-6 text-sm text-red-700">{query.error.message}</div>
+    ) : query.isLoading ? (
+      <div className="grid gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+          <CardSkeleton key={n} />
+        ))}
+      </div>
+    ) : items.length ? (
+      <div className="grid gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        {items.map((item) =>
+          kind === "shops" ? (
+            <ShopCard key={item._id} shop={item} />
+          ) : (
+            <ItemCard key={item._id} item={item} kind={kind} />
+          )
+        )}
+      </div>
+    ) : (
+      <div className="rounded-3xl border border-dashed border-forest/20 bg-white p-12 text-center">
+        <Sparkles className="mx-auto text-emerald-700" />
+        <h2 className="mt-4 font-bold text-forest">The neighborhood's still growing</h2>
+        <p className="mt-2 text-sm text-slate-500">{current.empty}</p>
+        <Link to="/register" className="btn mt-5 rounded-full border-0 bg-forest text-white">
+          Help it grow
+        </Link>
+      </div>
+    )}
   </div>;
 }
 
