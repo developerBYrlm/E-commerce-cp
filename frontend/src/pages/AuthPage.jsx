@@ -19,7 +19,11 @@ export default function AuthPage({ mode = "login" }) {
   const [shopCategories, setShopCategories] = useState([]);
   const googleButtonRef = useRef(null);
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-  const redirectTarget = params.get("redirect") === "/cart" ? "/cart" : "/dashboard";
+  const redirectParam = params.get("redirect");
+  const redirectTarget =
+    redirectParam && redirectParam.startsWith("/") && !redirectParam.startsWith("//")
+      ? redirectParam
+      : "/dashboard";
   const { register, handleSubmit, control, formState: { errors } } = useForm({
     defaultValues: { role: params.get("role") === "owner" ? "owner" : "customer" },
   });
@@ -85,7 +89,7 @@ export default function AuthPage({ mode = "login" }) {
         if (selectedRole === "owner" && (!shopCategories.length || shopCategories.length > 10)) throw new Error("Choose between 1 and 10 business categories");
         await createAccount({ ...values, ...location, shopCategories });
         toast.success("Your LocalSphere account is ready");
-        navigate("/dashboard");
+        navigate(redirectTarget, { replace: true });
       } else if (mode === "forgot") {
         const { data } = await api.post("/auth/forgot-password", values);
         setNotice(data.message);
@@ -111,6 +115,12 @@ export default function AuthPage({ mode = "login" }) {
       <p className="mt-8 text-xs font-bold uppercase tracking-[.18em] text-emerald-700">{resetMode ? "Account help" : registerMode ? "Join the neighborhood" : "Welcome back"}</p>
       <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-forest">{mode === "login" ? "Good to see you." : mode === "register" ? "Find your kind of local." : mode === "forgot" ? "Forgot your password?" : "Choose a new password"}</h2>
       <p className="mt-2 text-sm leading-6 text-slate-500">{mode === "login" ? "Sign in to pick up where you left off." : mode === "register" ? "Create an account and get to know your neighborhood." : "We'll help you get back into your account."}</p>
+      {redirectParam?.includes("/messages") && (
+        <div className="mt-6 rounded-2xl border border-emerald-300 bg-emerald-50/95 p-4 text-xs font-semibold text-emerald-900 shadow-sm flex items-center gap-2.5">
+          <span className="text-base shrink-0">🔒</span>
+          <span>Please log in to send a message to the shop owner. (দোকানদারকে মেসেজ পাঠাতে দয়া করে লগইন করুন)</span>
+        </div>
+      )}
       {notice ? <div className="mt-7 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">{notice}{mode === "reset" && <Link to="/login" className="mt-3 flex items-center gap-1 font-bold">Sign in <ArrowRight size={14} /></Link>}</div> : <form onSubmit={handleSubmit(onSubmit)} className="mt-7 space-y-4">
         {registerMode && <><label className="form-control gap-2"><span className="text-sm font-semibold text-forest">Your name</span><input className="input input-bordered w-full rounded-xl bg-white" placeholder="Alex Morgan" {...register("name", { required: "Please enter your name", minLength: { value: 2, message: "Name must be at least 2 characters" } })} />{errors.name && <span className="text-xs text-red-600">{errors.name.message}</span>}</label>
           <label className="form-control gap-2"><span className="text-sm font-semibold text-forest">I’m here as a</span><select className="select select-bordered w-full rounded-xl bg-white" {...register("role")}><option value="customer">Neighbor — discover local businesses</option><option value="owner">Business owner — grow my local business</option></select></label>
@@ -127,7 +137,7 @@ export default function AuthPage({ mode = "login" }) {
           ? <div ref={googleButtonRef} className="flex min-h-10 justify-center" />
           : <p className="text-center text-xs text-slate-400">Google sign-in is available after setting VITE_GOOGLE_CLIENT_ID.</p>}
       </div>}
-      <p className="mt-6 text-center text-sm text-slate-500">{mode === "login" ? <>New to LocalSphere? <Link to="/register" className="font-bold text-forest">Create an account</Link></> : mode === "register" ? <>Already have an account? <Link to="/login" className="font-bold text-forest">Sign in</Link></> : mode === "forgot" ? <Link to="/login" className="font-bold text-forest">Back to sign in</Link> : null}</p>
+      <p className="mt-6 text-center text-sm text-slate-500">{mode === "login" ? <>New to LocalSphere? <Link to={redirectParam ? `/register?redirect=${encodeURIComponent(redirectParam)}` : "/register"} className="font-bold text-forest">Create an account</Link></> : mode === "register" ? <>Already have an account? <Link to={redirectParam ? `/login?redirect=${encodeURIComponent(redirectParam)}` : "/login"} className="font-bold text-forest">Sign in</Link></> : mode === "forgot" ? <Link to="/login" className="font-bold text-forest">Back to sign in</Link> : null}</p>
     </div>
   </div>;
 }

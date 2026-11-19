@@ -21,7 +21,7 @@ export default function ChatContainer() {
   const [selectedParticipant, setSelectedParticipant] = useState(null);
   const [newChatModalOpen, setNewChatModalOpen] = useState(false);
 
-  const recipientParam = params.get("with") || "";
+  const recipientParam = params.get("with") || params.get("userId") || "";
 
   // 1. Fetch denormalized Inbox snapshot
   const { data: inboxData, isLoading: isInboxLoading } = useQuery({

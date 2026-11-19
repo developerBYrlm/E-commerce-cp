@@ -208,12 +208,20 @@ function ShopDetail({ shop, user, followShop }) {
             </button>
           )}
           {(!user || user.role === "customer") && shop.owner?._id && String(shop.owner._id) !== user?.id && (
-            <Link
-              to={user ? `/messages?with=${shop.owner._id}` : `/auth?redirect=${encodeURIComponent(`/messages?with=${shop.owner._id}`)}`}
+            <button
+              type="button"
+              onClick={() => {
+                if (!user) {
+                  toast("Please log in to message the shop owner", { icon: "🔒" });
+                  navigate(`/login?redirect=${encodeURIComponent(`/messages?with=${shop.owner._id}`)}`);
+                  return;
+                }
+                navigate(`/messages?with=${shop.owner._id}`);
+              }}
               className="btn mt-3 w-full rounded-xl border-0 bg-forest text-white"
             >
               Message this business
-            </Link>
+            </button>
           )}
           {user?.role === "customer" && (
             <button onClick={reportShop} className="btn btn-ghost mt-3 w-full rounded-xl text-slate-500">
@@ -298,7 +306,8 @@ function ItemDetail({ item, kind, user, toggleWishlist, followService }) {
       return;
     }
     if (!user) {
-      navigate(`/auth?redirect=${encodeURIComponent(`/messages?with=${ownerId}`)}`);
+      toast("Please log in to message the shop owner", { icon: "🔒" });
+      navigate(`/login?redirect=${encodeURIComponent(`/messages?with=${ownerId}`)}`);
       return;
     }
     if (String(user.id || user._id) === String(ownerId)) {

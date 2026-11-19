@@ -363,7 +363,8 @@ export default function Home() {
       return;
     }
     if (!user) {
-      navigate(`/auth?redirect=${encodeURIComponent(`/messages?with=${ownerId}`)}`);
+      toast("Please log in to message the shop owner", { icon: "🔒" });
+      navigate(`/login?redirect=${encodeURIComponent(`/messages?with=${ownerId}`)}`);
       return;
     }
     if (String(user.id || user._id) === String(ownerId)) {

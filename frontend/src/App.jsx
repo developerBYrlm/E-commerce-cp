@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
 const Home = lazy(() => import("./pages/Home"));
 const AuthPage = lazy(() => import("./pages/AuthPage"));
@@ -20,8 +20,12 @@ import toast from "react-hot-toast";
 
 function SessionGate({ children, roles }) {
   const { user, loading } = useAuth();
+  const location = useLocation();
   if (loading) return <Loader />;
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user) {
+    const redirectUrl = location.pathname + location.search;
+    return <Navigate to={`/login?redirect=${encodeURIComponent(redirectUrl)}`} replace />;
+  }
   if (roles && !roles.includes(user.role)) return <Navigate to="/dashboard" replace />;
   return children;
 }
@@ -43,6 +47,7 @@ export default function App() {
   return <Suspense fallback={<Loader />}><Routes><Route element={<MainLayout />}>
     <Route index element={<Home />} />
     <Route path="login" element={<AuthPage />} />
+    <Route path="auth" element={<AuthPage />} />
     <Route path="register" element={<AuthPage mode="register" />} />
     <Route path="forgot-password" element={<AuthPage mode="forgot" />} />
     <Route path="reset-password" element={<AuthPage mode="reset" />} />

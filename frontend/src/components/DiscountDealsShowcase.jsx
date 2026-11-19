@@ -476,14 +476,23 @@ function ProductAdWindowFrame({
                   <span>Details</span>
                 </Link>
 
-                {shop.owner && user?.role === "customer" && (
-                  <Link
-                    to={`/messages?userId=${owner._id || shop.owner}&shopId=${shop._id}`}
+                {shop.owner && (!user || user.role === "customer") && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const ownerId = owner._id || shop.owner;
+                      if (!user) {
+                        toast("Please log in to message the shop owner", { icon: "🔒" });
+                        navigate(`/login?redirect=${encodeURIComponent(`/messages?with=${ownerId}`)}`);
+                        return;
+                      }
+                      navigate(`/messages?with=${ownerId}`);
+                    }}
                     className="flex h-9 w-9 items-center justify-center rounded-xl border border-forest/20 bg-white/90 text-forest transition hover:bg-forest hover:text-white dark:border-white/15 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-emerald-600"
                     title="Message shop owner"
                   >
                     <MessageSquare className="h-3.5 w-3.5" />
-                  </Link>
+                  </button>
                 )}
               </div>
             </div>
