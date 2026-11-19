@@ -213,7 +213,9 @@ const CATEGORIES_DATA = [
     glowColor: "border-rose-300 shadow-rose-500/10",
     badgeColor: "bg-rose-100 text-rose-900 border-rose-200",
     keywords: [
-      "Pet", "Cat", "Dog", "Bird", "Pet Care", "Pet Food", "Cat Food", "Dog Food", "Bird Food",
+      "Pet", "Cat", "Dog", "Bird", "Pigeon", "Parrot", "Cockatiel", "Lovebird", "Budgerigar", "Budgie",
+      "Finch", "Canary", "Macaw", "Cockatoo", "Conure", "Dove", "Myna", "Quail", "Duck", "Chicken",
+      "Bird Cage", "Bird Accessories", "Pet Care", "Pet Food", "Cat Food", "Dog Food", "Bird Food",
       "Pet Accessories", "Fish & Aquarium", "Veterinary", "Pet Grooming", "Pet Training", "Pet Sitting",
       "Education", "Tuition", "Coaching", "Toys", "Baby Care", "Kids & Family", "Books",
       "Sports & Fitness", "Hotel Booking", "Resort Booking", "Travel Agency"
@@ -230,7 +232,9 @@ const CATEGORIES_DATA = [
         .join(" ")
         .toLowerCase();
       const matchWords = [
-        "pet", "dog", "cat", "bird", "fish", "aquarium", "vet", "grooming", "education", "tuition", "coach",
+        "pet", "dog", "cat", "bird", "pigeon", "parrot", "cockatiel", "lovebird", "budgie", "budgerigar",
+        "finch", "canary", "macaw", "cockatoo", "dove", "myna", "quail", "duck", "chicken",
+        "fish", "aquarium", "vet", "grooming", "education", "tuition", "coach",
         "toy", "baby", "kid", "child", "family", "book", "sport", "fitness",
         "hotel", "resort", "travel"
       ];

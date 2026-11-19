@@ -14,6 +14,9 @@ export const PRODUCT_KEYWORDS = [
   "Cosmetics", "Medicine", "Accessories", "Art",
   "Pet", "Cat", "Dog", "Bird", "Pet Food", "Cat Food", "Dog Food", "Bird Food",
   "Pet Accessories", "Fish & Aquarium", "Pet Care",
+  "Pigeon", "Parrot", "Cockatiel", "Lovebird", "Budgerigar", "Budgie",
+  "Finch", "Canary", "Macaw", "Cockatoo", "Conure", "Dove",
+  "Myna", "Quail", "Duck", "Chicken", "Bird Cage", "Bird Accessories",
 ];
 
 export const SERVICE_KEYWORDS = [
