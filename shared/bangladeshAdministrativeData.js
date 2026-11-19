@@ -37,7 +37,8 @@ export const BANGLADESH_ADMINISTRATIVE_DATA = {
       "Agargaon", "Agargaon Taltola", "West Agargaon", "Kalyanpur", "Kallyanpur",
       "Kazipara", "North Kazipara", "South Kazipara", "Shewrapara", "Sheorapara",
       "West Shewrapara", "East Shewrapara", "ECB Chattar", "ECB Square", "Kalshi",
-      "Kalshi Mor", "Bijoy Sarani", "Khamarbari", "Banglamotor", "Moghbazar",
+      "Kalshi Mor", "Nodda", "Nadda", "Notun Bazar", "Natun Bazar",
+      "Bijoy Sarani", "Khamarbari", "Banglamotor", "Moghbazar",
       "Eskaton", "Katabon", "Science Lab", "Matikata", "Senpara Parbata",
       "Dhanmondi 27", "Dhanmondi 32", "Sobhanbag", "Rayer Bazar", "Jigatola",
       "Gulshan 1", "Gulshan 2", "Niketan", "Banani", "Banani DOHS", "Mohakhali",
@@ -775,8 +776,8 @@ export const DHAKA_THANA_AREAS_MAP = {
   gulshan: ["Gulshan 1", "Gulshan 2", "Niketan", "Police Plaza"],
   banani: ["Banani", "Banani DOHS", "Kakoli", "Kemal Ataturk Avenue"],
   khilkhet: ["Khilkhet", "Kuril", "Nikunja 1", "Nikunja 2", "Pink City"],
-  bhatara: ["Bashundhara R/A", "Bhatara", "Nayanagar", "Kuril"],
-  badda: ["Badda", "Middle Badda", "North Badda", "South Badda", "Merul Badda", "Aftabnagar"],
+  bhatara: ["Nodda", "Nadda", "Notun Bazar", "Natun Bazar", "Bashundhara R/A", "Bhatara", "Nayanagar", "Kuril", "Solmaid"],
+  badda: ["Notun Bazar", "Natun Bazar", "Badda", "Middle Badda", "North Badda", "South Badda", "Merul Badda", "Aftabnagar"],
   rampura: ["Rampura", "Banasree", "Mahanagar Project"],
 };
 
