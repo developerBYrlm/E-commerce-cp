@@ -23,6 +23,11 @@ export default [
         clearInterval: "readonly",
         alert: "readonly",
         AbortSignal: "readonly",
+        Buffer: "readonly",
+        Blob: "readonly",
+        requestAnimationFrame: "readonly",
+        cancelAnimationFrame: "readonly",
+        ResizeObserver: "readonly",
       },
     },
     rules: {
