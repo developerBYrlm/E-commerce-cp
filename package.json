@@ -6,7 +6,7 @@
   "scripts": {
     "project": "concurrently \"npm:dev:server\" \"npm:dev:client\"",
     "dev": "npm run project",
-    "dev:server": "nodemon --watch server server/server.js",
+    "dev:server": "nodemon --watch server --watch shared server/server.js",
     "dev:client": "vite frontend --host 0.0.0.0",
     "build": "vite build frontend",
     "test": "node --test",
