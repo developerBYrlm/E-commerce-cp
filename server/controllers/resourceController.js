@@ -43,7 +43,29 @@ export function resourceController(Model, { ownerField, populate = "", searchabl
         filter.type = { $in: [req.query.type, "all"] };
       }
       if (req.query.status && ["owner", "admin"].includes(req.user?.role) && isMineQuery) filter.status = req.query.status;
-      if (req.query.q) filter.$text = { $search: String(req.query.q).slice(0, 100) };
+      if (req.query.q) {
+        const qClean = String(req.query.q).trim().slice(0, 100);
+        if (qClean) {
+          const escaped = qClean.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+          const regex = new RegExp(escaped, "i");
+          if (["Product", "Service"].includes(Model.modelName)) {
+            filter.$or = [
+              { name: regex },
+              { keywords: regex },
+              { description: regex },
+            ];
+          } else if (Model.modelName === "Shop") {
+            filter.$or = [
+              { name: regex },
+              { description: regex },
+              { area: regex },
+              { district: regex },
+            ];
+          } else {
+            filter.$text = { $search: qClean };
+          }
+        }
+      }
       const page = Math.max(1, Number.parseInt(req.query.page, 10) || 1);
       const limit = Math.min(50, Math.max(1, Number.parseInt(req.query.limit, 10) || 12));
       const sort = req.query.trending === "true" && ["Product", "Service"].includes(Model.modelName)

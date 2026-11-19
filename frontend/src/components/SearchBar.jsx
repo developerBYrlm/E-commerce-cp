@@ -40,9 +40,11 @@ import { getImageUrl } from "../utils/imageUrl";
     }, []);
 
     const suggestions = useQuery({
-      queryKey: ["/search/suggestions", debouncedQuery],
+      queryKey: ["/search/suggestions", debouncedQuery, currentKind],
       queryFn: async () => {
-        const response = await api.get("/search/suggestions", { params: { q: debouncedQuery } });
+        const response = await api.get("/search/suggestions", {
+          params: { q: debouncedQuery, type: currentKind },
+        });
         return response.data;
       },
       staleTime: 30_000,
@@ -137,7 +139,7 @@ import { getImageUrl } from "../utils/imageUrl";
                   <div className="mb-3 border-b border-slate-100 pb-3">
                     <div className="flex items-center gap-1.5 px-2 py-1 text-xs font-bold uppercase tracking-wider text-emerald-700">
                       <Sparkles size={13} className="text-amber-500" />
-                      <span>Related Keywords (কাছাকাছি কিওয়ার্ড)</span>
+                      <span>Suggested Keywords &amp; Products (প্রস্তাবিত কিওয়ার্ড ও প্রোডাক্ট)</span>
                     </div>
                     <div className="mt-1.5 flex flex-wrap gap-1.5 px-1">
                       {recommendedKeywords.map((kw) => (

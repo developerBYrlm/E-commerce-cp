@@ -132,15 +132,53 @@ export const search = asyncHandler(async (req, res) => {
 
 export const suggestions = asyncHandler(async (req, res) => {
   const q = String(req.query.q || "").trim().slice(0, 80);
+  const targetType = String(req.query.type || "").trim().toLowerCase();
+
   if (!q) {
+    const [recentProducts, recentServices, activeCategories] = await Promise.all([
+      Product.find({ status: "active" })
+        .select("name keywords")
+        .sort({ createdAt: -1 })
+        .limit(8)
+        .lean(),
+      Service.find({ status: "active" })
+        .select("name keywords")
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .lean(),
+      Category.find({}).select("name").limit(6).lean(),
+    ]);
+
+    const defaultKeywords = new Set();
+    // 1. Add real product names from the database as dynamic keyword suggestions
+    for (const p of recentProducts) {
+      if (p.name) defaultKeywords.add(p.name);
+      for (const kw of p.keywords || []) defaultKeywords.add(kw);
+    }
+    // 2. Add service names
+    if (targetType !== "products") {
+      for (const s of recentServices) {
+        if (s.name) defaultKeywords.add(s.name);
+        for (const kw of s.keywords || []) defaultKeywords.add(kw);
+      }
+    }
+    // 3. Fallback popular keywords
+    for (const c of activeCategories) {
+      if (c.name) defaultKeywords.add(c.name);
+    }
+    for (const kw of ["table", "bed", "dress", "furniture", "electronics", "fashion", "repair"]) {
+      defaultKeywords.add(kw);
+    }
+
     return res.json({
       items: [],
-      recommendedKeywords: ["dress", "repair", "electrician", "furniture", "electronics", "cleaning", "fashion", "table"],
+      recommendedKeywords: [...defaultKeywords].slice(0, 10),
       shops: [],
       products: [],
       services: [],
     });
   }
+
   const expression = new RegExp(escapeRegex(q), "i");
   const activeShopIds = await Shop.find({ status: "active" }).distinct("_id");
 
@@ -159,7 +197,7 @@ export const suggestions = asyncHandler(async (req, res) => {
     })
       .populate("shop", "name slug")
       .select("name price discountPrice isNegotiable images keywords shop")
-      .limit(4)
+      .limit(6)
       .lean(),
     Service.find({
       status: "active",
@@ -168,23 +206,37 @@ export const suggestions = asyncHandler(async (req, res) => {
     })
       .populate("shop", "name slug")
       .select("name price isNegotiable images keywords shop")
-      .limit(4)
+      .limit(6)
       .lean(),
     Category.find({ name: expression }).select("name type").limit(5).lean(),
   ]);
 
   // Extract nearby / related keyword suggestions
   const keywordsSet = new Set();
+
+  // 1. Add product names as keyword suggestions whenever they match the query
   for (const p of products) {
+    if (p.name && (p.name.toLowerCase().includes(q.toLowerCase()) || q.toLowerCase().includes(p.name.toLowerCase()))) {
+      keywordsSet.add(p.name);
+    }
     for (const kw of p.keywords || []) {
       if (kw.toLowerCase().includes(q.toLowerCase())) keywordsSet.add(kw);
     }
   }
-  for (const s of services) {
-    for (const kw of s.keywords || []) {
-      if (kw.toLowerCase().includes(q.toLowerCase())) keywordsSet.add(kw);
+
+  // 2. Add service names as keyword suggestions
+  if (targetType !== "products") {
+    for (const s of services) {
+      if (s.name && (s.name.toLowerCase().includes(q.toLowerCase()) || q.toLowerCase().includes(s.name.toLowerCase()))) {
+        keywordsSet.add(s.name);
+      }
+      for (const kw of s.keywords || []) {
+        if (kw.toLowerCase().includes(q.toLowerCase())) keywordsSet.add(kw);
+      }
     }
   }
+
+  // 3. Add categories
   for (const c of categories) {
     keywordsSet.add(c.name);
   }
@@ -192,7 +244,8 @@ export const suggestions = asyncHandler(async (req, res) => {
   const ALL_PRESET_KEYWORDS = [
     "clothing", "dress", "mens dress", "shirt", "pant", "fashion", "furniture", "table", "chair", "bed", "sofa",
     "electrician", "electric", "wiring", "repair", "tv repair", "fridge repair", "appliance", "plumbing",
-    "cleaning", "beauty", "haircut", "salon", "groceries", "food", "bakery", "delivery", "carpentry", "maintenance"
+    "cleaning", "beauty", "haircut", "salon", "groceries", "food", "bakery", "delivery", "carpentry", "maintenance",
+    "pet", "cat", "dog", "bird", "pigeon", "parrot", "cockatiel", "lovebird", "budgie", "quail"
   ];
   for (const kw of ALL_PRESET_KEYWORDS) {
     if (kw.toLowerCase().includes(q.toLowerCase()) || q.toLowerCase().includes(kw.toLowerCase())) {
@@ -217,7 +270,7 @@ export const suggestions = asyncHandler(async (req, res) => {
 
   res.json({
     items: [...unique.values()].slice(0, 10),
-    recommendedKeywords: [...keywordsSet].slice(0, 8),
+    recommendedKeywords: [...keywordsSet].slice(0, 10),
     shops,
     products,
     services,
