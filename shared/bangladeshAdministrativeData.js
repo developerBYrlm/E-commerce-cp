@@ -33,11 +33,17 @@ export const BANGLADESH_ADMINISTRATIVE_DATA = {
       "Uttarkhan", "Wari",
     ],
     areas: [
+      "Farmgate", "Kawran Bazar", "Karwan Bazar", "Shahbagh", "Shahbag",
+      "Agargaon", "Agargaon Taltola", "West Agargaon", "Kalyanpur", "Kallyanpur",
+      "Kazipara", "North Kazipara", "South Kazipara", "Shewrapara", "Sheorapara",
+      "West Shewrapara", "East Shewrapara", "ECB Chattar", "ECB Square", "Kalshi",
+      "Kalshi Mor", "Bijoy Sarani", "Khamarbari", "Banglamotor", "Moghbazar",
+      "Eskaton", "Katabon", "Science Lab", "Matikata", "Senpara Parbata",
       "Dhanmondi 27", "Dhanmondi 32", "Sobhanbag", "Rayer Bazar", "Jigatola",
       "Gulshan 1", "Gulshan 2", "Niketan", "Banani", "Banani DOHS", "Mohakhali",
       "Mohakhali DOHS", "Mirpur 1", "Mirpur 2", "Mirpur 6", "Mirpur 10", "Mirpur 11",
-      "Mirpur 12", "Mirpur 14", "Kazipara", "Shewrapara", "Pallabi", "Mohammadpur",
-      "Katai", "Town Hall", "Lalmatia", "Salimullah Road", "Iqbal Road",
+      "Mirpur 12", "Mirpur 14", "Pallabi", "Mohammadpur",
+      "Town Hall", "Lalmatia", "Salimullah Road", "Iqbal Road",
       "Uttara Sector 1", "Uttara Sector 3", "Uttara Sector 4", "Uttara Sector 7",
       "Uttara Sector 9", "Uttara Sector 10", "Uttara Sector 11", "Uttara Sector 12",
       "Uttara Sector 13", "Uttara Sector 14", "Azampur", "Badda", "Middle Badda",
@@ -46,8 +52,8 @@ export const BANGLADESH_ADMINISTRATIVE_DATA = {
       "Motijheel", "Dilkusha", "Paltan", "Bijoynagar", "Wari", "Old Dhaka",
       "Lalbagh", "Chawkbazar", "Bangshal", "Sadarghat", "Armanitola", "Islampur",
       "Elephant Road", "New Market", "Azimpur", "Panthapath", "Green Road",
-      "Farmgate", "Tejgaon", "Nakhalpara", "Baridhara", "Baridhara DOHS",
-      "Bashundhara R/A", "Bhatara", "Kuril", "Khilkhet", "Darus Salam", "Kallyanpur",
+      "Tejgaon", "Nakhalpara", "Baridhara", "Baridhara DOHS",
+      "Bashundhara R/A", "Bhatara", "Kuril", "Khilkhet", "Darus Salam",
       "Gabtoli", "Adabor", "Shekhertek", "Hazaribagh", "Kamrangirchar",
       "Jatrabari", "Sayedabad", "Dholairpar", "Jurain", "Postogola", "Demra",
       "Savar Bazar", "Ashulia", "DEPZ", "Hemayetpur", "Dhamrai Bazar",
@@ -751,6 +757,29 @@ export function getSubDistrictsByDistrict(districtName) {
   return BANGLADESH_SUB_DISTRICTS_MAP[official] || [];
 }
 
+export const DHAKA_THANA_AREAS_MAP = {
+  tejgaon: ["Farmgate", "Kawran Bazar", "Karwan Bazar", "Tejgaon", "Nakhalpara", "Bijoy Sarani", "Khamarbari"],
+  "tejgaon industrial area": ["Tejgaon Industrial Area", "Nabiket", "Kunipara"],
+  shahbagh: ["Shahbagh", "Shahbag", "Katabon", "Paribagh", "Banglamotor", "Elephant Road", "Science Lab", "Nilkhet"],
+  "sher-e-bangla nagar": ["Agargaon", "Agargaon Taltola", "West Agargaon", "Shyamoli", "Manik Mia Avenue", "Bijoy Sarani"],
+  kafrul: ["Kazipara", "Shewrapara", "South Kazipara", "Senpara Parbata", "Mirpur 14", "Kafrul"],
+  mirpur: ["Mirpur 1", "Mirpur 2", "Mirpur 6", "Mirpur 10", "Mirpur 11", "Mirpur 12", "Mirpur 14", "Kazipara", "Shewrapara", "Kalyanpur"],
+  cantonment: ["ECB Chattar", "ECB Square", "Matikata", "Dhaka Cantonment", "Zia Colony"],
+  pallabi: ["Kalshi", "Kalshi Mor", "Pallabi", "Mirpur 11", "Mirpur 12", "Purobi"],
+  bhashantek: ["Bhashantek", "Kalshi", "ECB Chattar", "Damalkot"],
+  "darus salam": ["Kalyanpur", "Kallyanpur", "Darus Salam", "Technical", "Gabtoli"],
+  ramna: ["Kakrail", "Shantinagar", "Malibagh", "Moghbazar", "Eskaton", "Baily Road"],
+  kalabagan: ["Panthapath", "Green Road", "Kalabagan", "Dhanmondi 32", "Sobhanbag", "Kathalbagan"],
+  dhanmondi: ["Dhanmondi 27", "Dhanmondi 32", "Jigatola", "Rayer Bazar", "Sobhanbag"],
+  mohammadpur: ["Town Hall", "Lalmatia", "Salimullah Road", "Iqbal Road", "Taj Mahal Road", "Japan Garden City", "Shekhertek"],
+  gulshan: ["Gulshan 1", "Gulshan 2", "Niketan", "Police Plaza"],
+  banani: ["Banani", "Banani DOHS", "Kakoli", "Kemal Ataturk Avenue"],
+  khilkhet: ["Khilkhet", "Kuril", "Nikunja 1", "Nikunja 2", "Pink City"],
+  bhatara: ["Bashundhara R/A", "Bhatara", "Nayanagar", "Kuril"],
+  badda: ["Badda", "Middle Badda", "North Badda", "South Badda", "Merul Badda", "Aftabnagar"],
+  rampura: ["Rampura", "Banasree", "Mahanagar Project"],
+};
+
 /**
  * Get suggested popular areas/elaka for a district or sub-district
  */
@@ -763,6 +792,9 @@ export function getSuggestedAreas(districtName, subDistrictName = "") {
 
   if (subDistrictName) {
     const subLower = subDistrictName.trim().toLowerCase();
+    if (official === "Dhaka" && DHAKA_THANA_AREAS_MAP[subLower]) {
+      return DHAKA_THANA_AREAS_MAP[subLower];
+    }
     const filtered = (info.areas || []).filter((a) => a.toLowerCase().includes(subLower));
     if (filtered.length > 0) return filtered;
   }
