@@ -3,14 +3,15 @@ export const SHOP_CATEGORIES = [
   "Health & Beauty", "Electronics", "Mobile Shop", "Computer Shop", "Fashion",
   "Clothing", "Home Appliances", "Furniture", "Automotive", "Education",
   "Travel Agency", "Repair Services", "Hotel & Resort", "Sports & Fitness",
-  "Agriculture", "Real Estate", "Freelance Services", "Pet Care", "Laundry", "Others",
+  "Agriculture", "Real Estate", "Freelance Services", "Pet Care", "Laundry",
+  "Art", "Others",
 ];
 
 export const PRODUCT_KEYWORDS = [
   "Mobile Phone", "Smartphone", "Laptop", "Computer", "Mouse", "Keyboard", "Monitor",
   "Printer", "Camera", "TV", "Refrigerator", "AC", "Fan", "Electronics", "Grocery",
   "Food", "Fashion", "Shoes", "Watch", "Furniture", "Home Decor", "Beauty",
-  "Cosmetics", "Medicine", "Accessories",
+  "Cosmetics", "Medicine", "Accessories", "Art",
 ];
 
 export const SERVICE_KEYWORDS = [
