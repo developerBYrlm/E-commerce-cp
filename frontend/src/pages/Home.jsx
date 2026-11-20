@@ -159,14 +159,18 @@ const CATEGORIES_DATA = [
     glowColor: "border-sky-300 shadow-sky-500/10",
     badgeColor: "bg-sky-100 text-sky-900 border-sky-200",
     keywords: [
-      "Repair Services", "Electrician", "Plumbing", "AC Repair", "Refrigerator Repair",
-      "Electronics Repair", "TV Repair", "Washing Machine Repair", "Oven Repair",
+      "Repair Services", "Car Service", "Car Servicing", "Car Repair", "Auto Service",
+      "Bike Service", "Bike Servicing", "Bike Repair", "Motorcycle Servicing",
+      "Plumber", "Plumbing", "Plumbing Service", "Electrician", "AC Repair", "Car AC Repair",
+      "TV Repair", "TV Installation", "Smart TV Setup", "LED TV Repair",
+      "Fridge Repair", "Fridge Servicing", "Refrigerator Repair", "Refrigerator Servicing",
+      "Furniture Service", "Furniture Repair", "Furniture Polish", "Sofa Repair", "Sofa Cleaning",
+      "WiFi Service", "Broadband Service", "Internet Service", "WiFi Setup",
+      "Electronics Repair", "Washing Machine Repair", "Oven Repair",
       "Gas Stove Repair", "Geyser Repair", "Water Purifier Repair", "IPS Repair",
       "Generator Repair", "CCTV Repair", "Mobile Repair", "Phone Repair", "Computer Repair",
-      "Laptop Repair", "Printer Repair", "Car Repair", "Bike Repair", "Motorcycle Repair",
-      "Bicycle Repair", "Car AC Repair", "Auto Service", "Furniture Repair", "Sofa Repair",
-      "Locksmith & Key Service", "Watch Repair", "Shoe Repair", "Home Cleaning",
-      "Laundry", "Carpentry", "Maintenance", "Handyman", "Painter", "Freelance Services"
+      "Laptop Repair", "Printer Repair", "Locksmith & Key Service", "Watch Repair", "Shoe Repair", "Home Cleaning",
+      "Laundry", "Carpentry", "Carpentry Service", "Maintenance", "Handyman", "Painter", "Freelance Services"
     ],
     matcher: (item) => {
       if (item.shopType === "service" || item.durationMinutes !== undefined || item.bookingCount !== undefined) {
@@ -183,11 +187,12 @@ const CATEGORIES_DATA = [
         .join(" ")
         .toLowerCase();
       const matchWords = [
-        "repair", "electric", "plumb", "ac", "refrigerator", "fridge", "tv", "television",
+        "repair", "electric", "plumb", "plumber", "ac", "refrigerator", "fridge", "tv", "television",
         "washing", "oven", "microwave", "stove", "geyser", "purifier", "ips", "generator",
         "cctv", "mobile", "phone", "computer", "laptop", "printer", "cleaning", "wash", "car",
         "bike", "motorcycle", "cycle", "bicycle", "furniture", "sofa", "lock", "locksmith",
-        "watch", "shoe", "service", "laundry", "carpenter", "maintenance", "fix", "handyman", "technician"
+        "watch", "shoe", "service", "laundry", "carpenter", "maintenance", "fix", "handyman", "technician",
+        "wifi", "broadband", "internet", "router", "fiber", "tank", "pipe", "drain", "polish"
       ];
       return matchWords.some((w) => text.includes(w));
     },
