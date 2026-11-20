@@ -160,6 +160,9 @@ const CATEGORIES_DATA = [
     glowColor: "border-sky-300 shadow-sky-500/10",
     badgeColor: "bg-sky-100 text-sky-900 border-sky-200",
     keywords: [
+      "Construction", "Builder", "Building Construction", "House Construction", "Building Contractor", "Civil Contractor",
+      "Architectural Design", "Interior Design", "Renovation Service", "Home Renovation", "Masonry Service", "Tiles Fitting",
+      "Painter Service", "Steel Fabrication & Grill",
       "Repair Services", "Car Service", "Car Servicing", "Car Repair", "Auto Service",
       "Bike Service", "Bike Servicing", "Bike Repair", "Motorcycle Servicing",
       "Plumber", "Plumbing", "Plumbing Service", "Electrician", "AC Repair", "Car AC Repair",
@@ -188,6 +191,7 @@ const CATEGORIES_DATA = [
         .join(" ")
         .toLowerCase();
       const matchWords = [
+        "construction", "builder", "building", "contractor", "renovation", "renovate", "mason", "masonry", "tiles", "cement", "architect", "interior",
         "repair", "electric", "plumb", "plumber", "ac", "refrigerator", "fridge", "tv", "television",
         "washing", "oven", "microwave", "stove", "geyser", "purifier", "ips", "generator",
         "cctv", "mobile", "phone", "computer", "laptop", "printer", "cleaning", "wash", "car",

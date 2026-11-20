@@ -4,7 +4,8 @@ export const SHOP_CATEGORIES = [
   "Clothing", "Home Appliances", "Furniture", "Automotive", "Education",
   "Library", "Bookstore", "Book Shop", "Books & Stationery", "Stationery", "Books",
   "Travel Agency", "Repair Services", "Hotel & Resort", "Sports & Fitness",
-  "Agriculture", "Real Estate", "Freelance Services", "Pet Care", "Laundry",
+  "Agriculture", "Real Estate", "Construction & Builder", "Building Materials",
+  "Freelance Services", "Pet Care", "Laundry",
   "Internet & Broadband", "Art", "Others",
 ];
 
@@ -16,6 +17,9 @@ export const PRODUCT_KEYWORDS = [
   "Dressing Table", "Dining Table", "Office Chair", "Bookshelf", "Home Decor", "Beauty",
   "Cosmetics", "Medicine", "Accessories", "Art",
   "WiFi Router", "Router", "Modem", "ONU", "Optical Fiber Cable",
+  // Construction & Building Materials
+  "Cement", "Rod & Steel", "Bricks", "Sand & Stone", "Tiles", "Wall Paint",
+  "Hardware & Tools", "Sanitary Ware", "Plywood & Board", "Glass & Aluminum",
   "Pizza", "Burger", "Shawarma", "Sharma", "Sandwich", "Sub Sandwich", "Pasta",
   "French Fries", "Fried Chicken", "Chicken Roll", "Roll", "Hot Dog", "Noodles",
   "Chowmein", "Soup", "Nachos", "Tacos", "Wonton", "Momos", "Fast Food", "Snacks",
@@ -41,6 +45,11 @@ export const PRODUCT_KEYWORDS = [
 ];
 
 export const SERVICE_KEYWORDS = [
+  // Construction & Building Services
+  "Construction", "Builder", "Building Construction", "House Construction",
+  "Building Contractor", "Civil Contractor", "Architectural Design", "Interior Design",
+  "Renovation Service", "Home Renovation", "Masonry Service", "Tiles Fitting",
+  "Painter Service", "False Ceiling & Gypsum", "Steel Fabrication & Grill",
   "Car Repair", "Car Service", "Car Servicing", "Car Maintenance", "Car Wash", "Car Detailing", "Car Polishing", "Car Oil Change", "Auto Service",
   "Bike Repair", "Bike Service", "Bike Servicing", "Motorcycle Servicing", "Bike Wash", "Bike Maintenance", "Motorcycle Repair", "Scooter Repair", "Bicycle Repair", "Cycle Repair",
   "Hotel Booking", "Resort Booking",

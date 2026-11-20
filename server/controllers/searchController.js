@@ -243,6 +243,10 @@ export const suggestions = asyncHandler(async (req, res) => {
 
   const ALL_PRESET_KEYWORDS = [
     "clothing", "dress", "mens dress", "shirt", "pant", "fashion",
+    "construction", "builder", "building construction", "house construction", "building contractor", "civil contractor", "contractor",
+    "architectural design", "interior design", "renovation service", "home renovation", "renovation", "masonry service", "masonry", "mason",
+    "tiles fitting", "tiles", "painter service", "painter", "painting", "false ceiling", "gypsum", "steel fabrication", "grill",
+    "cement", "rod & steel", "rod", "steel", "bricks", "sand & stone", "sand", "building materials", "sanitary ware", "hardware & tools", "hardware",
     "furniture", "furniture service", "furniture repair", "furniture polish", "furniture assembly", "table", "chair", "bed", "sofa", "sofa repair", "sofa cleaning", "wood polish", "custom furniture", "wardrobe", "almirah",
     "electrician", "electric", "wiring", "repair", "handyman",
     "tv", "smart tv", "led tv", "tv repair", "television repair", "tv installation", "tv wall mounting", "cable tv", "dish tv",
