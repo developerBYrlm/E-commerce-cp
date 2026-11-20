@@ -47,8 +47,8 @@ export default function AuthPage({ mode = "login" }) {
         callback: async ({ credential }) => {
           setBusy(true);
           setLoadingStep(1);
-          const stepTimer = setTimeout(() => setLoadingStep(2), 750);
-          const minWait = new Promise((resolve) => setTimeout(resolve, MIN_LOADING_TIME));
+          const stepTimer = setTimeout(() => setLoadingStep(2), 1000);
+          const minWait = new Promise((resolve) => setTimeout(resolve, 2000));
           try {
             const [result] = await Promise.all([
               googleLogin({ credential }).catch((err) => ({ error: err })),
@@ -107,10 +107,11 @@ export default function AuthPage({ mode = "login" }) {
       return;
     }
 
+    const waitDuration = mode === "login" ? 2000 : 1500;
     setBusy(true);
     setLoadingStep(1);
-    const stepTimer = setTimeout(() => setLoadingStep(2), 750);
-    const minWait = new Promise((resolve) => setTimeout(resolve, MIN_LOADING_TIME));
+    const stepTimer = setTimeout(() => setLoadingStep(2), mode === "login" ? 1000 : 750);
+    const minWait = new Promise((resolve) => setTimeout(resolve, waitDuration));
 
     try {
       if (mode === "login") {
@@ -127,8 +128,11 @@ export default function AuthPage({ mode = "login" }) {
           minWait,
         ]);
         if (result?.error) throw result.error;
-        toast.success("Your LocalSphere account is ready");
-        navigate(redirectTarget, { replace: true });
+        toast.success("Account created successfully! Please sign in.");
+        const loginUrl = redirectParam
+          ? `/login?redirect=${encodeURIComponent(redirectParam)}`
+          : "/login";
+        navigate(loginUrl, { replace: true });
       } else if (mode === "forgot") {
         const [result] = await Promise.all([
           api.post("/auth/forgot-password", values).catch((err) => ({ error: err })),
@@ -160,7 +164,7 @@ export default function AuthPage({ mode = "login" }) {
       <div className="mt-20 max-w-lg"><p className="text-xs font-bold uppercase tracking-[.2em] text-lime">Good things are closer</p><h1 className="mt-4 text-5xl font-extrabold leading-tight tracking-tight">{registerMode ? "Your next chapter is just around the corner." : "Your neighborhood, right where you left it."}</h1><p className="mt-5 leading-7 text-white/65">Meet the people, places, and independent businesses that make your local community feel like home.</p></div>
       <div className="mt-16 rounded-2xl bg-white/10 p-5"><p className="text-sm leading-6 text-white/85">“Found my new favorite bakery and booked a bike tune-up in one afternoon. Love having the neighborhood in one place.”</p><p className="mt-3 text-xs font-semibold text-lime">— Maya, LocalSphere neighbor</p></div>
     </div>
-    <div className="relative mx-auto w-full max-w-md min-h-[480px]">
+    <div className="mx-auto w-full max-w-md">
       <AnimatePresence>
         {busy && <ModernAuthLoader mode={mode} step={loadingStep} />}
       </AnimatePresence>

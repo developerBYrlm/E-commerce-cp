@@ -63,8 +63,7 @@ export const register = asyncHandler(async (req, res) => {
   } catch (error) {
     console.error("Account created but verification email delivery failed:", error);
   }
-  setSession(res, user);
-  res.status(201).json({ user: publicUser(user), message: "Account created. Check your email to verify your address." });
+  res.status(201).json({ success: true, message: "Account created successfully. Please sign in." });
 });
 
 export const login = asyncHandler(async (req, res) => {

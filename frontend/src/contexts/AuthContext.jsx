@@ -23,7 +23,10 @@ export function AuthProvider({ children }) {
   }, []);
   const login = useCallback((values) => authenticate("/auth/login", values), [authenticate]);
   const googleLogin = useCallback((credential) => authenticate("/auth/google", credential), [authenticate]);
-  const register = useCallback((values) => authenticate("/auth/register", values), [authenticate]);
+  const register = useCallback(async (values) => {
+    const { data } = await api.post("/auth/register", values);
+    return data;
+  }, []);
   const logout = useCallback(async () => {
     await api.post("/auth/logout");
     setUser(null);
