@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
   Activity,
@@ -95,11 +95,15 @@ export default function DashboardPage({ initialTab = "overview" }) {
     }
   }, [urlTab]);
 
+  const prevInitialTabRef = useRef(initialTab);
   useEffect(() => {
-    if (!urlTab && initialTab && initialTab !== tab) {
-      setTabState(initialTab);
+    if (prevInitialTabRef.current !== initialTab) {
+      prevInitialTabRef.current = initialTab;
+      if (!urlTab && initialTab !== tab) {
+        setTabState(initialTab);
+      }
     }
-  }, [initialTab, urlTab]);
+  }, [initialTab, urlTab, tab]);
 
   const [targetShopFilter, setTargetShopFilter] = useState("");
   const queryClient = useQueryClient();

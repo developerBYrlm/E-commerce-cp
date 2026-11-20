@@ -49,6 +49,27 @@ export default function ChatContainer() {
       return;
     }
 
+    // Skip redundant network call if this conversation is already active
+    if (
+      selectedParticipant &&
+      (String(selectedParticipant._id) === String(recipientParam) ||
+        String(selectedParticipant.id) === String(recipientParam))
+    ) {
+      return;
+    }
+
+    // If conversation already exists in loaded inbox items, select it directly
+    const existing = conversations.find(
+      (c) =>
+        String(c.participant?._id) === String(recipientParam) ||
+        String(c.participant?.id) === String(recipientParam)
+    );
+    if (existing) {
+      setSelectedConversationId(existing._id);
+      setSelectedParticipant(existing.participant);
+      return;
+    }
+
     let active = true;
     api
       .post("/chat/conversations", { recipientId: recipientParam })
@@ -67,13 +88,17 @@ export default function ChatContainer() {
     return () => {
       active = false;
     };
-  }, [recipientParam, user, queryClient]);
+  }, [recipientParam, user, queryClient, selectedParticipant, conversations]);
 
-  // When clicking on an inbox item
+  // When clicking on an inbox item - preserve all existing searchParams (e.g. tab=inbox)
   const handleSelectConversation = (convId, participant) => {
     setSelectedConversationId(convId);
     setSelectedParticipant(participant);
-    setParams({ with: participant._id });
+    setParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set("with", participant._id);
+      return next;
+    });
   };
 
   // 3. Fetch messages for active conversation
@@ -158,7 +183,12 @@ export default function ChatContainer() {
       if (selectedConversationId === convId) {
         setSelectedConversationId(null);
         setSelectedParticipant(null);
-        setParams({});
+        setParams((prev) => {
+          const next = new URLSearchParams(prev);
+          next.delete("with");
+          next.delete("userId");
+          return next;
+        });
       }
     } catch (err) {
       toast.error(err.message);
@@ -180,7 +210,12 @@ export default function ChatContainer() {
   const handleBackToInbox = () => {
     setSelectedConversationId(null);
     setSelectedParticipant(null);
-    setParams({});
+    setParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.delete("with");
+      next.delete("userId");
+      return next;
+    });
   };
 
   return (
@@ -281,7 +316,11 @@ export default function ChatContainer() {
         isOpen={newChatModalOpen}
         onClose={() => setNewChatModalOpen(false)}
         onSelectOwner={(ownerId) => {
-          setParams({ with: ownerId });
+          setParams((prev) => {
+            const next = new URLSearchParams(prev);
+            next.set("with", ownerId);
+            return next;
+          });
         }}
       />
     </div >
