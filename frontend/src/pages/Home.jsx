@@ -28,6 +28,7 @@ import toast from "react-hot-toast";
 import SearchBar from "../components/SearchBar";
 import ShopCard from "../components/ShopCard";
 import { CardSkeleton } from "../components/Loader";
+import ProductImageSlider from "../components/ProductImageSlider";
 import { useCollection } from "../hooks/useApi";
 import { useAuth } from "../contexts/AuthContext";
 import { formatCurrency } from "../utils/currency";
@@ -880,17 +881,13 @@ export default function Home() {
                     scale={1.03}
                     className="overflow-hidden rounded-3xl bg-white p-3 shadow-sm transition hover:shadow-lg"
                   >
-                    {item.images?.[0] ? (
-                      <img
-                        src={getImageUrl(item.images[0])}
-                        alt={item.name}
-                        className="h-44 w-full rounded-2xl object-cover"
-                      />
-                    ) : (
-                      <div className="grid h-44 place-items-center rounded-2xl bg-gradient-to-br from-lime/40 to-emerald-100">
-                        <Sparkles className="text-forest" />
-                      </div>
-                    )}
+                    <ProductImageSlider
+                      images={item.images}
+                      alt={item.name}
+                      className="h-44 w-full"
+                      rounded="rounded-2xl"
+                      fallbackIcon={Sparkles}
+                    />
                     <div className="px-2 pb-2 pt-4">
                       <div className="flex items-center justify-between gap-1">
                         <p className="truncate font-bold text-forest">{item.name}</p>
@@ -964,17 +961,13 @@ export default function Home() {
                     scale={1.03}
                     className="overflow-hidden rounded-3xl bg-white p-3 shadow-sm transition hover:shadow-lg"
                   >
-                    {item.images?.[0] ? (
-                      <img
-                        src={getImageUrl(item.images[0])}
-                        alt={item.name}
-                        className="h-40 w-full rounded-2xl object-cover"
-                      />
-                    ) : (
-                      <div className="grid h-40 place-items-center rounded-2xl bg-lime/30">
-                        <Store className="text-forest" />
-                      </div>
-                    )}
+                    <ProductImageSlider
+                      images={item.images}
+                      alt={item.name}
+                      className="h-40 w-full"
+                      rounded="rounded-2xl"
+                      fallbackIcon={Store}
+                    />
                     <div className="px-2 pb-2 pt-4">
                       <div className="flex items-center justify-between gap-1">
                         <p className="truncate font-bold text-forest">{item.name}</p>

@@ -10,6 +10,7 @@ import { useCart } from "../contexts/CartContext";
 import { useQueryClient } from "@tanstack/react-query";
 import { formatCurrency } from "../utils/currency";
 import { getImageUrl } from "../utils/imageUrl";
+import ProductImageSlider from "../components/ProductImageSlider";
 
 export default function DetailPage({ kind }) {
   const { id } = useParams();
@@ -107,17 +108,12 @@ function ShopDetail({ shop, user, followShop }) {
                     to={`/products/${prod._id}`}
                     className="group rounded-2xl border border-slate-100 bg-white p-3.5 shadow-xs transition hover:shadow-md hover:border-emerald-300"
                   >
-                    <div className="h-36 overflow-hidden rounded-xl bg-slate-100">
-                      {prod.images?.[0] ? (
-                        <img
-                          src={getImageUrl(prod.images[0])}
-                          alt={prod.name}
-                          className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-                        />
-                      ) : (
-                        <div className="grid h-full place-items-center text-slate-400">🛍️</div>
-                      )}
-                    </div>
+                    <ProductImageSlider
+                      images={prod.images}
+                      alt={prod.name}
+                      className="h-36 w-full"
+                      rounded="rounded-xl"
+                    />
                     <div className="mt-3">
                       <h3 className="font-bold text-forest text-sm truncate">{prod.name}</h3>
                       <div className="mt-1.5 flex items-center justify-between text-xs">
@@ -154,17 +150,12 @@ function ShopDetail({ shop, user, followShop }) {
                     to={`/services/${srv._id}`}
                     className="group rounded-2xl border border-slate-100 bg-white p-3.5 shadow-xs transition hover:shadow-md hover:border-sky-300"
                   >
-                    <div className="h-36 overflow-hidden rounded-xl bg-slate-100">
-                      {srv.images?.[0] ? (
-                        <img
-                          src={getImageUrl(srv.images[0])}
-                          alt={srv.name}
-                          className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-                        />
-                      ) : (
-                        <div className="grid h-full place-items-center text-slate-400">🔧</div>
-                      )}
-                    </div>
+                    <ProductImageSlider
+                      images={srv.images}
+                      alt={srv.name}
+                      className="h-36 w-full"
+                      rounded="rounded-xl"
+                    />
                     <div className="mt-3">
                       <h3 className="font-bold text-forest text-sm truncate">{srv.name}</h3>
                       <div className="mt-1.5 flex items-center justify-between text-xs">
@@ -333,13 +324,16 @@ function ItemDetail({ item, kind, user, toggleWishlist, followService }) {
       </button>
       <div className="grid gap-10 lg:grid-cols-2">
         <div className="space-y-4">
-          <div className="overflow-hidden rounded-[30px] bg-gradient-to-br from-lime/40 to-emerald-100">
-            {images[activeImage] || images[0] ? (
-              <img src={getImageUrl(images[activeImage] || images[0])} alt={item.name} className="h-[420px] w-full object-cover" />
-            ) : (
-              <div className="grid h-[420px] place-items-center"><Store size={48} className="text-forest" /></div>
-            )}
-          </div>
+          <ProductImageSlider
+            images={images}
+            alt={item.name}
+            className="h-[420px] w-full shadow-xs"
+            rounded="rounded-[30px]"
+            currentIndex={activeImage}
+            onIndexChange={setActiveImage}
+            interval={3500}
+            fallbackIcon={Store}
+          />
           {images.length > 1 && (
             <div className="flex gap-2 overflow-x-auto pb-1">
               {images.map((img, idx) => (

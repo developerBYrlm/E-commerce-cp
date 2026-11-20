@@ -4,6 +4,7 @@ import SearchBar from "../components/SearchBar";
 import ShopCard from "../components/ShopCard";
 import { useCollection } from "../hooks/useApi";
 import { CardSkeleton } from "../components/Loader";
+import ProductImageSlider from "../components/ProductImageSlider";
 import toast from "react-hot-toast";
 import { formatCurrency } from "../utils/currency";
 import { getImageUrl } from "../utils/imageUrl";
@@ -310,17 +311,13 @@ function ResultCard({ item, kind }) {
       to={`/${kind}/${item._id}`}
       className="overflow-hidden rounded-3xl bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
     >
-      {item.images?.[0] ? (
-        <img
-          src={getImageUrl(item.images[0])}
-          alt={item.name}
-          className="h-40 w-full object-cover"
-        />
-      ) : (
-        <div className="grid h-40 place-items-center bg-gradient-to-br from-lime/40 to-emerald-100">
-          <Store className="text-forest" />
-        </div>
-      )}
+      <ProductImageSlider
+        images={item.images}
+        alt={item.name}
+        className="h-40 w-full"
+        rounded="rounded-none"
+        fallbackIcon={Store}
+      />
       <div className="p-4">
         <p className="truncate text-xs font-semibold text-emerald-700">
           {item.shop?.name || "Independent local"}

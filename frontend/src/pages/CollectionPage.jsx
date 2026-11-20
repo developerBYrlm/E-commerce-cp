@@ -8,6 +8,7 @@ import ShopCard from "../components/ShopCard";
 import MapView from "../components/MapView";
 import SearchBar from "../components/SearchBar";
 import { CardSkeleton } from "../components/Loader";
+import ProductImageSlider from "../components/ProductImageSlider";
 import { formatCurrency } from "../utils/currency";
 import { getImageUrl } from "../utils/imageUrl";
 
@@ -105,17 +106,14 @@ function ItemCard({ item, kind }) {
       to={`/${route}/${item._id}`}
       className="group overflow-hidden rounded-[24px] border border-forest/5 bg-white shadow-[0_8px_30px_rgba(22,42,32,.04)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(22,42,32,.12)]"
     >
-      {item.images?.[0] ? (
-        <img
-          src={getImageUrl(item.images[0])}
-          alt={item.name}
-          className="h-52 w-full object-cover transition duration-500 group-hover:scale-105"
-        />
-      ) : (
-        <div className="grid h-52 place-items-center bg-gradient-to-br from-lime/40 to-emerald-100">
-          <Sparkles className="text-forest" />
-        </div>
-      )}
+      <ProductImageSlider
+        images={item.images}
+        alt={item.name}
+        className="h-52 w-full"
+        rounded="rounded-none"
+        imageClassName="object-cover transition duration-500 group-hover:scale-105"
+        fallbackIcon={Sparkles}
+      />
       <div className="p-5">
         <div className="flex items-center justify-between gap-2">
           <p className="truncate text-xs font-semibold uppercase tracking-wide text-emerald-700">
