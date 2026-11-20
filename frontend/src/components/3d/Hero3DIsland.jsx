@@ -19,37 +19,40 @@ import {
 const LANDMARKS = [
   {
     id: "home",
-    name: "My Home — Smart Villa",
+    name: "My Home",
+    fullName: "My Home — Smart Connected Villa",
     category: "Residence",
     rating: "Sweet Home",
     distance: "Center Point",
     status: "Safe · High-Speed Fiber",
-    badgeColor: "#10b981",
+    badgeColor: "#1e293b",
     pinBg: "#ffffff",
     pinText: "#0f172a",
     icon: "🏠",
     position: [0, 4.2, 0],
     link: "/shops",
-    desc: "Cozy neighborhood bungalow with terracotta roof, white picket perimeter wall, manicured lawn, and flower garden at the heart of the community.",
+    desc: "Cozy neighborhood bungalow with hipped terracotta roof, white chimney, picket perimeter wall, manicured lawn, and flower garden at the heart of the community.",
   },
   {
     id: "hospital",
-    name: "Central Care Hospital & Emergency",
+    name: "Hospital",
+    fullName: "Central Medical Complex & Emergency",
     category: "Healthcare",
     rating: "4.9 ★ (340)",
     distance: "120m away",
     status: "24/7 Trauma Care Active",
     badgeColor: "#ef4444",
-    pinBg: "#eff6ff",
-    pinText: "#1e3a8a",
+    pinBg: "#fef2f2",
+    pinText: "#991b1b",
     icon: "🏥",
     position: [-12.2, 4.8, 6.5],
     link: "/services?q=Healthcare",
-    desc: "Two-story medical complex with emergency bay, red cross emblems, rooftop ventilation, specialist doctors, and dedicated ambulance fleet on standby.",
+    desc: "Two-story medical complex with emergency bay, red cross emblems, rooftop ventilation, specialist doctors, and dedicated ambulance on duty.",
   },
   {
     id: "pharmacy",
-    name: "LocalCare 24/7 Wellness Pharmacy",
+    name: "Pharmacy",
+    fullName: "LocalCare 24/7 Wellness Pharmacy",
     category: "Medicine",
     rating: "4.8 ★ (210)",
     distance: "180m away",
@@ -64,7 +67,8 @@ const LANDMARKS = [
   },
   {
     id: "auto-service",
-    name: "Apex Auto & Motorcycle MegaCare",
+    name: "Auto & Bike Service",
+    fullName: "Apex Auto & Motorcycle MegaCare",
     category: "Repair Services",
     rating: "4.9 ★ (420)",
     distance: "290m away",
@@ -79,7 +83,8 @@ const LANDMARKS = [
   },
   {
     id: "grocery",
-    name: "Green Valley Organic Market & Bazaar",
+    name: "Grocery Shop",
+    fullName: "Green Valley Organic Market & Bazaar",
     category: "Grocery & Food",
     rating: "4.9 ★ (510)",
     distance: "150m away",
@@ -94,7 +99,8 @@ const LANDMARKS = [
   },
   {
     id: "repair-shop",
-    name: "TechFix Electronics & Appliance Lab",
+    name: "Repair Shop",
+    fullName: "TechFix Electronics & Appliance Lab",
     category: "Repair Services",
     rating: "4.8 ★ (180)",
     distance: "190m away",
@@ -105,11 +111,12 @@ const LANDMARKS = [
     icon: "🛠️",
     position: [12.6, 4.0, -1.2],
     link: "/services?q=Repair",
-    desc: "Quick diagnostics and repair for mobile screens, laptops, TV motherboards, refrigerator compressors, microwave ovens, and electrical home appliances.",
+    desc: "Quick diagnostics and repair for mobile screens, laptops, TV motherboards, refrigerator compressors, microwave ovens, and electrical appliances.",
   },
   {
     id: "laundry",
-    name: "SmartSparks Express Laundromat",
+    name: "Laundry",
+    fullName: "SmartSparks Express Laundromat",
     category: "Laundry",
     rating: "4.7 ★ (135)",
     distance: "110m away",
@@ -124,7 +131,8 @@ const LANDMARKS = [
   },
   {
     id: "restaurant",
-    name: "The Terrace Cafe, Grill & Bistro",
+    name: "Restaurant",
+    fullName: "The Terrace Cafe, Grill & Bistro",
     category: "Restaurant",
     rating: "5.0 ★ (680)",
     distance: "80m away",
@@ -139,18 +147,18 @@ const LANDMARKS = [
   },
 ];
 
-// Continuous Looping Road Track (Superellipse cornering for smooth vehicle navigation)
+// Continuous Looping Road Track (Superellipse for smooth vehicle navigation)
 function getRoadTrackPoint(progress) {
   const t = ((progress % 1) + 1) % 1;
   const angle = t * Math.PI * 2;
-  const R = 8.6; // radius of wide looping boulevard around My Home block
+  const R = 8.6; // radius of boulevard looping around My Home block
 
   const cosA = Math.cos(angle);
   const sinA = Math.sin(angle);
   const px = THREE.MathUtils.clamp(Math.sign(cosA) * Math.min(R, Math.abs(cosA) * (R * 1.36)), -R, R);
   const pz = THREE.MathUtils.clamp(Math.sign(sinA) * Math.min(R, Math.abs(sinA) * (R * 1.36)), -R, R);
 
-  // Tangent calculation for vehicle heading orientation
+  // Tangent calculation for smooth vehicle heading alignment
   const dt = 0.005;
   const nAngle = ((t + dt) % 1) * Math.PI * 2;
   const nCos = Math.cos(nAngle);
@@ -221,7 +229,7 @@ export default function Hero3DIsland() {
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
-    controls.maxPolarAngle = Math.PI / 2.14; // never look below the ground base
+    controls.maxPolarAngle = Math.PI / 2.14; // never look below ground base
     controls.minPolarAngle = Math.PI / 7;
     controls.minDistance = 12;
     controls.maxDistance = 55;
@@ -318,7 +326,6 @@ export default function Hero3DIsland() {
       // Laundry & Restaurant
       laundryCyan: new THREE.MeshLambertMaterial({ color: "#0284c7" }),
       restTerracotta: new THREE.MeshLambertMaterial({ color: "#ea580c" }),
-      restCream: new THREE.MeshLambertMaterial({ color: "#ffedd5" }),
       fountainWater: new THREE.MeshLambertMaterial({ color: "#0ea5e9" }),
 
       // Nature & Infrastructure
@@ -354,7 +361,6 @@ export default function Hero3DIsland() {
       clothesYellow: new THREE.MeshLambertMaterial({ color: "#eab308" }),
       clothesWhite: new THREE.MeshLambertMaterial({ color: "#ffffff" }),
       hairDark: new THREE.MeshLambertMaterial({ color: "#0f172a" }),
-      hairBrown: new THREE.MeshLambertMaterial({ color: "#451a03" }),
     };
 
     // Root Diorama Group
@@ -494,7 +500,7 @@ export default function Hero3DIsland() {
     makePavedPlaza(7.6, 14.0, 12.4, 6.5); // Restaurant & Laundry Plaza
 
     // ========================================================
-    // 3. CENTERPIECE — "MY HOME" (BUNGALOW MATCHING REFERENCE IMAGE)
+    // 3. CENTERPIECE — "MY HOME" (BUNGALOW EXACTLY MATCHING VIDEO)
     // ========================================================
     const homeGroup = new THREE.Group();
     diorama.add(homeGroup);
@@ -580,7 +586,7 @@ export default function Hero3DIsland() {
     mailbox.position.set(1.1, 1.25, 5.3);
     homeGroup.add(gateCol1, gateCol2, mailbox);
 
-    // Garden Flower Shrubs in Yard
+    // Backyard Trees & Garden Shrubs
     const addShrub = (sx, sz, mat) => {
       const sh = new THREE.Mesh(new THREE.DodecahedronGeometry(0.45), mat);
       sh.position.set(sx, 0.4, sz);
@@ -592,8 +598,16 @@ export default function Hero3DIsland() {
     addShrub(3.8, 3.6, mats.leafLight);
     addShrub(3.8, 2.4, mats.leafMid);
 
+    // Lush trees in home yard
+    const yardTree1 = new THREE.Mesh(new THREE.DodecahedronGeometry(0.9), mats.leafDark);
+    yardTree1.position.set(-3.2, 1.6, -3.2);
+    yardTree1.castShadow = true;
+    const yardTree2 = new THREE.Mesh(new THREE.DodecahedronGeometry(0.75), mats.leafMid);
+    yardTree2.position.set(-3.4, 2.3, -3.2);
+    homeGroup.add(yardTree1, yardTree2);
+
     // ========================================================
-    // 4. CENTRAL HOSPITAL (FRONT LEFT CLINIC + PARKED AMBULANCE)
+    // 4. CENTRAL HOSPITAL (FRONT LEFT CLINIC)
     // ========================================================
     const hospGroup = new THREE.Group();
     hospGroup.position.set(-12.2, 0, 6.5);
@@ -637,46 +651,6 @@ export default function Hero3DIsland() {
     const hvac = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.6, 1.4), mats.hospDark);
     hvac.position.set(-0.6, 4.35, 0);
     hospGroup.add(hvac);
-
-    // Parked High-Detail Ambulance
-    const ambGroup = new THREE.Group();
-    ambGroup.position.set(-10.2, 0.16, 10.8);
-    ambGroup.rotation.y = -Math.PI / 2;
-    diorama.add(ambGroup);
-
-    const ambBody = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.1, 3.2), mats.hospWhite);
-    ambBody.position.y = 0.8;
-    ambBody.castShadow = true;
-    const ambStripe = new THREE.Mesh(new THREE.BoxGeometry(1.64, 0.24, 3.24), mats.hospRed);
-    ambStripe.position.y = 0.8;
-    const ambGlass = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.5, 0.1), mats.villaGlass);
-    ambGlass.position.set(0, 0.95, 1.56);
-    ambGlass.rotation.x = -0.25;
-    ambGroup.add(ambBody, ambStripe, ambGlass);
-
-    // Dual-color Flashing Siren Bar
-    const sirenMesh = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.16, 0.28), mats.hospRed);
-    sirenMesh.position.set(0, 1.45, 0.4);
-    ambGroup.add(sirenMesh);
-
-    // Dynamic Flashing Emergency Light
-    const ambPointLight = new THREE.PointLight("#ef4444", 2.2, 8);
-    ambPointLight.position.set(-10.2, 1.8, 10.8);
-    scene.add(ambPointLight);
-    animatedRefs.current.ambLight = ambPointLight;
-
-    // Ambulance Wheels
-    for (let ax of [-0.82, 0.82]) {
-      for (let az of [-0.95, 0.95]) {
-        const aw = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.14, 16), mats.wheelRubber);
-        aw.rotation.z = Math.PI / 2;
-        aw.position.set(ax, 0.24, az);
-        const rim = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.13, 0.15, 8), mats.wheelHub);
-        rim.rotation.z = Math.PI / 2;
-        rim.position.set(ax, 0.24, az);
-        ambGroup.add(aw, rim);
-      }
-    }
 
     // Doctor / Nurse Character outside Hospital
     const doctorGroup = new THREE.Group();
@@ -726,7 +700,7 @@ export default function Hero3DIsland() {
     pharmGlass.position.set(2.64, 1.25, 0);
     pharmGroup.add(pharmGlass);
 
-    // Shelves with colored medicine boxes
+    // Shelves with colored medicine boxes inside
     for (let sy = 0.7; sy <= 2.0; sy += 0.4) {
       const shelf = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.05, 3.2), mats.villaTrim);
       shelf.position.set(2.35, sy, 0);
@@ -771,7 +745,7 @@ export default function Hero3DIsland() {
     bay2.position.set(3.2, 1.6, 2.8);
     autoGroup.add(bay1, bay2);
 
-    // Bay 1: Hydraulic Car Lift raising vehicle
+    // Bay 1: Hydraulic Car Lift raising vehicle into air
     const liftCol1 = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 2.4), mats.metalPlate);
     liftCol1.position.set(-4.4, 1.25, 3.4);
     const liftCol2 = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 2.4), mats.metalPlate);
@@ -865,7 +839,7 @@ export default function Hero3DIsland() {
     bazaarGroup.add(shopperGroup);
 
     // ========================================================
-    // 8. SMARTSPARKS LAUNDRY & CHAI STALL (FRONT RIGHT MIDDLE)
+    // 8. SMARTSPARKS LAUNDRY & YELLOW CHAI KIOSK (RIGHT FRONT MIDDLE)
     // ========================================================
     const laundryGroup = new THREE.Group();
     laundryGroup.position.set(12.4, 0, 4.0);
@@ -889,11 +863,13 @@ export default function Hero3DIsland() {
       laundryGroup.add(washer);
     }
 
-    // Yellow Chai / Street Snack Kiosk
+    // Yellow Chai / Street Snack Kiosk (Just like video!)
     const chaiKiosk = new THREE.Mesh(new THREE.BoxGeometry(2.2, 2.1, 2.0), mats.awningYellow);
     chaiKiosk.position.set(-0.6, 1.15, -2.8);
     chaiKiosk.castShadow = true;
-    laundryGroup.add(chaiKiosk);
+    const chaiCounter = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.8, 1.8), mats.crateWood);
+    chaiCounter.position.set(-1.8, 0.55, -2.8);
+    laundryGroup.add(chaiKiosk, chaiCounter);
 
     // ========================================================
     // 9. THE TERRACE CAFE & RESTAURANT (FRONT RIGHT CORNER)
@@ -966,7 +942,7 @@ export default function Hero3DIsland() {
     restGroup.add(fountain);
 
     // ========================================================
-    // 10. OVERHEAD UTILITY POLES & TELEPHONE WIRES (LIKE REFERENCE IMAGE!)
+    // 10. OVERHEAD UTILITY POLES & TELEPHONE WIRES (LIKE VIDEO)
     // ========================================================
     const utilityGroup = new THREE.Group();
     diorama.add(utilityGroup);
@@ -985,7 +961,6 @@ export default function Hero3DIsland() {
       pole.position.set(px, 2.2, pz);
       pole.castShadow = true;
 
-      // Crossarm
       const arm = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.08, 0.08), mats.poleWood);
       arm.position.set(px, 4.2, pz);
       utilityGroup.add(pole, arm);
@@ -993,12 +968,12 @@ export default function Hero3DIsland() {
       poleTops.push(new THREE.Vector3(px, 4.2, pz));
     });
 
-    // Hanging Catenary Overhead Wires between utility poles
+    // Hanging Catenary Overhead Wires
     for (let i = 0; i < poleTops.length; i++) {
       const p1 = poleTops[i];
       const p2 = poleTops[(i + 1) % poleTops.length];
       const mid = p1.clone().lerp(p2, 0.5);
-      mid.y -= 0.35; // catenary sag
+      mid.y -= 0.35; // graceful catenary sag
 
       const curve = new THREE.QuadraticBezierCurve3(p1, mid, p2);
       const wireGeo = new THREE.BufferGeometry().setFromPoints(curve.getPoints(24));
@@ -1065,7 +1040,7 @@ export default function Hero3DIsland() {
     animatedRefs.current.trees = trees;
 
     // ========================================================
-    // 12. DYNAMIC TRAFFIC FLEET WITH ROLLING WHEELS (60 FPS CONTINUOUS)
+    // 12. DYNAMIC TRAFFIC FLEET INCLUDING MOVING AMBULANCE & CYCLIST
     // ========================================================
     const vehicleGroup = new THREE.Group();
     diorama.add(vehicleGroup);
@@ -1108,6 +1083,46 @@ export default function Hero3DIsland() {
         }
       }
       return { car, wheels };
+    };
+
+    // Moving Ambulance Factory (cruises boulevard with flashing beacon)
+    const createMovingAmbulance = () => {
+      const amb = new THREE.Group();
+      const body = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.1, 3.0), mats.hospWhite);
+      body.position.y = 0.8;
+      body.castShadow = true;
+
+      const redStripe = new THREE.Mesh(new THREE.BoxGeometry(1.54, 0.22, 3.04), mats.hospRed);
+      redStripe.position.y = 0.8;
+
+      const windshield = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.5, 0.08), mats.villaGlass);
+      windshield.position.set(0, 0.95, 1.45);
+      windshield.rotation.x = -0.25;
+
+      const siren = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.16, 0.26), mats.hospRed);
+      siren.position.set(0, 1.45, 0.3);
+
+      amb.add(body, redStripe, windshield, siren);
+
+      const sirenLight = new THREE.PointLight("#ef4444", 2.4, 7);
+      sirenLight.position.set(0, 1.6, 0.3);
+      amb.add(sirenLight);
+      animatedRefs.current.ambLight = sirenLight;
+
+      const wheels = [];
+      for (let ax of [-0.78, 0.78]) {
+        for (let az of [-0.9, 0.9]) {
+          const w = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.14, 16), mats.wheelRubber);
+          w.rotation.z = Math.PI / 2;
+          w.position.set(ax, 0.24, az);
+          const rim = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.13, 0.15, 8), mats.wheelHub);
+          rim.rotation.z = Math.PI / 2;
+          rim.position.set(ax, 0.24, az);
+          amb.add(w, rim);
+          wheels.push(w, rim);
+        }
+      }
+      return { car: amb, wheels };
     };
 
     // Auto-Rickshaw Factory: Authentic Bangladeshi CNG 3-Wheeler
@@ -1167,20 +1182,44 @@ export default function Hero3DIsland() {
       return { car: bike, wheels: [w1, w2] };
     };
 
+    // Cyclist Factory (Bicycle rider on the road)
+    const createBicycleRider = () => {
+      const cycle = new THREE.Group();
+      const frame = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.35, 1.3), mats.clothesNavy);
+      frame.position.y = 0.42;
+
+      const bw1 = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.06), mats.wheelRubber);
+      bw1.rotation.z = Math.PI / 2;
+      bw1.position.set(0, 0.22, 0.55);
+      const bw2 = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.06), mats.wheelRubber);
+      bw2.rotation.z = Math.PI / 2;
+      bw2.position.set(0, 0.22, -0.55);
+
+      const riderTorso = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.42, 0.2), mats.clothesYellow);
+      riderTorso.position.set(0, 0.78, -0.05);
+      const riderHead = new THREE.Mesh(new THREE.SphereGeometry(0.14), mats.skinTone);
+      riderHead.position.set(0, 1.15, -0.05);
+
+      cycle.add(frame, bw1, bw2, riderTorso, riderHead);
+      return { car: cycle, wheels: [bw1, bw2] };
+    };
+
     const redSedan = createSedan(mats.carRed);
     const blueSedan = createSedan(mats.carBlue);
     const yellowTaxi = createSedan(mats.carYellow);
+    const movingAmb = createMovingAmbulance();
     const cngVeh = createCNG();
     const deliveryBike1 = createDeliveryBike(mats.carRed);
-    const deliveryBike2 = createDeliveryBike(mats.carBlue);
+    const bicycle1 = createBicycleRider();
 
     const fleet = [
       { mesh: redSedan.car, wheels: redSedan.wheels, progress: 0.05, speed: 0.032 },
       { mesh: blueSedan.car, wheels: blueSedan.wheels, progress: 0.38, speed: 0.034 },
+      { mesh: movingAmb.car, wheels: movingAmb.wheels, progress: 0.20, speed: 0.038 },
       { mesh: yellowTaxi.car, wheels: yellowTaxi.wheels, progress: 0.72, speed: 0.031 },
       { mesh: cngVeh.car, wheels: cngVeh.wheels, progress: 0.55, speed: 0.027 },
-      { mesh: deliveryBike1.car, wheels: deliveryBike1.wheels, progress: 0.21, speed: 0.039 },
-      { mesh: deliveryBike2.car, wheels: deliveryBike2.wheels, progress: 0.88, speed: 0.037 },
+      { mesh: deliveryBike1.car, wheels: deliveryBike1.wheels, progress: 0.88, speed: 0.040 },
+      { mesh: bicycle1.car, wheels: bicycle1.wheels, progress: 0.42, speed: 0.022 },
     ];
 
     fleet.forEach((v) => vehicleGroup.add(v.mesh));
@@ -1238,7 +1277,7 @@ export default function Hero3DIsland() {
     animatedRefs.current.walkers = walkers;
 
     // ========================================================
-    // 14. FLOATING BOBBING PINS & BILLBOARDS MATCHING IMAGE
+    // 14. FLOATING BOBBING TEARDROP MAP PINS (EXACTLY MATCHING VIDEO)
     // ========================================================
     const pinsGroup = new THREE.Group();
     diorama.add(pinsGroup);
@@ -1249,44 +1288,60 @@ export default function Hero3DIsland() {
       const pinObj = new THREE.Group();
       pinObj.position.set(lm.position[0], lm.position[1], lm.position[2]);
 
-      // High-resolution canvas for crisp typography
       const canvas = document.createElement("canvas");
-      canvas.width = 360;
-      canvas.height = 96;
+      canvas.width = 380;
+      canvas.height = 120;
       const ctx = canvas.getContext("2d");
 
-      // Draw rounded teardrop badge with border
+      // Draw Teardrop / Speech-bubble Map-Pin Badge with bottom pointer tip
+      const x = 12;
+      const y = 8;
+      const w = 356;
+      const h = 76;
+      const r = 38;
+
+      ctx.save();
+      ctx.shadowColor = "rgba(0, 0, 0, 0.18)";
+      ctx.shadowBlur = 10;
+      ctx.shadowOffsetY = 4;
+
       ctx.fillStyle = lm.pinBg;
       ctx.strokeStyle = lm.badgeColor;
-      ctx.lineWidth = 6;
+      ctx.lineWidth = 5;
+
       ctx.beginPath();
-      ctx.roundRect(8, 8, 344, 80, 40);
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + w / 2 + 16, y + h);
+      ctx.lineTo(x + w / 2, y + h + 22); // pointed downward tip
+      ctx.lineTo(x + w / 2 - 16, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
       ctx.fill();
       ctx.stroke();
+      ctx.restore();
 
-      // Text and Icon
+      // Text and Category Icon
       ctx.fillStyle = lm.pinText;
-      ctx.font = "bold 28px Inter, system-ui, -apple-system, sans-serif";
+      ctx.font = "bold 30px Inter, system-ui, -apple-system, sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText(`${lm.icon} ${lm.name.slice(0, 16)}`, 180, 48);
+      ctx.fillText(`${lm.icon} ${lm.name}`, 190, y + h / 2);
 
       const texture = new THREE.CanvasTexture(canvas);
       texture.minFilter = THREE.LinearFilter;
 
       const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true });
       const sprite = new THREE.Sprite(spriteMat);
-      sprite.scale.set(3.4, 0.9, 1);
-      sprite.position.y = 0.7;
+      sprite.scale.set(3.6, 1.14, 1);
+      sprite.position.y = 0.75;
       pinObj.add(sprite);
-
-      // Pin Needle
-      const needle = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.04, 0.01, 0.65),
-        new THREE.MeshBasicMaterial({ color: lm.badgeColor })
-      );
-      needle.position.y = 0.3;
-      pinObj.add(needle);
 
       // Target Orb on the ground point
       const targetOrb = new THREE.Mesh(
@@ -1378,15 +1433,11 @@ export default function Hero3DIsland() {
       if (animatedRefs.current.walkers) {
         animatedRefs.current.walkers.forEach((w) => {
           const walkPhase = Math.sin(time * 7 + w.phase);
-          // Scissor legs
           w.leg1.rotation.x = walkPhase * 0.55;
           w.leg2.rotation.x = -walkPhase * 0.55;
-          // Contralateral arm swing (opposite to leg)
           w.arm1.rotation.x = -walkPhase * 0.5;
           w.arm2.rotation.x = walkPhase * 0.5;
-          // Torso bounce
           w.torso.position.y = 0.52 + Math.abs(Math.sin(time * 7 + w.phase)) * 0.04;
-          // Sidewalk movement
           w.person.position.z = w.baseZ + Math.sin(time * 0.7 + w.phase) * 0.8 * w.dirZ;
         });
       }
@@ -1594,7 +1645,7 @@ export default function Hero3DIsland() {
                   </span>
                 </div>
                 <h3 className="mt-1.5 text-base font-extrabold text-forest sm:text-lg">
-                  {activeLandmark.name}
+                  {activeLandmark.fullName || activeLandmark.name}
                 </h3>
                 <p className="mt-1 text-xs text-slate-600 sm:text-sm leading-relaxed">
                   {activeLandmark.desc}
