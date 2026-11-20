@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 import { Link } from "react-router-dom";
 import {
   Sun,
@@ -216,7 +217,7 @@ export default function Hero3DIsland() {
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.16;
+      renderer.toneMappingExposure = 1.14;
       container.innerHTML = "";
       container.appendChild(renderer.domElement);
       rendererRef.current = renderer;
@@ -243,12 +244,12 @@ export default function Hero3DIsland() {
       setAutoRotate(false);
     });
 
-    // 5. Lighting Setup (Soft Studio Warm Daylight)
-    const ambientLight = new THREE.AmbientLight("#fff8ee", 1.35);
+    // 5. Lighting Setup (Soft Studio Warm Daylight with PBR specular highlights)
+    const ambientLight = new THREE.AmbientLight("#fff8ee", 1.25);
     scene.add(ambientLight);
 
-    const dirLight = new THREE.DirectionalLight("#fff3dd", 2.3);
-    dirLight.position.set(26, 36, 22);
+    const dirLight = new THREE.DirectionalLight("#fff4e0", 2.6);
+    dirLight.position.set(24, 34, 20);
     dirLight.castShadow = true;
     dirLight.shadow.mapSize.width = 2048;
     dirLight.shadow.mapSize.height = 2048;
@@ -258,109 +259,125 @@ export default function Hero3DIsland() {
     dirLight.shadow.camera.right = 26;
     dirLight.shadow.camera.top = 26;
     dirLight.shadow.camera.bottom = -26;
-    dirLight.shadow.bias = -0.0003;
+    dirLight.shadow.bias = -0.0002;
+    dirLight.shadow.radius = 2.0; // soft penumbra
     scene.add(dirLight);
 
-    const fillLight = new THREE.DirectionalLight("#bfdbfe", 0.85);
-    fillLight.position.set(-24, 18, -24);
+    const fillLight = new THREE.DirectionalLight("#c2dcff", 0.95);
+    fillLight.position.set(-22, 16, -22);
     scene.add(fillLight);
 
-    const groundHemiLight = new THREE.HemisphereLight("#ffffff", "#c7dbb9", 0.65);
+    const groundHemiLight = new THREE.HemisphereLight("#fffaf0", "#c8bda8", 0.65);
     scene.add(groundHemiLight);
 
     lightsRef.current = { ambientLight, dirLight, fillLight, groundHemiLight };
 
-    // --- COLOR PALETTE & MATTE CLAY MATERIALS ---
+    // ========================================================
+    // PHYSICALLY BASED RENDERING (PBR) MATERIALS
+    // (Replaced flat MeshLambert with velvety, organic MeshStandardMaterial)
+    // ========================================================
     const mats = {
       // Ground Layers
-      dirtCore: new THREE.MeshLambertMaterial({ color: "#543825" }),
-      dirtMid: new THREE.MeshLambertMaterial({ color: "#9c6d48" }),
-      dirtLip: new THREE.MeshLambertMaterial({ color: "#e8ded2" }),
-      grassLawn: new THREE.MeshLambertMaterial({ color: "#cde3b5" }),
-      grassDark: new THREE.MeshLambertMaterial({ color: "#9dbf7c" }),
-      sidewalk: new THREE.MeshLambertMaterial({ color: "#f2ece1" }),
-      curbStone: new THREE.MeshLambertMaterial({ color: "#d9d0c3" }),
-      plazaPave: new THREE.MeshLambertMaterial({ color: "#e6decb" }),
-      roadAsphalt: new THREE.MeshLambertMaterial({ color: "#28303d" }),
-      roadDashes: new THREE.MeshLambertMaterial({ color: "#f8fafc" }),
-      crosswalk: new THREE.MeshLambertMaterial({ color: "#ffffff" }),
+      dirtCore: new THREE.MeshStandardMaterial({ color: "#4a311f", roughness: 0.75, metalness: 0.05 }),
+      dirtMid: new THREE.MeshStandardMaterial({ color: "#8a5e3c", roughness: 0.72, metalness: 0.04 }),
+      dirtLip: new THREE.MeshStandardMaterial({ color: "#ded4c7", roughness: 0.68, metalness: 0.06 }),
+      grassLawn: new THREE.MeshStandardMaterial({ color: "#b9d89a", roughness: 0.85, metalness: 0.02 }),
+      grassDark: new THREE.MeshStandardMaterial({ color: "#92b770", roughness: 0.85, metalness: 0.02 }),
+      sidewalk: new THREE.MeshStandardMaterial({ color: "#eee6d9", roughness: 0.75, metalness: 0.04 }),
+      curbStone: new THREE.MeshStandardMaterial({ color: "#d2c7b5", roughness: 0.78, metalness: 0.05 }),
+      plazaPave: new THREE.MeshStandardMaterial({ color: "#e4dbcb", roughness: 0.75, metalness: 0.05 }),
+      roadAsphalt: new THREE.MeshStandardMaterial({ color: "#2d3440", roughness: 0.82, metalness: 0.06 }),
+      roadDashes: new THREE.MeshStandardMaterial({ color: "#f8fafc", roughness: 0.6, metalness: 0.02 }),
+      crosswalk: new THREE.MeshStandardMaterial({ color: "#ffffff", roughness: 0.55, metalness: 0.02 }),
 
-      // My Home Villa
-      villaWall: new THREE.MeshLambertMaterial({ color: "#fbf5eb" }),
-      villaRoof: new THREE.MeshLambertMaterial({ color: "#c3532c" }),
-      villaTrim: new THREE.MeshLambertMaterial({ color: "#ffffff" }),
-      villaFence: new THREE.MeshLambertMaterial({ color: "#a87149" }),
-      villaGlass: new THREE.MeshLambertMaterial({ color: "#93c5fd" }),
-      villaChimney: new THREE.MeshLambertMaterial({ color: "#f1f5f9" }),
+      // My Home Villa (Soft Creamy Stucco & Warm Terracotta)
+      villaWall: new THREE.MeshStandardMaterial({ color: "#fcf7ef", roughness: 0.68, metalness: 0.02 }),
+      villaRoof: new THREE.MeshStandardMaterial({ color: "#c45330", roughness: 0.58, metalness: 0.04 }),
+      villaTrim: new THREE.MeshStandardMaterial({ color: "#ffffff", roughness: 0.5, metalness: 0.05 }),
+      villaFence: new THREE.MeshStandardMaterial({ color: "#9c6842", roughness: 0.7, metalness: 0.02 }),
+      villaGlass: new THREE.MeshStandardMaterial({
+        color: "#93c5fd",
+        roughness: 0.12,
+        metalness: 0.35,
+        transparent: true,
+        opacity: 0.88,
+      }),
+      villaChimney: new THREE.MeshStandardMaterial({ color: "#f1f5f9", roughness: 0.6, metalness: 0.02 }),
 
-      // Central Hospital
-      hospWhite: new THREE.MeshLambertMaterial({ color: "#f8fafc" }),
-      hospBlue: new THREE.MeshLambertMaterial({ color: "#38bdf8" }),
-      hospRed: new THREE.MeshLambertMaterial({ color: "#ef4444" }),
-      hospDark: new THREE.MeshLambertMaterial({ color: "#334155" }),
+      // Central Hospital (Crisp White & Soft Medical Sky Blue)
+      hospWhite: new THREE.MeshStandardMaterial({ color: "#f8fafc", roughness: 0.55, metalness: 0.05 }),
+      hospBlue: new THREE.MeshStandardMaterial({ color: "#38bdf8", roughness: 0.5, metalness: 0.08 }),
+      hospRed: new THREE.MeshStandardMaterial({ color: "#ef4444", roughness: 0.45, metalness: 0.05 }),
+      hospDark: new THREE.MeshStandardMaterial({ color: "#334155", roughness: 0.65, metalness: 0.15 }),
 
-      // Pharmacy
-      pharmMint: new THREE.MeshLambertMaterial({ color: "#10b981" }),
-      pharmLight: new THREE.MeshLambertMaterial({ color: "#ecfdf5" }),
-      pharmGreen: new THREE.MeshLambertMaterial({ color: "#047857" }),
+      // Pharmacy (Herbal Mint & Clean Light White)
+      pharmMint: new THREE.MeshStandardMaterial({ color: "#10b981", roughness: 0.5, metalness: 0.06 }),
+      pharmLight: new THREE.MeshStandardMaterial({ color: "#ecfdf5", roughness: 0.6, metalness: 0.03 }),
+      pharmGreen: new THREE.MeshStandardMaterial({ color: "#059669", roughness: 0.45, metalness: 0.05 }),
 
-      // Auto & Bike Service
-      autoGray: new THREE.MeshLambertMaterial({ color: "#94a3b8" }),
-      autoDark: new THREE.MeshLambertMaterial({ color: "#475569" }),
-      autoRed: new THREE.MeshLambertMaterial({ color: "#dc2626" }),
-      autoYellow: new THREE.MeshLambertMaterial({ color: "#f59e0b" }),
-      metalPlate: new THREE.MeshLambertMaterial({ color: "#64748b" }),
+      // Auto & Bike Service (Industrial Slate & Racing Accents)
+      autoGray: new THREE.MeshStandardMaterial({ color: "#8a99ac", roughness: 0.65, metalness: 0.12 }),
+      autoDark: new THREE.MeshStandardMaterial({ color: "#475569", roughness: 0.65, metalness: 0.2 }),
+      autoRed: new THREE.MeshStandardMaterial({ color: "#dc2626", roughness: 0.4, metalness: 0.15 }),
+      autoYellow: new THREE.MeshStandardMaterial({ color: "#f59e0b", roughness: 0.4, metalness: 0.12 }),
+      metalPlate: new THREE.MeshStandardMaterial({ color: "#94a3b8", roughness: 0.25, metalness: 0.85 }),
 
-      // Market & Grocery
-      awningRed: new THREE.MeshLambertMaterial({ color: "#e11d48" }),
-      awningGreen: new THREE.MeshLambertMaterial({ color: "#16a34a" }),
-      awningBlue: new THREE.MeshLambertMaterial({ color: "#2563eb" }),
-      awningYellow: new THREE.MeshLambertMaterial({ color: "#facc15" }),
-      crateWood: new THREE.MeshLambertMaterial({ color: "#b48356" }),
-      fruitRed: new THREE.MeshLambertMaterial({ color: "#ef4444" }),
-      fruitOrange: new THREE.MeshLambertMaterial({ color: "#f97316" }),
-      fruitYellow: new THREE.MeshLambertMaterial({ color: "#eab308" }),
-      fruitGreen: new THREE.MeshLambertMaterial({ color: "#22c55e" }),
-      fruitPurple: new THREE.MeshLambertMaterial({ color: "#7c3aed" }),
+      // Market & Grocery (Vibrant matte fabric canopies & wooden crates)
+      awningRed: new THREE.MeshStandardMaterial({ color: "#e11d48", roughness: 0.6, metalness: 0.02 }),
+      awningGreen: new THREE.MeshStandardMaterial({ color: "#16a34a", roughness: 0.6, metalness: 0.02 }),
+      awningBlue: new THREE.MeshStandardMaterial({ color: "#2563eb", roughness: 0.6, metalness: 0.02 }),
+      awningYellow: new THREE.MeshStandardMaterial({ color: "#facc15", roughness: 0.6, metalness: 0.02 }),
+      crateWood: new THREE.MeshStandardMaterial({ color: "#b48356", roughness: 0.78, metalness: 0.03 }),
+      fruitRed: new THREE.MeshStandardMaterial({ color: "#ef4444", roughness: 0.45, metalness: 0.05 }),
+      fruitOrange: new THREE.MeshStandardMaterial({ color: "#f97316", roughness: 0.45, metalness: 0.05 }),
+      fruitYellow: new THREE.MeshStandardMaterial({ color: "#eab308", roughness: 0.45, metalness: 0.05 }),
+      fruitGreen: new THREE.MeshStandardMaterial({ color: "#22c55e", roughness: 0.45, metalness: 0.05 }),
+      fruitPurple: new THREE.MeshStandardMaterial({ color: "#7c3aed", roughness: 0.45, metalness: 0.05 }),
 
       // Laundry & Restaurant
-      laundryCyan: new THREE.MeshLambertMaterial({ color: "#0284c7" }),
-      restTerracotta: new THREE.MeshLambertMaterial({ color: "#ea580c" }),
-      fountainWater: new THREE.MeshLambertMaterial({ color: "#0ea5e9" }),
+      laundryCyan: new THREE.MeshStandardMaterial({ color: "#0284c7", roughness: 0.52, metalness: 0.1 }),
+      restTerracotta: new THREE.MeshStandardMaterial({ color: "#ea580c", roughness: 0.6, metalness: 0.04 }),
+      fountainWater: new THREE.MeshStandardMaterial({
+        color: "#0ea5e9",
+        roughness: 0.15,
+        metalness: 0.15,
+        transparent: true,
+        opacity: 0.85,
+      }),
 
       // Nature & Infrastructure
-      poleWood: new THREE.MeshLambertMaterial({ color: "#6b4a31" }),
+      poleWood: new THREE.MeshStandardMaterial({ color: "#61432b", roughness: 0.8, metalness: 0.02 }),
       wireMat: new THREE.LineBasicMaterial({ color: "#334155", linewidth: 1 }),
-      treeTrunk: new THREE.MeshLambertMaterial({ color: "#543a25" }),
-      leafLight: new THREE.MeshLambertMaterial({ color: "#4ade80" }),
-      leafMid: new THREE.MeshLambertMaterial({ color: "#22c55e" }),
-      leafDark: new THREE.MeshLambertMaterial({ color: "#15803d" }),
-      lampMetal: new THREE.MeshLambertMaterial({ color: "#334155" }),
+      treeTrunk: new THREE.MeshStandardMaterial({ color: "#543a25", roughness: 0.8, metalness: 0.02 }),
+      leafLight: new THREE.MeshStandardMaterial({ color: "#5bbd50", roughness: 0.72, metalness: 0.02 }),
+      leafMid: new THREE.MeshStandardMaterial({ color: "#3f9c35", roughness: 0.72, metalness: 0.02 }),
+      leafDark: new THREE.MeshStandardMaterial({ color: "#2d7525", roughness: 0.72, metalness: 0.02 }),
+      lampMetal: new THREE.MeshStandardMaterial({ color: "#334155", roughness: 0.4, metalness: 0.6 }),
       lampGlow: new THREE.MeshBasicMaterial({ color: "#fef08a" }),
 
-      // Vehicles
-      carRed: new THREE.MeshLambertMaterial({ color: "#dc2626" }),
-      carBlue: new THREE.MeshLambertMaterial({ color: "#2563eb" }),
-      carYellow: new THREE.MeshLambertMaterial({ color: "#eab308" }),
-      carWhite: new THREE.MeshLambertMaterial({ color: "#f8fafc" }),
-      cngGreen: new THREE.MeshLambertMaterial({ color: "#16a34a" }),
-      cngYellow: new THREE.MeshLambertMaterial({ color: "#facc15" }),
-      wheelRubber: new THREE.MeshLambertMaterial({ color: "#1e293b" }),
-      wheelHub: new THREE.MeshLambertMaterial({ color: "#cbd5e1" }),
+      // Vehicles (Glossy Automotive Lacquer)
+      carRed: new THREE.MeshStandardMaterial({ color: "#dc2626", roughness: 0.2, metalness: 0.22 }),
+      carBlue: new THREE.MeshStandardMaterial({ color: "#2563eb", roughness: 0.2, metalness: 0.22 }),
+      carYellow: new THREE.MeshStandardMaterial({ color: "#eab308", roughness: 0.2, metalness: 0.22 }),
+      carWhite: new THREE.MeshStandardMaterial({ color: "#f8fafc", roughness: 0.2, metalness: 0.22 }),
+      cngGreen: new THREE.MeshStandardMaterial({ color: "#16a34a", roughness: 0.35, metalness: 0.1 }),
+      cngYellow: new THREE.MeshStandardMaterial({ color: "#facc15", roughness: 0.4, metalness: 0.05 }),
+      wheelRubber: new THREE.MeshStandardMaterial({ color: "#1e293b", roughness: 0.85, metalness: 0.05 }),
+      wheelHub: new THREE.MeshStandardMaterial({ color: "#cbd5e1", roughness: 0.2, metalness: 0.85 }),
       headlightGlow: new THREE.MeshBasicMaterial({ color: "#fef08a" }),
       taillightGlow: new THREE.MeshBasicMaterial({ color: "#ef4444" }),
 
       // Pedestrians
-      skinTone: new THREE.MeshLambertMaterial({ color: "#fed7aa" }),
-      skinToneAlt: new THREE.MeshLambertMaterial({ color: "#fbcfe8" }),
-      clothesNavy: new THREE.MeshLambertMaterial({ color: "#1e3a8a" }),
-      clothesDark: new THREE.MeshLambertMaterial({ color: "#1e293b" }),
-      clothesRed: new THREE.MeshLambertMaterial({ color: "#e11d48" }),
-      clothesGreen: new THREE.MeshLambertMaterial({ color: "#10b981" }),
-      clothesBlue: new THREE.MeshLambertMaterial({ color: "#3b82f6" }),
-      clothesYellow: new THREE.MeshLambertMaterial({ color: "#eab308" }),
-      clothesWhite: new THREE.MeshLambertMaterial({ color: "#ffffff" }),
-      hairDark: new THREE.MeshLambertMaterial({ color: "#0f172a" }),
+      skinTone: new THREE.MeshStandardMaterial({ color: "#fed7aa", roughness: 0.65, metalness: 0.02 }),
+      skinToneAlt: new THREE.MeshStandardMaterial({ color: "#fbcfe8", roughness: 0.65, metalness: 0.02 }),
+      clothesNavy: new THREE.MeshStandardMaterial({ color: "#1e3a8a", roughness: 0.7, metalness: 0.02 }),
+      clothesDark: new THREE.MeshStandardMaterial({ color: "#1e293b", roughness: 0.7, metalness: 0.02 }),
+      clothesRed: new THREE.MeshStandardMaterial({ color: "#e11d48", roughness: 0.7, metalness: 0.02 }),
+      clothesGreen: new THREE.MeshStandardMaterial({ color: "#10b981", roughness: 0.7, metalness: 0.02 }),
+      clothesBlue: new THREE.MeshStandardMaterial({ color: "#3b82f6", roughness: 0.7, metalness: 0.02 }),
+      clothesYellow: new THREE.MeshStandardMaterial({ color: "#eab308", roughness: 0.7, metalness: 0.02 }),
+      clothesWhite: new THREE.MeshStandardMaterial({ color: "#ffffff", roughness: 0.65, metalness: 0.02 }),
+      hairDark: new THREE.MeshStandardMaterial({ color: "#0f172a", roughness: 0.8, metalness: 0.05 }),
     };
 
     // Root Diorama Group
@@ -368,23 +385,23 @@ export default function Hero3DIsland() {
     scene.add(diorama);
 
     // ========================================================
-    // 1. EXPANSIVE 34x34 DIORAMA BASE WITH MULTI-TIER EARTHEN LAYERS
+    // 1. EXPANSIVE 34x34 DIORAMA BASE WITH BEVELED ROUNDED EDGES
     // ========================================================
     const baseSize = 34.0;
     const baseH = 2.2;
 
-    // Subterranean Earthen Core
+    // Subterranean Earthen Core with rounded edges
     const earthCore = new THREE.Mesh(
-      new THREE.BoxGeometry(baseSize, baseH, baseSize),
+      new RoundedBoxGeometry(baseSize, baseH, baseSize, 4, 0.4),
       mats.dirtCore
     );
     earthCore.position.y = -baseH / 2;
     earthCore.receiveShadow = true;
     diorama.add(earthCore);
 
-    // Mid-tier Strata Layer
+    // Mid-tier Strata Layer with soft bevel
     const earthMid = new THREE.Mesh(
-      new THREE.BoxGeometry(baseSize + 0.3, 0.4, baseSize + 0.3),
+      new RoundedBoxGeometry(baseSize + 0.3, 0.4, baseSize + 0.3, 4, 0.15),
       mats.dirtMid
     );
     earthMid.position.y = -0.45;
@@ -393,7 +410,7 @@ export default function Hero3DIsland() {
 
     // Beveled Top Clay/Stone Trim Lip
     const earthLip = new THREE.Mesh(
-      new THREE.BoxGeometry(baseSize + 0.5, 0.28, baseSize + 0.5),
+      new RoundedBoxGeometry(baseSize + 0.5, 0.28, baseSize + 0.5, 4, 0.12),
       mats.dirtLip
     );
     earthLip.position.y = -0.14;
@@ -402,7 +419,7 @@ export default function Hero3DIsland() {
 
     // Top Emerald Grass Soil Plane
     const topGrass = new THREE.Mesh(
-      new THREE.BoxGeometry(baseSize - 0.1, 0.22, baseSize - 0.1),
+      new RoundedBoxGeometry(baseSize - 0.1, 0.22, baseSize - 0.1, 4, 0.1),
       mats.grassLawn
     );
     topGrass.position.y = 0.05;
@@ -484,9 +501,9 @@ export default function Hero3DIsland() {
     makeCrosswalk(0, -loopR, false);
     makeCrosswalk(loopR, 0, true);
 
-    // Sidewalk Pavements & Plazas
+    // Sidewalk Pavements & Plazas with rounded corners
     const makePavedPlaza = (w, d, x, z) => {
-      const p = new THREE.Mesh(new THREE.BoxGeometry(w, 0.14, d), mats.sidewalk);
+      const p = new THREE.Mesh(new RoundedBoxGeometry(w, 0.14, d, 3, 0.08), mats.sidewalk);
       p.position.set(x, 0.12, z);
       p.receiveShadow = true;
       diorama.add(p);
@@ -500,24 +517,24 @@ export default function Hero3DIsland() {
     makePavedPlaza(7.6, 14.0, 12.4, 6.5); // Restaurant & Laundry Plaza
 
     // ========================================================
-    // 3. CENTERPIECE — "MY HOME" (BUNGALOW EXACTLY MATCHING VIDEO)
+    // 3. CENTERPIECE — "MY HOME" (BEVELED BUNGALOW MATCHING VIDEO)
     // ========================================================
     const homeGroup = new THREE.Group();
     diorama.add(homeGroup);
 
     // Manicured Yard Lawn
-    const homeLawn = new THREE.Mesh(new THREE.BoxGeometry(10.8, 0.15, 10.8), mats.grassDark);
+    const homeLawn = new THREE.Mesh(new RoundedBoxGeometry(10.8, 0.15, 10.8, 3, 0.08), mats.grassDark);
     homeLawn.position.set(0, 0.13, 0);
     homeLawn.receiveShadow = true;
     homeGroup.add(homeLawn);
 
     // Flagstone Garden Pathway to Front Gate
-    const walkStone = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.16, 4.4), mats.plazaPave);
+    const walkStone = new THREE.Mesh(new RoundedBoxGeometry(1.8, 0.16, 4.4, 2, 0.04), mats.plazaPave);
     walkStone.position.set(0, 0.14, 3.2);
     homeGroup.add(walkStone);
 
-    // Cozy Beige House Body
-    const houseBody = new THREE.Mesh(new THREE.BoxGeometry(5.4, 2.3, 4.6), mats.villaWall);
+    // Cozy Beige House Body with soft rounded corners
+    const houseBody = new THREE.Mesh(new RoundedBoxGeometry(5.4, 2.3, 4.6, 4, 0.12), mats.villaWall);
     houseBody.position.set(0, 1.3, -0.4);
     houseBody.castShadow = true;
     houseBody.receiveShadow = true;
@@ -532,31 +549,31 @@ export default function Hero3DIsland() {
     homeGroup.add(houseRoof);
 
     // Chimney with terracotta cap
-    const chimney = new THREE.Mesh(new THREE.BoxGeometry(0.55, 1.2, 0.55), mats.villaChimney);
+    const chimney = new THREE.Mesh(new RoundedBoxGeometry(0.55, 1.2, 0.55, 2, 0.05), mats.villaChimney);
     chimney.position.set(1.4, 3.4, -0.8);
-    const chimneyCap = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.12, 0.7), mats.villaRoof);
+    const chimneyCap = new THREE.Mesh(new RoundedBoxGeometry(0.7, 0.12, 0.7, 2, 0.03), mats.villaRoof);
     chimneyCap.position.set(1.4, 4.05, -0.8);
     homeGroup.add(chimney, chimneyCap);
 
     // Front Porch Veranda with White Posts
-    const porchRoof = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.15, 1.4), mats.villaRoof);
+    const porchRoof = new THREE.Mesh(new RoundedBoxGeometry(2.4, 0.15, 1.4, 2, 0.04), mats.villaRoof);
     porchRoof.position.set(0, 2.3, 2.2);
-    const post1 = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 2.0), mats.villaTrim);
+    const post1 = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 2.0, 16), mats.villaTrim);
     post1.position.set(-1.0, 1.15, 2.7);
-    const post2 = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 2.0), mats.villaTrim);
+    const post2 = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 2.0, 16), mats.villaTrim);
     post2.position.set(1.0, 1.15, 2.7);
     homeGroup.add(porchRoof, post1, post2);
 
     // Front Wooden Door
-    const frontDoor = new THREE.Mesh(new THREE.BoxGeometry(0.9, 1.6, 0.08), mats.villaFence);
+    const frontDoor = new THREE.Mesh(new RoundedBoxGeometry(0.9, 1.6, 0.08, 2, 0.02), mats.villaFence);
     frontDoor.position.set(0, 0.95, 1.92);
     homeGroup.add(frontDoor);
 
     // Front Framed Windows
     const makeHomeWindow = (wx, wy, wz) => {
       const g = new THREE.Group();
-      const frame = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.9, 0.06), mats.villaTrim);
-      const glass = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.7, 0.08), mats.villaGlass);
+      const frame = new THREE.Mesh(new RoundedBoxGeometry(1.2, 0.9, 0.06, 2, 0.02), mats.villaTrim);
+      const glass = new THREE.Mesh(new RoundedBoxGeometry(1.0, 0.7, 0.08, 2, 0.02), mats.villaGlass);
       g.add(frame, glass);
       g.position.set(wx, wy, wz);
       return g;
@@ -566,7 +583,7 @@ export default function Hero3DIsland() {
 
     // Surrounding Boundary Fence (White Posts & Wooden Rails)
     const makeFenceRail = (w, d, x, z) => {
-      const rail = new THREE.Mesh(new THREE.BoxGeometry(w, 0.65, d), mats.villaWall);
+      const rail = new THREE.Mesh(new RoundedBoxGeometry(w, 0.65, d, 2, 0.04), mats.villaWall);
       rail.position.set(x, 0.48, z);
       rail.castShadow = true;
       homeGroup.add(rail);
@@ -578,17 +595,17 @@ export default function Hero3DIsland() {
     makeFenceRail(4.2, 0.18, 3.3, 5.3); // front right
 
     // Front Gate Entry Pillars & Mailbox
-    const gateCol1 = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.0, 0.4), mats.villaTrim);
+    const gateCol1 = new THREE.Mesh(new RoundedBoxGeometry(0.4, 1.0, 0.4, 2, 0.04), mats.villaTrim);
     gateCol1.position.set(-1.1, 0.65, 5.3);
-    const gateCol2 = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.0, 0.4), mats.villaTrim);
+    const gateCol2 = new THREE.Mesh(new RoundedBoxGeometry(0.4, 1.0, 0.4, 2, 0.04), mats.villaTrim);
     gateCol2.position.set(1.1, 0.65, 5.3);
-    const mailbox = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.4, 0.25), mats.hospRed);
+    const mailbox = new THREE.Mesh(new RoundedBoxGeometry(0.35, 0.4, 0.25, 2, 0.04), mats.hospRed);
     mailbox.position.set(1.1, 1.25, 5.3);
     homeGroup.add(gateCol1, gateCol2, mailbox);
 
-    // Backyard Trees & Garden Shrubs
+    // Backyard Trees & Garden Shrubs (Smooth spheres)
     const addShrub = (sx, sz, mat) => {
-      const sh = new THREE.Mesh(new THREE.DodecahedronGeometry(0.45), mat);
+      const sh = new THREE.Mesh(new THREE.SphereGeometry(0.45, 16, 12), mat);
       sh.position.set(sx, 0.4, sz);
       sh.castShadow = true;
       homeGroup.add(sh);
@@ -599,10 +616,10 @@ export default function Hero3DIsland() {
     addShrub(3.8, 2.4, mats.leafMid);
 
     // Lush trees in home yard
-    const yardTree1 = new THREE.Mesh(new THREE.DodecahedronGeometry(0.9), mats.leafDark);
+    const yardTree1 = new THREE.Mesh(new THREE.SphereGeometry(0.9, 20, 16), mats.leafDark);
     yardTree1.position.set(-3.2, 1.6, -3.2);
     yardTree1.castShadow = true;
-    const yardTree2 = new THREE.Mesh(new THREE.DodecahedronGeometry(0.75), mats.leafMid);
+    const yardTree2 = new THREE.Mesh(new THREE.SphereGeometry(0.75, 20, 16), mats.leafMid);
     yardTree2.position.set(-3.4, 2.3, -3.2);
     homeGroup.add(yardTree1, yardTree2);
 
@@ -613,25 +630,25 @@ export default function Hero3DIsland() {
     hospGroup.position.set(-12.2, 0, 6.5);
     diorama.add(hospGroup);
 
-    // Two-Story Medical Center Body
-    const hospTower = new THREE.Mesh(new THREE.BoxGeometry(5.4, 3.8, 5.4), mats.hospWhite);
+    // Two-Story Medical Center Body with rounded edges
+    const hospTower = new THREE.Mesh(new RoundedBoxGeometry(5.4, 3.8, 5.4, 4, 0.15), mats.hospWhite);
     hospTower.position.set(0, 2.0, 0);
     hospTower.castShadow = true;
     hospTower.receiveShadow = true;
     hospGroup.add(hospTower);
 
     // Sky-Blue Base Skirting & Roof Parapet
-    const hospBase = new THREE.Mesh(new THREE.BoxGeometry(5.5, 0.5, 5.5), mats.hospBlue);
+    const hospBase = new THREE.Mesh(new RoundedBoxGeometry(5.5, 0.5, 5.5, 3, 0.1), mats.hospBlue);
     hospBase.position.set(0, 0.35, 0);
-    const hospRoof = new THREE.Mesh(new THREE.BoxGeometry(5.5, 0.35, 5.5), mats.hospBlue);
+    const hospRoof = new THREE.Mesh(new RoundedBoxGeometry(5.5, 0.35, 5.5, 3, 0.1), mats.hospBlue);
     hospRoof.position.set(0, 4.0, 0);
     hospGroup.add(hospBase, hospRoof);
 
     // 3D Red Cross Sign on front
     const makeRedCross = (x, y, z, rotY = 0) => {
       const g = new THREE.Group();
-      const b1 = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.4, 0.12), mats.hospRed);
-      const b2 = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.2, 0.12), mats.hospRed);
+      const b1 = new THREE.Mesh(new RoundedBoxGeometry(1.2, 0.4, 0.12, 2, 0.04), mats.hospRed);
+      const b2 = new THREE.Mesh(new RoundedBoxGeometry(0.4, 1.2, 0.12, 2, 0.04), mats.hospRed);
       g.add(b1, b2);
       g.position.set(x, y, z);
       g.rotation.y = rotY;
@@ -640,26 +657,26 @@ export default function Hero3DIsland() {
     hospGroup.add(makeRedCross(2.76, 3.1, 0, Math.PI / 2));
 
     // Red & White Striped Entrance Canopy
-    const hospCanopy = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.16, 2.4), mats.awningRed);
+    const hospCanopy = new THREE.Mesh(new RoundedBoxGeometry(1.8, 0.16, 2.4, 2, 0.04), mats.awningRed);
     hospCanopy.position.set(3.4, 1.8, 0);
     hospCanopy.rotation.z = -0.22;
-    const hospDoor = new THREE.Mesh(new THREE.BoxGeometry(0.08, 1.5, 1.4), mats.villaGlass);
+    const hospDoor = new THREE.Mesh(new RoundedBoxGeometry(0.08, 1.5, 1.4, 2, 0.02), mats.villaGlass);
     hospDoor.position.set(2.72, 0.85, 0);
     hospGroup.add(hospCanopy, hospDoor);
 
     // Rooftop AC / HVAC Utility Unit
-    const hvac = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.6, 1.4), mats.hospDark);
+    const hvac = new THREE.Mesh(new RoundedBoxGeometry(1.6, 0.6, 1.4, 2, 0.05), mats.hospDark);
     hvac.position.set(-0.6, 4.35, 0);
     hospGroup.add(hvac);
 
     // Doctor / Nurse Character outside Hospital
     const doctorGroup = new THREE.Group();
-    const docLegs = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.4, 0.18), mats.clothesNavy);
-    docLegs.position.y = 0.2;
-    const docCoat = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.48, 0.22), mats.clothesWhite);
-    docCoat.position.y = 0.58;
-    const docHead = new THREE.Mesh(new THREE.SphereGeometry(0.14), mats.skinTone);
-    docHead.position.y = 0.92;
+    const docLegs = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.38, 12), mats.clothesNavy);
+    docLegs.position.y = 0.19;
+    const docCoat = new THREE.Mesh(new RoundedBoxGeometry(0.32, 0.44, 0.22, 2, 0.04), mats.clothesWhite);
+    docCoat.position.y = 0.56;
+    const docHead = new THREE.Mesh(new THREE.SphereGeometry(0.14, 16, 14), mats.skinTone);
+    docHead.position.y = 0.88;
     doctorGroup.add(docLegs, docCoat, docHead);
     doctorGroup.position.set(-10.5, 0.14, 8.2);
     diorama.add(doctorGroup);
@@ -672,21 +689,21 @@ export default function Hero3DIsland() {
     diorama.add(pharmGroup);
 
     // Pharmacy Building (Mint & Clean White)
-    const pharmBody = new THREE.Mesh(new THREE.BoxGeometry(5.2, 3.2, 5.0), mats.pharmLight);
+    const pharmBody = new THREE.Mesh(new RoundedBoxGeometry(5.2, 3.2, 5.0, 4, 0.14), mats.pharmLight);
     pharmBody.position.set(0, 1.7, 0);
     pharmBody.castShadow = true;
     pharmGroup.add(pharmBody);
 
     // Mint Green Parapet & Sign Fascia
-    const pharmFascia = new THREE.Mesh(new THREE.BoxGeometry(5.3, 0.5, 5.1), mats.pharmMint);
+    const pharmFascia = new THREE.Mesh(new RoundedBoxGeometry(5.3, 0.5, 5.1, 3, 0.1), mats.pharmMint);
     pharmFascia.position.set(0, 3.4, 0);
     pharmGroup.add(pharmFascia);
 
     // 3D Green Cross Mounted on Roof & Facade
     const makeGreenCross = (x, y, z, rotY = 0) => {
       const g = new THREE.Group();
-      const p1 = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.4, 0.14), mats.pharmGreen);
-      const p2 = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.2, 0.14), mats.pharmGreen);
+      const p1 = new THREE.Mesh(new RoundedBoxGeometry(1.2, 0.4, 0.14, 2, 0.04), mats.pharmGreen);
+      const p2 = new THREE.Mesh(new RoundedBoxGeometry(0.4, 1.2, 0.14, 2, 0.04), mats.pharmGreen);
       g.add(p1, p2);
       g.position.set(x, y, z);
       g.rotation.y = rotY;
@@ -696,7 +713,7 @@ export default function Hero3DIsland() {
     pharmGroup.add(makeGreenCross(0, 4.2, 0, 0));
 
     // Transparent Glass Display with Medicine Boxes
-    const pharmGlass = new THREE.Mesh(new THREE.BoxGeometry(0.08, 1.8, 3.6), mats.villaGlass);
+    const pharmGlass = new THREE.Mesh(new RoundedBoxGeometry(0.08, 1.8, 3.6, 2, 0.02), mats.villaGlass);
     pharmGlass.position.set(2.64, 1.25, 0);
     pharmGroup.add(pharmGlass);
 
@@ -707,7 +724,7 @@ export default function Hero3DIsland() {
       pharmGroup.add(shelf);
       for (let sz = -1.2; sz <= 1.2; sz += 0.55) {
         const medBox = new THREE.Mesh(
-          new THREE.BoxGeometry(0.2, 0.18, 0.22),
+          new RoundedBoxGeometry(0.2, 0.18, 0.22, 2, 0.02),
           Math.random() > 0.5 ? mats.hospBlue : mats.hospRed
         );
         medBox.position.set(2.35, sy + 0.11, sz);
@@ -723,68 +740,68 @@ export default function Hero3DIsland() {
     diorama.add(autoGroup);
 
     // Main Workshop Garage Structure
-    const autoBody = new THREE.Mesh(new THREE.BoxGeometry(12.4, 4.4, 5.6), mats.autoGray);
+    const autoBody = new THREE.Mesh(new RoundedBoxGeometry(12.4, 4.4, 5.6, 4, 0.16), mats.autoGray);
     autoBody.position.set(0, 2.3, 0);
     autoBody.castShadow = true;
     autoGroup.add(autoBody);
 
-    // Dark Corrugated Roof
-    const autoRoof = new THREE.Mesh(new THREE.BoxGeometry(12.8, 0.35, 6.0), mats.autoDark);
+    // Dark Corrugated Roof with soft bevel
+    const autoRoof = new THREE.Mesh(new RoundedBoxGeometry(12.8, 0.35, 6.0, 3, 0.08), mats.autoDark);
     autoRoof.position.set(0, 4.6, 0);
     autoGroup.add(autoRoof);
 
     // Red Marquee Sign: "Auto & Bike Service"
-    const autoSign = new THREE.Mesh(new THREE.BoxGeometry(10.8, 0.85, 0.16), mats.autoRed);
+    const autoSign = new THREE.Mesh(new RoundedBoxGeometry(10.8, 0.85, 0.16, 2, 0.04), mats.autoRed);
     autoSign.position.set(0, 4.0, 2.85);
     autoGroup.add(autoSign);
 
     // 2 Open Service Bays
-    const bay1 = new THREE.Mesh(new THREE.BoxGeometry(3.6, 3.0, 0.2), mats.autoDark);
+    const bay1 = new THREE.Mesh(new RoundedBoxGeometry(3.6, 3.0, 0.2, 2, 0.05), mats.autoDark);
     bay1.position.set(-3.2, 1.6, 2.8);
-    const bay2 = new THREE.Mesh(new THREE.BoxGeometry(3.6, 3.0, 0.2), mats.autoDark);
+    const bay2 = new THREE.Mesh(new RoundedBoxGeometry(3.6, 3.0, 0.2, 2, 0.05), mats.autoDark);
     bay2.position.set(3.2, 1.6, 2.8);
     autoGroup.add(bay1, bay2);
 
     // Bay 1: Hydraulic Car Lift raising vehicle into air
-    const liftCol1 = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 2.4), mats.metalPlate);
+    const liftCol1 = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 2.4, 16), mats.metalPlate);
     liftCol1.position.set(-4.4, 1.25, 3.4);
-    const liftCol2 = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 2.4), mats.metalPlate);
+    const liftCol2 = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 2.4, 16), mats.metalPlate);
     liftCol2.position.set(-2.0, 1.25, 3.4);
-    const liftPlat = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.1, 3.0), mats.metalPlate);
+    const liftPlat = new THREE.Mesh(new RoundedBoxGeometry(2.4, 0.1, 3.0, 2, 0.04), mats.metalPlate);
     liftPlat.position.set(-3.2, 2.0, 3.4);
-    const elevatedCar = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.8, 2.8), mats.carBlue);
+    const elevatedCar = new THREE.Mesh(new RoundedBoxGeometry(1.6, 0.8, 2.8, 4, 0.16), mats.carBlue);
     elevatedCar.position.set(-3.2, 2.5, 3.4);
     elevatedCar.castShadow = true;
     autoGroup.add(liftCol1, liftCol2, liftPlat, elevatedCar);
 
     // Bay 2: Motorcycle Tuning & Mechanic Workstation
-    const bikeBench = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.65, 1.6), mats.carRed);
+    const bikeBench = new THREE.Mesh(new RoundedBoxGeometry(0.45, 0.65, 1.6, 2, 0.06), mats.carRed);
     bikeBench.position.set(3.2, 0.6, 3.4);
-    const bw1 = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.1), mats.wheelRubber);
+    const bw1 = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.1, 16), mats.wheelRubber);
     bw1.rotation.z = Math.PI / 2;
     bw1.position.set(3.2, 0.24, 2.6);
-    const bw2 = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.1), mats.wheelRubber);
+    const bw2 = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.1, 16), mats.wheelRubber);
     bw2.rotation.z = Math.PI / 2;
     bw2.position.set(3.2, 0.24, 4.2);
     autoGroup.add(bikeBench, bw1, bw2);
 
     // Master Mechanic Figure in Blue Overalls
-    const mechTorso = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.45, 0.2), mats.clothesNavy);
+    const mechTorso = new THREE.Mesh(new RoundedBoxGeometry(0.3, 0.44, 0.22, 2, 0.04), mats.clothesNavy);
     mechTorso.position.set(2.2, 0.55, 3.4);
-    const mechHead = new THREE.Mesh(new THREE.SphereGeometry(0.14), mats.skinTone);
-    mechHead.position.set(2.2, 0.9, 3.4);
+    const mechHead = new THREE.Mesh(new THREE.SphereGeometry(0.14, 16, 14), mats.skinTone);
+    mechHead.position.set(2.2, 0.88, 3.4);
     autoGroup.add(mechTorso, mechHead);
 
     // Tire Stacks & Red Oil Barrels
     for (let ty = 0.25; ty <= 1.0; ty += 0.26) {
-      const tire = new THREE.Mesh(new THREE.TorusGeometry(0.32, 0.12, 8, 16), mats.wheelRubber);
+      const tire = new THREE.Mesh(new THREE.TorusGeometry(0.32, 0.12, 12, 20), mats.wheelRubber);
       tire.rotation.x = Math.PI / 2;
       tire.position.set(5.0, ty, 3.6);
       autoGroup.add(tire);
     }
-    const barrelRed = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.85, 16), mats.autoRed);
+    const barrelRed = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.85, 20), mats.autoRed);
     barrelRed.position.set(0.6, 0.5, 3.4);
-    const barrelYellow = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.85, 16), mats.autoYellow);
+    const barrelYellow = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.85, 20), mats.autoYellow);
     barrelYellow.position.set(1.3, 0.5, 3.1);
     autoGroup.add(barrelRed, barrelYellow);
 
@@ -796,14 +813,14 @@ export default function Hero3DIsland() {
     diorama.add(bazaarGroup);
 
     // Market Pavilion Structure
-    const marketBuilding = new THREE.Mesh(new THREE.BoxGeometry(4.8, 3.2, 7.2), mats.villaWall);
+    const marketBuilding = new THREE.Mesh(new RoundedBoxGeometry(4.8, 3.2, 7.2, 4, 0.14), mats.villaWall);
     marketBuilding.position.set(0, 1.7, 0);
     marketBuilding.castShadow = true;
     bazaarGroup.add(marketBuilding);
 
     // Striped Tiered Awnings (Green/White, Red/White, Blue/White)
     const makeAwning = (az, mat) => {
-      const awn = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.16, 2.2), mat);
+      const awn = new THREE.Mesh(new RoundedBoxGeometry(1.6, 0.16, 2.2, 2, 0.04), mat);
       awn.position.set(-2.6, 2.4, az);
       awn.rotation.z = 0.26;
       bazaarGroup.add(awn);
@@ -814,9 +831,9 @@ export default function Hero3DIsland() {
 
     // Tiered Fruit & Vegetable Crates Outside
     const addFruitCrate = (cx, cz, fruitColor) => {
-      const crate = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.28, 0.65), mats.crateWood);
+      const crate = new THREE.Mesh(new RoundedBoxGeometry(0.75, 0.28, 0.65, 2, 0.04), mats.crateWood);
       crate.position.set(cx, 0.42, cz);
-      const fruits = new THREE.Mesh(new THREE.DodecahedronGeometry(0.24), fruitColor);
+      const fruits = new THREE.Mesh(new THREE.SphereGeometry(0.24, 14, 12), fruitColor);
       fruits.position.set(cx, 0.62, cz);
       bazaarGroup.add(crate, fruits);
     };
@@ -830,10 +847,10 @@ export default function Hero3DIsland() {
 
     // Shopper Figure Browsing Market
     const shopperGroup = new THREE.Group();
-    const shopTorso = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.45, 0.2), mats.clothesYellow);
-    shopTorso.position.y = 0.55;
-    const shopHead = new THREE.Mesh(new THREE.SphereGeometry(0.14), mats.skinTone);
-    shopHead.position.y = 0.9;
+    const shopTorso = new THREE.Mesh(new RoundedBoxGeometry(0.28, 0.44, 0.2, 2, 0.04), mats.clothesYellow);
+    shopTorso.position.y = 0.54;
+    const shopHead = new THREE.Mesh(new THREE.SphereGeometry(0.14, 16, 14), mats.skinTone);
+    shopHead.position.y = 0.88;
     shopperGroup.add(shopTorso, shopHead);
     shopperGroup.position.set(-4.0, 0.12, 0.2);
     bazaarGroup.add(shopperGroup);
@@ -846,28 +863,28 @@ export default function Hero3DIsland() {
     diorama.add(laundryGroup);
 
     // Modern Blue Laundromat
-    const laundryBody = new THREE.Mesh(new THREE.BoxGeometry(4.4, 3.0, 3.8), mats.laundryCyan);
+    const laundryBody = new THREE.Mesh(new RoundedBoxGeometry(4.4, 3.0, 3.8, 4, 0.14), mats.laundryCyan);
     laundryBody.position.set(0, 1.6, 0);
     laundryBody.castShadow = true;
     laundryGroup.add(laundryBody);
 
     // Front Glass Window with 3 Washing Machine Doors
-    const laundryGlass = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.8, 3.2), mats.villaGlass);
+    const laundryGlass = new THREE.Mesh(new RoundedBoxGeometry(0.1, 1.8, 3.2, 2, 0.02), mats.villaGlass);
     laundryGlass.position.set(-2.26, 1.3, 0);
     laundryGroup.add(laundryGlass);
 
     for (let wz = -0.95; wz <= 0.95; wz += 0.95) {
-      const washer = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.38, 0.12, 18), mats.metalPlate);
+      const washer = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.38, 0.12, 20), mats.metalPlate);
       washer.rotation.z = Math.PI / 2;
       washer.position.set(-2.28, 1.1, wz);
       laundryGroup.add(washer);
     }
 
-    // Yellow Chai / Street Snack Kiosk (Just like video!)
-    const chaiKiosk = new THREE.Mesh(new THREE.BoxGeometry(2.2, 2.1, 2.0), mats.awningYellow);
+    // Yellow Chai / Street Snack Kiosk
+    const chaiKiosk = new THREE.Mesh(new RoundedBoxGeometry(2.2, 2.1, 2.0, 3, 0.1), mats.awningYellow);
     chaiKiosk.position.set(-0.6, 1.15, -2.8);
     chaiKiosk.castShadow = true;
-    const chaiCounter = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.8, 1.8), mats.crateWood);
+    const chaiCounter = new THREE.Mesh(new RoundedBoxGeometry(0.4, 0.8, 1.8, 2, 0.04), mats.crateWood);
     chaiCounter.position.set(-1.8, 0.55, -2.8);
     laundryGroup.add(chaiKiosk, chaiCounter);
 
@@ -879,13 +896,13 @@ export default function Hero3DIsland() {
     diorama.add(restGroup);
 
     // Terracotta Bistro Building
-    const restBuilding = new THREE.Mesh(new THREE.BoxGeometry(4.8, 3.4, 4.6), mats.restTerracotta);
+    const restBuilding = new THREE.Mesh(new RoundedBoxGeometry(4.8, 3.4, 4.6, 4, 0.14), mats.restTerracotta);
     restBuilding.position.set(0, 1.8, 0);
     restBuilding.castShadow = true;
     restGroup.add(restBuilding);
 
     // Green & White Striped Canopy
-    const restCanopy = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.18, 4.4), mats.awningGreen);
+    const restCanopy = new THREE.Mesh(new RoundedBoxGeometry(1.8, 0.18, 4.4, 2, 0.04), mats.awningGreen);
     restCanopy.position.set(-2.6, 2.4, 0);
     restCanopy.rotation.z = 0.24;
     restGroup.add(restCanopy);
@@ -894,32 +911,32 @@ export default function Hero3DIsland() {
     const makeDinerTable = (tx, tz, umbrellaMat) => {
       const tableGroup = new THREE.Group();
       // Table
-      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.65), mats.villaFence);
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.65, 14), mats.villaFence);
       pole.position.set(tx, 0.42, tz);
-      const top = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 0.08, 16), mats.villaTrim);
+      const top = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 0.08, 20), mats.villaTrim);
       top.position.set(tx, 0.75, tz);
 
       // Umbrella
-      const uPole = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 2.2), mats.villaTrim);
+      const uPole = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 2.2, 14), mats.villaTrim);
       uPole.position.set(tx, 1.2, tz);
-      const canopy = new THREE.Mesh(new THREE.ConeGeometry(1.15, 0.6, 14), umbrellaMat);
+      const canopy = new THREE.Mesh(new THREE.ConeGeometry(1.15, 0.6, 20), umbrellaMat);
       canopy.position.set(tx, 2.3, tz);
 
       // 2 Chairs
-      const c1 = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.4, 0.35), mats.villaFence);
+      const c1 = new THREE.Mesh(new RoundedBoxGeometry(0.35, 0.4, 0.35, 2, 0.04), mats.villaFence);
       c1.position.set(tx - 0.6, 0.28, tz);
-      const c2 = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.4, 0.35), mats.villaFence);
+      const c2 = new THREE.Mesh(new RoundedBoxGeometry(0.35, 0.4, 0.35, 2, 0.04), mats.villaFence);
       c2.position.set(tx + 0.6, 0.28, tz);
 
       // Seated Customer Figures
-      const diner1 = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.35, 0.2), mats.clothesRed);
+      const diner1 = new THREE.Mesh(new RoundedBoxGeometry(0.28, 0.35, 0.2, 2, 0.04), mats.clothesRed);
       diner1.position.set(tx - 0.6, 0.55, tz);
-      const dHead1 = new THREE.Mesh(new THREE.SphereGeometry(0.12), mats.skinTone);
+      const dHead1 = new THREE.Mesh(new THREE.SphereGeometry(0.12, 14, 12), mats.skinTone);
       dHead1.position.set(tx - 0.6, 0.8, tz);
 
-      const diner2 = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.35, 0.2), mats.clothesGreen);
+      const diner2 = new THREE.Mesh(new RoundedBoxGeometry(0.28, 0.35, 0.2, 2, 0.04), mats.clothesGreen);
       diner2.position.set(tx + 0.6, 0.55, tz);
-      const dHead2 = new THREE.Mesh(new THREE.SphereGeometry(0.12), mats.skinToneAlt);
+      const dHead2 = new THREE.Mesh(new THREE.SphereGeometry(0.12, 14, 12), mats.skinToneAlt);
       dHead2.position.set(tx + 0.6, 0.8, tz);
 
       tableGroup.add(pole, top, uPole, canopy, c1, c2, diner1, dHead1, diner2, dHead2);
@@ -931,9 +948,9 @@ export default function Hero3DIsland() {
 
     // Stone Tiered Water Fountain
     const fountain = new THREE.Group();
-    const fBase = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.4, 0.35, 20), mats.plazaPave);
+    const fBase = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.4, 0.35, 24), mats.plazaPave);
     fBase.position.y = 0.2;
-    const fWater = new THREE.Mesh(new THREE.CylinderGeometry(1.0, 1.0, 0.36, 20), mats.fountainWater);
+    const fWater = new THREE.Mesh(new THREE.CylinderGeometry(1.0, 1.0, 0.36, 24), mats.fountainWater);
     fWater.position.y = 0.22;
     const fCenter = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.4, 0.8, 16), mats.villaTrim);
     fCenter.position.y = 0.6;
@@ -957,11 +974,11 @@ export default function Hero3DIsland() {
     const poleTops = [];
 
     polePositions.forEach(([px, pz]) => {
-      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 4.4), mats.poleWood);
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 4.4, 16), mats.poleWood);
       pole.position.set(px, 2.2, pz);
       pole.castShadow = true;
 
-      const arm = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.08, 0.08), mats.poleWood);
+      const arm = new THREE.Mesh(new RoundedBoxGeometry(0.9, 0.08, 0.08, 2, 0.02), mats.poleWood);
       arm.position.set(px, 4.2, pz);
       utilityGroup.add(pole, arm);
 
@@ -983,11 +1000,11 @@ export default function Hero3DIsland() {
 
     // Modern Curved Streetlamps
     const makeStreetlamp = (lx, lz) => {
-      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.09, 3.8), mats.lampMetal);
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.09, 3.8, 16), mats.lampMetal);
       pole.position.set(lx, 1.9, lz);
       const arm = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.06, 0.06), mats.lampMetal);
       arm.position.set(lx + 0.3, 3.75, lz);
-      const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.16), mats.lampGlow);
+      const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.16, 16, 14), mats.lampGlow);
       bulb.position.set(lx + 0.65, 3.65, lz);
       utilityGroup.add(pole, arm, bulb);
     };
@@ -998,7 +1015,7 @@ export default function Hero3DIsland() {
     makeStreetlamp(8.6, 8.6);
 
     // ========================================================
-    // 11. PUFFY STYLIZED CLAY TREES WITH WIND SWAY
+    // 11. PUFFY ORGANIC CLAY TREES (SMOOTH MULTI-SPHERE CLUSTERS)
     // ========================================================
     const natureGroup = new THREE.Group();
     diorama.add(natureGroup);
@@ -1006,17 +1023,17 @@ export default function Hero3DIsland() {
     const makePuffyClayTree = (tx, tz, scale = 1.0, leafMat = mats.leafMid) => {
       const tree = new THREE.Group();
       const trunk = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.14 * scale, 0.19 * scale, 1.4 * scale),
+        new THREE.CylinderGeometry(0.14 * scale, 0.19 * scale, 1.4 * scale, 16),
         mats.treeTrunk
       );
       trunk.position.y = 0.8 * scale;
       trunk.castShadow = true;
 
-      // Multi-cluster puffy cloud foliage
-      const f1 = new THREE.Mesh(new THREE.DodecahedronGeometry(1.15 * scale), leafMat);
+      // Organic multi-sphere puffy cloud foliage (smooth clusters)
+      const f1 = new THREE.Mesh(new THREE.SphereGeometry(1.15 * scale, 24, 20), leafMat);
       f1.position.y = 1.7 * scale;
       f1.castShadow = true;
-      const f2 = new THREE.Mesh(new THREE.DodecahedronGeometry(0.9 * scale), mats.leafLight);
+      const f2 = new THREE.Mesh(new THREE.SphereGeometry(0.9 * scale, 22, 18), mats.leafLight);
       f2.position.set(0.2 * scale, 2.4 * scale, 0);
       f2.castShadow = true;
 
@@ -1045,26 +1062,26 @@ export default function Hero3DIsland() {
     const vehicleGroup = new THREE.Group();
     diorama.add(vehicleGroup);
 
-    // Car Factory: Sleek Clay Sedan
+    // Car Factory: Smooth Aerodynamic Clay Sedan
     const createSedan = (bodyMat) => {
       const car = new THREE.Group();
-      const body = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.6, 2.6), bodyMat);
+      const body = new THREE.Mesh(new RoundedBoxGeometry(1.4, 0.58, 2.6, 4, 0.18), bodyMat);
       body.position.y = 0.52;
       body.castShadow = true;
 
-      const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.18, 0.5, 1.5), mats.hospDark);
-      cabin.position.set(0, 0.95, -0.15);
+      const cabin = new THREE.Mesh(new RoundedBoxGeometry(1.18, 0.48, 1.5, 4, 0.14), mats.hospDark);
+      cabin.position.set(0, 0.94, -0.15);
 
-      const windshield = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.42, 0.06), mats.villaGlass);
-      windshield.position.set(0, 0.95, 0.62);
+      const windshield = new THREE.Mesh(new RoundedBoxGeometry(1.1, 0.42, 0.08, 2, 0.02), mats.villaGlass);
+      windshield.position.set(0, 0.94, 0.62);
       windshield.rotation.x = -0.28;
 
-      const hl1 = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.12, 0.05), mats.headlightGlow);
+      const hl1 = new THREE.Mesh(new RoundedBoxGeometry(0.24, 0.12, 0.05, 2, 0.02), mats.headlightGlow);
       hl1.position.set(-0.46, 0.52, 1.31);
-      const hl2 = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.12, 0.05), mats.headlightGlow);
+      const hl2 = new THREE.Mesh(new RoundedBoxGeometry(0.24, 0.12, 0.05, 2, 0.02), mats.headlightGlow);
       hl2.position.set(0.46, 0.52, 1.31);
 
-      const tl = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.08, 0.05), mats.taillightGlow);
+      const tl = new THREE.Mesh(new RoundedBoxGeometry(1.1, 0.08, 0.05, 2, 0.02), mats.taillightGlow);
       tl.position.set(0, 0.52, -1.31);
 
       car.add(body, cabin, windshield, hl1, hl2, tl);
@@ -1072,10 +1089,10 @@ export default function Hero3DIsland() {
       const wheels = [];
       for (let wx of [-0.72, 0.72]) {
         for (let wz of [-0.75, 0.75]) {
-          const w = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.14, 16), mats.wheelRubber);
+          const w = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.14, 20), mats.wheelRubber);
           w.rotation.z = Math.PI / 2;
           w.position.set(wx, 0.24, wz);
-          const rim = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.15, 8), mats.wheelHub);
+          const rim = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.15, 14), mats.wheelHub);
           rim.rotation.z = Math.PI / 2;
           rim.position.set(wx, 0.24, wz);
           car.add(w, rim);
@@ -1088,18 +1105,18 @@ export default function Hero3DIsland() {
     // Moving Ambulance Factory (cruises boulevard with flashing beacon)
     const createMovingAmbulance = () => {
       const amb = new THREE.Group();
-      const body = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.1, 3.0), mats.hospWhite);
+      const body = new THREE.Mesh(new RoundedBoxGeometry(1.5, 1.1, 3.0, 4, 0.14), mats.hospWhite);
       body.position.y = 0.8;
       body.castShadow = true;
 
-      const redStripe = new THREE.Mesh(new THREE.BoxGeometry(1.54, 0.22, 3.04), mats.hospRed);
+      const redStripe = new THREE.Mesh(new RoundedBoxGeometry(1.54, 0.22, 3.04, 2, 0.02), mats.hospRed);
       redStripe.position.y = 0.8;
 
-      const windshield = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.5, 0.08), mats.villaGlass);
+      const windshield = new THREE.Mesh(new RoundedBoxGeometry(1.4, 0.5, 0.08, 2, 0.02), mats.villaGlass);
       windshield.position.set(0, 0.95, 1.45);
       windshield.rotation.x = -0.25;
 
-      const siren = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.16, 0.26), mats.hospRed);
+      const siren = new THREE.Mesh(new RoundedBoxGeometry(0.7, 0.16, 0.26, 2, 0.04), mats.hospRed);
       siren.position.set(0, 1.45, 0.3);
 
       amb.add(body, redStripe, windshield, siren);
@@ -1112,10 +1129,10 @@ export default function Hero3DIsland() {
       const wheels = [];
       for (let ax of [-0.78, 0.78]) {
         for (let az of [-0.9, 0.9]) {
-          const w = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.14, 16), mats.wheelRubber);
+          const w = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.14, 20), mats.wheelRubber);
           w.rotation.z = Math.PI / 2;
           w.position.set(ax, 0.24, az);
-          const rim = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.13, 0.15, 8), mats.wheelHub);
+          const rim = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.13, 0.15, 14), mats.wheelHub);
           rim.rotation.z = Math.PI / 2;
           rim.position.set(ax, 0.24, az);
           amb.add(w, rim);
@@ -1128,11 +1145,11 @@ export default function Hero3DIsland() {
     // Auto-Rickshaw Factory: Authentic Bangladeshi CNG 3-Wheeler
     const createCNG = () => {
       const cng = new THREE.Group();
-      const lower = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.5, 2.0), mats.cngGreen);
+      const lower = new THREE.Mesh(new RoundedBoxGeometry(1.2, 0.5, 2.0, 4, 0.15), mats.cngGreen);
       lower.position.y = 0.42;
       lower.castShadow = true;
 
-      const hood = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.65, 1.3), mats.cngYellow);
+      const hood = new THREE.Mesh(new RoundedBoxGeometry(1.1, 0.65, 1.3, 4, 0.14), mats.cngYellow);
       hood.position.set(0, 0.95, -0.25);
 
       const wind = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.45, 0.05), mats.hospDark);
@@ -1141,13 +1158,13 @@ export default function Hero3DIsland() {
       cng.add(lower, hood, wind);
 
       const wheels = [];
-      const fw = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.1, 14), mats.wheelRubber);
+      const fw = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.1, 16), mats.wheelRubber);
       fw.rotation.z = Math.PI / 2;
       fw.position.set(0, 0.2, 0.8);
-      const rw1 = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.1, 14), mats.wheelRubber);
+      const rw1 = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.1, 16), mats.wheelRubber);
       rw1.rotation.z = Math.PI / 2;
       rw1.position.set(-0.62, 0.2, -0.6);
-      const rw2 = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.1, 14), mats.wheelRubber);
+      const rw2 = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.1, 16), mats.wheelRubber);
       rw2.rotation.z = Math.PI / 2;
       rw2.position.set(0.62, 0.2, -0.6);
 
@@ -1159,23 +1176,23 @@ export default function Hero3DIsland() {
     // Delivery Motorbike Factory: Courier Rider with Helmet & Food Box
     const createDeliveryBike = (bikeMat) => {
       const bike = new THREE.Group();
-      const frame = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.45, 1.4), bikeMat);
+      const frame = new THREE.Mesh(new RoundedBoxGeometry(0.35, 0.45, 1.4, 2, 0.06), bikeMat);
       frame.position.y = 0.46;
 
-      const w1 = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.1), mats.wheelRubber);
+      const w1 = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.1, 16), mats.wheelRubber);
       w1.rotation.z = Math.PI / 2;
       w1.position.set(0, 0.24, 0.6);
-      const w2 = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.1), mats.wheelRubber);
+      const w2 = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.1, 16), mats.wheelRubber);
       w2.rotation.z = Math.PI / 2;
       w2.position.set(0, 0.24, -0.6);
 
-      const riderTorso = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.48, 0.26), mats.clothesGreen);
+      const riderTorso = new THREE.Mesh(new RoundedBoxGeometry(0.36, 0.48, 0.26, 2, 0.04), mats.clothesGreen);
       riderTorso.position.set(0, 0.86, 0);
-      const riderHelmet = new THREE.Mesh(new THREE.SphereGeometry(0.18), mats.hospRed);
+      const riderHelmet = new THREE.Mesh(new THREE.SphereGeometry(0.18, 16, 14), mats.hospRed);
       riderHelmet.position.set(0, 1.25, 0);
 
       // Courier delivery backpack box on rear rack
-      const courierBag = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.45, 0.38), mats.leafLight);
+      const courierBag = new THREE.Mesh(new RoundedBoxGeometry(0.42, 0.45, 0.38, 2, 0.04), mats.leafLight);
       courierBag.position.set(0, 0.9, -0.32);
 
       bike.add(frame, w1, w2, riderTorso, riderHelmet, courierBag);
@@ -1188,16 +1205,16 @@ export default function Hero3DIsland() {
       const frame = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.35, 1.3), mats.clothesNavy);
       frame.position.y = 0.42;
 
-      const bw1 = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.06), mats.wheelRubber);
+      const bw1 = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.06, 16), mats.wheelRubber);
       bw1.rotation.z = Math.PI / 2;
       bw1.position.set(0, 0.22, 0.55);
-      const bw2 = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.06), mats.wheelRubber);
+      const bw2 = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.06, 16), mats.wheelRubber);
       bw2.rotation.z = Math.PI / 2;
       bw2.position.set(0, 0.22, -0.55);
 
-      const riderTorso = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.42, 0.2), mats.clothesYellow);
+      const riderTorso = new THREE.Mesh(new RoundedBoxGeometry(0.28, 0.42, 0.2, 2, 0.04), mats.clothesYellow);
       riderTorso.position.set(0, 0.78, -0.05);
-      const riderHead = new THREE.Mesh(new THREE.SphereGeometry(0.14), mats.skinTone);
+      const riderHead = new THREE.Mesh(new THREE.SphereGeometry(0.14, 16, 14), mats.skinTone);
       riderHead.position.set(0, 1.15, -0.05);
 
       cycle.add(frame, bw1, bw2, riderTorso, riderHead);
@@ -1235,26 +1252,26 @@ export default function Hero3DIsland() {
       const person = new THREE.Group();
 
       // Articulated Legs
-      const leg1 = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.38), pantsMat);
+      const leg1 = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.38, 12), pantsMat);
       leg1.position.set(-0.08, 0.19, 0);
-      const leg2 = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.38), pantsMat);
+      const leg2 = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.38, 12), pantsMat);
       leg2.position.set(0.08, 0.19, 0);
 
-      // Torso
-      const torso = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.42, 0.2), shirtMat);
+      // Torso with soft rounded edges
+      const torso = new THREE.Mesh(new RoundedBoxGeometry(0.3, 0.42, 0.2, 2, 0.04), shirtMat);
       torso.position.y = 0.52;
       torso.castShadow = true;
 
       // Articulated Arms
-      const arm1 = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.34), shirtMat);
+      const arm1 = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.34, 12), shirtMat);
       arm1.position.set(-0.19, 0.48, 0);
-      const arm2 = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.34), shirtMat);
+      const arm2 = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.34, 12), shirtMat);
       arm2.position.set(0.19, 0.48, 0);
 
       // Head & Hair
-      const head = new THREE.Mesh(new THREE.SphereGeometry(0.14), mats.skinTone);
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.14, 16, 14), mats.skinTone);
       head.position.y = 0.82;
-      const hair = new THREE.Mesh(new THREE.SphereGeometry(0.145), mats.hairDark);
+      const hair = new THREE.Mesh(new THREE.SphereGeometry(0.145, 16, 14), mats.hairDark);
       hair.position.set(0, 0.86, -0.02);
 
       person.add(leg1, leg2, torso, arm1, arm2, head, hair);
@@ -1345,7 +1362,7 @@ export default function Hero3DIsland() {
 
       // Target Orb on the ground point
       const targetOrb = new THREE.Mesh(
-        new THREE.SphereGeometry(0.12),
+        new THREE.SphereGeometry(0.12, 16, 14),
         new THREE.MeshBasicMaterial({ color: lm.badgeColor })
       );
       targetOrb.position.y = 0.06;
@@ -1484,11 +1501,11 @@ export default function Hero3DIsland() {
     if (timeOfDay === "day") {
       scene.background.set("#F8F9FA");
       lights.ambientLight?.color.set("#fff8ee");
-      lights.ambientLight.intensity = 1.35;
-      lights.dirLight?.color.set("#fff3dd");
-      lights.dirLight.intensity = 2.3;
-      lights.fillLight?.color.set("#bfdbfe");
-      lights.fillLight.intensity = 0.85;
+      lights.ambientLight.intensity = 1.25;
+      lights.dirLight?.color.set("#fff4e0");
+      lights.dirLight.intensity = 2.6;
+      lights.fillLight?.color.set("#c2dcff");
+      lights.fillLight.intensity = 0.95;
     } else if (timeOfDay === "sunset") {
       scene.background.set("#fef2f2");
       lights.ambientLight?.color.set("#fed7aa");
