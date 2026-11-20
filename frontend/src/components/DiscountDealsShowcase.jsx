@@ -187,9 +187,8 @@ function ProductAdWindowFrame({
 
           {/* Slot Title */}
           <span
-            className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-              windowBadgeColor || "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-300"
-            }`}
+            className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${windowBadgeColor || "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-300"
+              }`}
           >
             {windowTitle}
           </span>
@@ -339,11 +338,10 @@ function ProductAdWindowFrame({
                         e.stopPropagation();
                         setSelectedImageIndex(idx);
                       }}
-                      className={`relative h-9 w-9 flex-shrink-0 overflow-hidden rounded-lg border transition-all ${
-                        selectedImageIndex === idx
-                          ? "border-lime scale-105 shadow-sm shadow-lime/40"
-                          : "border-white/10 opacity-70 hover:opacity-100"
-                      }`}
+                      className={`relative h-9 w-9 flex-shrink-0 overflow-hidden rounded-lg border transition-all ${selectedImageIndex === idx
+                        ? "border-lime scale-105 shadow-sm shadow-lime/40"
+                        : "border-white/10 opacity-70 hover:opacity-100"
+                        }`}
                     >
                       <img
                         src={getImageUrl(img)}

@@ -2,6 +2,7 @@ export const SHOP_CATEGORIES = [
   "Food & Drink", "Restaurant", "Cafe", "Grocery", "Super Shop", "Pharmacy",
   "Health & Beauty", "Electronics", "Mobile Shop", "Computer Shop", "Fashion",
   "Clothing", "Home Appliances", "Furniture", "Automotive", "Education",
+  "Library", "Bookstore", "Book Shop", "Books & Stationery", "Stationery", "Books",
   "Travel Agency", "Repair Services", "Hotel & Resort", "Sports & Fitness",
   "Agriculture", "Real Estate", "Freelance Services", "Pet Care", "Laundry",
   "Art", "Others",
@@ -21,6 +22,11 @@ export const PRODUCT_KEYWORDS = [
   "Cough Syrup", "Cold & Flu", "Antiseptic", "Oral Saline", "Diabetes Care",
   "Blood Pressure Monitor", "Thermometer", "Nebulizer", "Surgical Mask",
   "Medical Equipment", "Herbal Medicine", "Eye Drops", "Inhaler", "Baby Healthcare",
+  "Book", "Books", "Novel", "Story Book", "Textbook", "Academic Book",
+  "Islamic Books", "Religious Book", "Comics", "Magazine", "Children Book",
+  "Literature", "Poetry", "Fiction", "Non-Fiction", "Biography", "Dictionary",
+  "Guide Book", "Stationery", "Notebook", "Pen & Pencil", "Diary", "Art Paper",
+  "Office Supplies", "Geometry Box", "Calculator", "School Bag", "Book Accessories",
 ];
 
 export const SERVICE_KEYWORDS = [
@@ -32,6 +38,8 @@ export const SERVICE_KEYWORDS = [
   "Healthcare", "Doctor Appointment",
   "Pet Care", "Veterinary", "Pet Grooming", "Pet Training", "Pet Sitting",
   "Home Nursing", "Physiotherapy", "Diagnostic Test", "Ambulance Service",
+  "Library", "Library Membership", "Book Rental", "Book Lending", "Reading Space",
+  "Study Room", "Book Binding", "Photocopy & Print", "Stationery Supply", "Laminating & Scanning",
 ];
 
 export const MAX_LISTING_IMAGES = 5;

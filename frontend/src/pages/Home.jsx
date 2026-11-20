@@ -191,6 +191,7 @@ const CATEGORIES_DATA = [
     keywords: [
       "Photography", "Graphic Design", "Handicrafts", "Handmade", "Pottery",
       "Painting", "Artwork", "Jewelry", "Flowers", "Gift Shop", "Stationery",
+      "Books & Stationery", "Bookstore", "Library", "Book Shop", "Books", "Notebook",
       "Custom Crafts", "Tailoring", "Printing", "Decoration", "Art"
     ],
     matcher: (item) => {
@@ -206,7 +207,8 @@ const CATEGORIES_DATA = [
         .toLowerCase();
       const matchWords = [
         "art", "gift", "photo", "craft", "handmade", "pottery", "paint",
-        "jewel", "flower", "stationery", "design", "print", "tailor", "decor"
+        "jewel", "flower", "stationery", "design", "print", "tailor", "decor",
+        "book", "library", "novel", "textbook", "notebook"
       ];
       return matchWords.some((w) => text.includes(w));
     },
@@ -225,6 +227,7 @@ const CATEGORIES_DATA = [
       "Bird Cage", "Bird Accessories", "Pet Care", "Pet Food", "Cat Food", "Dog Food", "Bird Food",
       "Pet Accessories", "Fish & Aquarium", "Veterinary", "Pet Grooming", "Pet Training", "Pet Sitting",
       "Education", "Tuition", "Coaching", "Toys", "Baby Care", "Kids & Family", "Books",
+      "Library", "Bookstore", "Book Shop", "Books & Stationery", "Stationery", "Textbook",
       "Sports & Fitness", "Hotel Booking", "Resort Booking", "Travel Agency"
     ],
     matcher: (item) => {
@@ -242,7 +245,7 @@ const CATEGORIES_DATA = [
         "pet", "dog", "cat", "bird", "pigeon", "parrot", "cockatiel", "lovebird", "budgie", "budgerigar",
         "finch", "canary", "macaw", "cockatoo", "dove", "myna", "quail", "duck", "chicken",
         "fish", "aquarium", "vet", "grooming", "education", "tuition", "coach",
-        "toy", "baby", "kid", "child", "family", "book", "sport", "fitness",
+        "toy", "baby", "kid", "child", "family", "book", "library", "stationery", "sport", "fitness",
         "hotel", "resort", "travel"
       ];
       return matchWords.some((w) => text.includes(w));

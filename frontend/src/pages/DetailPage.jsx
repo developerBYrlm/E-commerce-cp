@@ -332,168 +332,168 @@ function ItemDetail({ item, kind, user, toggleWishlist, followService }) {
         ← Back
       </button>
       <div className="grid gap-10 lg:grid-cols-2">
-    <div className="space-y-4">
-      <div className="overflow-hidden rounded-[30px] bg-gradient-to-br from-lime/40 to-emerald-100">
-        {images[activeImage] || images[0] ? (
-          <img src={getImageUrl(images[activeImage] || images[0])} alt={item.name} className="h-[420px] w-full object-cover" />
-        ) : (
-          <div className="grid h-[420px] place-items-center"><Store size={48} className="text-forest" /></div>
-        )}
-      </div>
-      {images.length > 1 && (
-        <div className="flex gap-2 overflow-x-auto pb-1">
-          {images.map((img, idx) => (
-            <button
-              key={idx}
-              onClick={() => setActiveImage(idx)}
-              className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border-2 transition ${activeImage === idx ? "border-forest scale-105" : "border-transparent opacity-70 hover:opacity-100"}`}
-            >
-              <img src={getImageUrl(img)} alt="" className="h-full w-full object-cover" />
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-      <div className="py-3"><p className="text-xs font-bold uppercase tracking-[.18em] text-emerald-700">{item.shop?.name || "LocalSphere independent"}</p><h1 className="mt-3 text-4xl font-extrabold tracking-tight text-forest">{item.name}</h1>
-        <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-slate-500">
-          <span className="flex items-center gap-1.5 font-semibold text-forest">
-            <Star size={16} className="fill-amber-400 text-amber-400" />
-            {Number(item.rating || 0).toFixed(1)} ({item.reviewCount || 0} reviews)
-          </span>
-          {kind === "products" && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-200 px-2.5 py-0.5 text-xs font-bold text-amber-900">
-              🔥 {item.soldCount || 0} sold
-            </span>
-          )}
-          {kind === "services" && (
-            <>
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-200 px-2.5 py-0.5 text-xs font-bold text-amber-900">
-                ⭐ {item.bookingCount || 0} booked
-              </span>
-              <span className="inline-flex items-center gap-1 rounded-full bg-sky-50 border border-sky-200 px-2.5 py-0.5 text-xs font-bold text-sky-900">
-                <Users size={12} className="text-sky-700" /> {followersCount} {followersCount === 1 ? "follower" : "followers"}
-              </span>
-            </>
-          )}
-        </div><p className="mt-6 leading-7 text-slate-600">{item.description || "Thoughtfully offered by a local business."}</p><p className="mt-7 flex flex-wrap items-center gap-2 text-3xl font-extrabold text-forest">
-          {item.isNegotiable && (!item.price || item.price === 0) ? "Negotiable" : formatCurrency(item.price)}
-          {item.isNegotiable && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 border border-emerald-200 px-3 py-1 text-xs font-bold text-emerald-800">
-              🤝 Negotiable (আলোচনা সাপেক্ষ)
-            </span>
-          )}
-          {kind === "services" && !item.isNegotiable && <span className="text-sm font-medium text-slate-500">per session</span>}
-        </p>
-        <div className="mt-7 flex flex-wrap gap-3">
-          {kind === "products" ? (
-            <>
-              <button
-                onClick={() => {
-                  if (!user) return toast.error("Please sign in to add products to your cart");
-                  addItem(item);
-                  toast.success("Added to your cart");
-                }}
-                className="btn rounded-xl border-0 bg-forest px-6 text-white"
-              >
-                <ShoppingBag size={17} /> Add to cart
-              </button>
-              <button onClick={saveProduct} className="btn rounded-xl bg-lime px-5 text-forest">
-                {user?.wishlist?.some((id) => String(id) === String(item._id)) ? "Saved · Remove" : "Save for later"}
-              </button>
-              <span className="self-center text-xs text-slate-500">{item.stock} in stock</span>
-              {user?.role === "customer" && (
-                <button type="button" onClick={reportItem} className="btn btn-ghost text-slate-500">
-                  <Flag size={15} /> Report
-                </button>
-              )}
-            </>
-          ) : (
-            <>
-              <input
-                type="datetime-local"
-                value={scheduledAt}
-                onChange={(event) => setScheduledAt(event.target.value)}
-                min={new Date(Date.now() + 60_000).toISOString().slice(0, 16)}
-                className="input input-bordered rounded-xl bg-white"
-                aria-label="Appointment date and time"
-              />
-              <button
-                onClick={() =>
-                  act(
-                    "/bookings",
-                    { service: item._id, scheduledAt: scheduledAt ? new Date(scheduledAt).toISOString() : "" },
-                    "Booking request sent"
-                  )
-                }
-                disabled={!scheduledAt}
-                className="btn rounded-xl border-0 bg-forest px-6 text-white"
-              >
-                <CalendarDays size={17} /> Request a booking
-              </button>
-              {(!user || user.role === "customer") && (
+        <div className="space-y-4">
+          <div className="overflow-hidden rounded-[30px] bg-gradient-to-br from-lime/40 to-emerald-100">
+            {images[activeImage] || images[0] ? (
+              <img src={getImageUrl(images[activeImage] || images[0])} alt={item.name} className="h-[420px] w-full object-cover" />
+            ) : (
+              <div className="grid h-[420px] place-items-center"><Store size={48} className="text-forest" /></div>
+            )}
+          </div>
+          {images.length > 1 && (
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              {images.map((img, idx) => (
                 <button
-                  type="button"
-                  onClick={toggleFollowService}
-                  className="btn rounded-xl bg-lime px-5 text-forest"
+                  key={idx}
+                  onClick={() => setActiveImage(idx)}
+                  className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border-2 transition ${activeImage === idx ? "border-forest scale-105" : "border-transparent opacity-70 hover:opacity-100"}`}
                 >
-                  {isFollowingService ? "Following · Unfollow" : "Follow service"}
+                  <img src={getImageUrl(img)} alt="" className="h-full w-full object-cover" />
                 </button>
-              )}
-              {user?.role === "customer" && (
-                <button type="button" onClick={reportItem} className="btn btn-ghost text-slate-500">
-                  <Flag size={15} /> Report
-                </button>
-              )}
-            </>
-          )}
-
-          {(!user || user.role === "customer") && (
-            <button
-              type="button"
-              onClick={handleMessageClick}
-              className="btn rounded-xl border border-forest/15 bg-cream/70 px-5 font-semibold text-forest shadow-xs transition hover:bg-forest hover:text-white"
-            >
-              <MessageSquare size={17} />
-              {kind === "products" ? "Message seller" : "Message expert"}
-            </button>
+              ))}
+            </div>
           )}
         </div>
-        {item.shop?._id && <div className="mt-10 border-t border-slate-200 pt-6"><p className="flex items-center gap-2 text-sm font-bold text-forest"><PackageCheck size={16} /> From a neighborhood business</p><p className="mt-2 flex items-center gap-2 text-sm text-slate-500"><MapPin size={15} />Visit in person or browse online</p></div>}
-        {item.shop?._id && <div className="mt-8"><ReviewPanel shopId={item.shop._id} target={{ [kind === "products" ? "product" : "service"]: item._id }} user={user} /></div>}
+        <div className="py-3"><p className="text-xs font-bold uppercase tracking-[.18em] text-emerald-700">{item.shop?.name || "LocalSphere independent"}</p><h1 className="mt-3 text-4xl font-extrabold tracking-tight text-forest">{item.name}</h1>
+          <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-slate-500">
+            <span className="flex items-center gap-1.5 font-semibold text-forest">
+              <Star size={16} className="fill-amber-400 text-amber-400" />
+              {Number(item.rating || 0).toFixed(1)} ({item.reviewCount || 0} reviews)
+            </span>
+            {kind === "products" && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-200 px-2.5 py-0.5 text-xs font-bold text-amber-900">
+                🔥 {item.soldCount || 0} sold
+              </span>
+            )}
+            {kind === "services" && (
+              <>
+                <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-200 px-2.5 py-0.5 text-xs font-bold text-amber-900">
+                  ⭐ {item.bookingCount || 0} booked
+                </span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-sky-50 border border-sky-200 px-2.5 py-0.5 text-xs font-bold text-sky-900">
+                  <Users size={12} className="text-sky-700" /> {followersCount} {followersCount === 1 ? "follower" : "followers"}
+                </span>
+              </>
+            )}
+          </div><p className="mt-6 leading-7 text-slate-600">{item.description || "Thoughtfully offered by a local business."}</p><p className="mt-7 flex flex-wrap items-center gap-2 text-3xl font-extrabold text-forest">
+            {item.isNegotiable && (!item.price || item.price === 0) ? "Negotiable" : formatCurrency(item.price)}
+            {item.isNegotiable && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 border border-emerald-200 px-3 py-1 text-xs font-bold text-emerald-800">
+                🤝 Negotiable (আলোচনা সাপেক্ষ)
+              </span>
+            )}
+            {kind === "services" && !item.isNegotiable && <span className="text-sm font-medium text-slate-500">per session</span>}
+          </p>
+          <div className="mt-7 flex flex-wrap gap-3">
+            {kind === "products" ? (
+              <>
+                <button
+                  onClick={() => {
+                    if (!user) return toast.error("Please sign in to add products to your cart");
+                    addItem(item);
+                    toast.success("Added to your cart");
+                  }}
+                  className="btn rounded-xl border-0 bg-forest px-6 text-white"
+                >
+                  <ShoppingBag size={17} /> Add to cart
+                </button>
+                <button onClick={saveProduct} className="btn rounded-xl bg-lime px-5 text-forest">
+                  {user?.wishlist?.some((id) => String(id) === String(item._id)) ? "Saved · Remove" : "Save for later"}
+                </button>
+                <span className="self-center text-xs text-slate-500">{item.stock} in stock</span>
+                {user?.role === "customer" && (
+                  <button type="button" onClick={reportItem} className="btn btn-ghost text-slate-500">
+                    <Flag size={15} /> Report
+                  </button>
+                )}
+              </>
+            ) : (
+              <>
+                <input
+                  type="datetime-local"
+                  value={scheduledAt}
+                  onChange={(event) => setScheduledAt(event.target.value)}
+                  min={new Date(Date.now() + 60_000).toISOString().slice(0, 16)}
+                  className="input input-bordered rounded-xl bg-white"
+                  aria-label="Appointment date and time"
+                />
+                <button
+                  onClick={() =>
+                    act(
+                      "/bookings",
+                      { service: item._id, scheduledAt: scheduledAt ? new Date(scheduledAt).toISOString() : "" },
+                      "Booking request sent"
+                    )
+                  }
+                  disabled={!scheduledAt}
+                  className="btn rounded-xl border-0 bg-forest px-6 text-white"
+                >
+                  <CalendarDays size={17} /> Request a booking
+                </button>
+                {(!user || user.role === "customer") && (
+                  <button
+                    type="button"
+                    onClick={toggleFollowService}
+                    className="btn rounded-xl bg-lime px-5 text-forest"
+                  >
+                    {isFollowingService ? "Following · Unfollow" : "Follow service"}
+                  </button>
+                )}
+                {user?.role === "customer" && (
+                  <button type="button" onClick={reportItem} className="btn btn-ghost text-slate-500">
+                    <Flag size={15} /> Report
+                  </button>
+                )}
+              </>
+            )}
+
+            {(!user || user.role === "customer") && (
+              <button
+                type="button"
+                onClick={handleMessageClick}
+                className="btn rounded-xl border border-forest/15 bg-cream/70 px-5 font-semibold text-forest shadow-xs transition hover:bg-forest hover:text-white"
+              >
+                <MessageSquare size={17} />
+                {kind === "products" ? "Message seller" : "Message expert"}
+              </button>
+            )}
+          </div>
+          {item.shop?._id && <div className="mt-10 border-t border-slate-200 pt-6"><p className="flex items-center gap-2 text-sm font-bold text-forest"><PackageCheck size={16} /> From a neighborhood business</p><p className="mt-2 flex items-center gap-2 text-sm text-slate-500"><MapPin size={15} />Visit in person or browse online</p></div>}
+          {item.shop?._id && <div className="mt-8"><ReviewPanel shopId={item.shop._id} target={{ [kind === "products" ? "product" : "service"]: item._id }} user={user} /></div>}
+        </div>
       </div>
     </div>
-  </div>
   );
 }
 
-    function ReviewPanel({shopId, target = {}, user}) {
+function ReviewPanel({ shopId, target = {}, user }) {
   const [rating, setRating] = useState("5");
-    const [text, setText] = useState("");
-    const queryClient = useQueryClient();
-    const filters = {shop: shopId, ...target };
-    const reviews = useCollection("/reviews", filters);
-    async function submit(event) {
-      event.preventDefault();
+  const [text, setText] = useState("");
+  const queryClient = useQueryClient();
+  const filters = { shop: shopId, ...target };
+  const reviews = useCollection("/reviews", filters);
+  async function submit(event) {
+    event.preventDefault();
     if (!user) return toast.error("Sign in to leave a review");
     try {
       await api.post("/reviews", { ...filters, rating: Number(rating), text: text.trim() });
-    setText("");
-    await queryClient.invalidateQueries({queryKey: ["/reviews"] });
-    toast.success("Thanks for sharing your review");
+      setText("");
+      await queryClient.invalidateQueries({ queryKey: ["/reviews"] });
+      toast.success("Thanks for sharing your review");
     } catch (error) {
       toast.error(error.message);
     }
   }
-    return <section className="rounded-3xl bg-white p-6 shadow-sm">
-      <h2 className="text-xl font-bold text-forest">Reviews</h2>
-      {reviews.isLoading ? <p className="mt-4 text-sm text-slate-500">Loading reviews…</p>
-        : reviews.isError ? <p role="alert" className="mt-4 text-sm text-red-600">{reviews.error.message}</p>
-          : reviews.data?.items?.length ? <div className="mt-4 divide-y divide-slate-100">{reviews.data.items.map((review) => <article key={review._id} className="py-4 first:pt-0"><p className="font-semibold text-forest">{review.author?.name || "LocalSphere member"} · {review.rating}/5</p><p className="mt-1 text-sm leading-6 text-slate-600">{review.text || "No written comment."}</p></article>)}</div>
-            : <p className="mt-3 text-sm text-slate-500">No reviews yet. Be the first to share your experience.</p>}
-      {user && <form onSubmit={submit} className="mt-5 grid gap-3 border-t border-slate-100 pt-5 sm:grid-cols-[130px_1fr_auto]">
-        <label className="form-control gap-1 text-xs font-semibold text-forest">Rating<select value={rating} onChange={(event) => setRating(event.target.value)} className="select select-bordered rounded-xl"><option value="5">5 stars</option><option value="4">4 stars</option><option value="3">3 stars</option><option value="2">2 stars</option><option value="1">1 star</option></select></label>
-        <label className="form-control gap-1 text-xs font-semibold text-forest">Your review<textarea value={text} onChange={(event) => setText(event.target.value)} maxLength={2000} rows={2} className="textarea textarea-bordered rounded-xl" placeholder="Share helpful details for your neighbors." /></label>
-        <button className="btn self-end rounded-xl border-0 bg-forest text-white">Post review</button>
-      </form>}
-    </section>;
+  return <section className="rounded-3xl bg-white p-6 shadow-sm">
+    <h2 className="text-xl font-bold text-forest">Reviews</h2>
+    {reviews.isLoading ? <p className="mt-4 text-sm text-slate-500">Loading reviews…</p>
+      : reviews.isError ? <p role="alert" className="mt-4 text-sm text-red-600">{reviews.error.message}</p>
+        : reviews.data?.items?.length ? <div className="mt-4 divide-y divide-slate-100">{reviews.data.items.map((review) => <article key={review._id} className="py-4 first:pt-0"><p className="font-semibold text-forest">{review.author?.name || "LocalSphere member"} · {review.rating}/5</p><p className="mt-1 text-sm leading-6 text-slate-600">{review.text || "No written comment."}</p></article>)}</div>
+          : <p className="mt-3 text-sm text-slate-500">No reviews yet. Be the first to share your experience.</p>}
+    {user && <form onSubmit={submit} className="mt-5 grid gap-3 border-t border-slate-100 pt-5 sm:grid-cols-[130px_1fr_auto]">
+      <label className="form-control gap-1 text-xs font-semibold text-forest">Rating<select value={rating} onChange={(event) => setRating(event.target.value)} className="select select-bordered rounded-xl"><option value="5">5 stars</option><option value="4">4 stars</option><option value="3">3 stars</option><option value="2">2 stars</option><option value="1">1 star</option></select></label>
+      <label className="form-control gap-1 text-xs font-semibold text-forest">Your review<textarea value={text} onChange={(event) => setText(event.target.value)} maxLength={2000} rows={2} className="textarea textarea-bordered rounded-xl" placeholder="Share helpful details for your neighbors." /></label>
+      <button className="btn self-end rounded-xl border-0 bg-forest text-white">Post review</button>
+    </form>}
+  </section>;
 }

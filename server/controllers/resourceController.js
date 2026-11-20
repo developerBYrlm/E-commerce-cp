@@ -67,12 +67,14 @@ export function resourceController(Model, { ownerField, populate = "", searchabl
         }
       }
       const page = Math.max(1, Number.parseInt(req.query.page, 10) || 1);
-      const limit = Math.min(50, Math.max(1, Number.parseInt(req.query.limit, 10) || 12));
+      const limit = Math.min(100, Math.max(1, Number.parseInt(req.query.limit, 10) || 12));
       const sort = req.query.trending === "true" && ["Product", "Service"].includes(Model.modelName)
         ? { views: -1, rating: -1, createdAt: -1 }
         : req.query.popular === "true" && Model.modelName === "Shop"
           ? { rating: -1, reviewCount: -1, createdAt: -1 }
-          : { createdAt: -1 };
+          : Model.modelName === "Category"
+            ? { name: 1 }
+            : { createdAt: -1 };
       const [items, total] = await Promise.all([
         Model.find(filter).populate(populate).sort(sort).skip((page - 1) * limit).limit(limit),
         Model.countDocuments(filter),
