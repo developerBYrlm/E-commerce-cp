@@ -479,7 +479,7 @@ export default function Home() {
             initial={{ opacity: 0, scale: 0.94 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.7, delay: 0.15 }}
-            className="relative z-10 mx-auto w-full max-w-[600px]"
+            className="relative z-10 mx-auto w-full max-w-[680px] lg:max-w-none"
           >
             <Hero3DIsland />
           </motion.div>
