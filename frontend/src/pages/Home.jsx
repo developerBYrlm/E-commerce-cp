@@ -51,7 +51,10 @@ const CATEGORIES_DATA = [
     keywords: [
       "Food", "Grocery", "Restaurant", "Cafe", "Super Shop", "Bakery",
       "Sweets", "Snacks", "Medicine", "Pharmacy", "Beverage", "Cooking",
-      "Organic Food", "Catering", "Breakfast", "Fast Food"
+      "Organic Food", "Catering", "Breakfast", "Fast Food",
+      "Pizza", "Burger", "Shawarma", "Sharma", "Sandwich", "Pasta", "French Fries",
+      "Fried Chicken", "Chicken Roll", "Biryani", "Kacchi Biryani", "Grill Chicken",
+      "Kebab", "Cake", "Pastry", "Coffee", "Tea", "Juice", "Milkshake", "Cold Drinks"
     ],
     matcher: (item) => {
       const text = [
@@ -67,7 +70,9 @@ const CATEGORIES_DATA = [
       const matchWords = [
         "food", "drink", "grocery", "restaurant", "cafe", "bakery", "sweet",
         "snack", "beverage", "super shop", "cooking", "catering", "burger",
-        "pizza", "tea", "coffee", "juice", "fruit", "vegetable", "meat", "fish", "rice",
+        "pizza", "shawarma", "sharma", "sandwich", "pasta", "fries", "fried chicken",
+        "roll", "biryani", "kacchi", "grill", "kebab", "tea", "coffee", "juice",
+        "cake", "pastry", "donut", "misti", "shake", "fruit", "vegetable", "meat", "fish", "rice",
         "medicine", "pharmacy"
       ];
       return matchWords.some((w) => text.includes(w));

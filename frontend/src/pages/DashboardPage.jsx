@@ -1624,7 +1624,7 @@ function ShopEditForm({ shop, onDone }) {
 
 function ResourceManagement({ title, icon: Icon, items = [], loading, createPath, shops = [], initialShopFilter = "", fields, salesMap }) {
   const isProduct = createPath === "/products";
-  const keywords = isProduct ? PRODUCT_KEYWORDS : SERVICE_KEYWORDS;
+  const keywords = useMemo(() => (isProduct ? PRODUCT_KEYWORDS : SERVICE_KEYWORDS).slice().sort((a, b) => a.localeCompare(b)), [isProduct]);
   const categories = useCollection("/categories", { type: isProduct ? "product" : "service", limit: 100 });
   const [editingId, setEditingId] = useState("");
   const [selectedVisitingItem, setSelectedVisitingItem] = useState(null);
@@ -1632,6 +1632,7 @@ function ResourceManagement({ title, icon: Icon, items = [], loading, createPath
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isNegotiable, setIsNegotiable] = useState(false);
+  const [keywordSearch, setKeywordSearch] = useState("");
   const queryClient = useQueryClient();
 
   // Filter shops to only show matching type
@@ -1968,14 +1969,29 @@ function ResourceManagement({ title, icon: Icon, items = [], loading, createPath
             />
 
             <fieldset className="rounded-xl border border-slate-200 p-3 sm:col-span-2">
-              <legend className="px-1 text-xs font-semibold text-forest">Choose 3–10 predefined keywords *</legend>
-              <div className="grid max-h-40 grid-cols-2 gap-2 overflow-auto sm:grid-cols-3">
-                {keywords.map((keyword) => (
-                  <label key={keyword} className="flex items-center gap-2 text-xs">
-                    <input type="checkbox" name="keywords" value={keyword} className="checkbox checkbox-xs checkbox-success" />
-                    {keyword}
-                  </label>
-                ))}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                <legend className="px-1 text-xs font-semibold text-forest">Choose 3–10 predefined keywords *</legend>
+                <input
+                  type="text"
+                  placeholder="Search keywords (e.g. Pizza, Burger, Sharma)..."
+                  value={keywordSearch}
+                  onChange={(e) => setKeywordSearch(e.target.value)}
+                  className="input input-xs input-bordered w-full sm:w-60 rounded-lg bg-cream/70 text-xs"
+                />
+              </div>
+              <div className="grid max-h-44 grid-cols-2 gap-2 overflow-auto sm:grid-cols-3">
+                {keywords.map((keyword) => {
+                  const isMatch = !keywordSearch || keyword.toLowerCase().includes(keywordSearch.toLowerCase());
+                  return (
+                    <label
+                      key={keyword}
+                      className={isMatch ? "flex items-center gap-2 text-xs select-none cursor-pointer hover:text-emerald-800" : "hidden"}
+                    >
+                      <input type="checkbox" name="keywords" value={keyword} className="checkbox checkbox-xs checkbox-success" />
+                      <span>{keyword}</span>
+                    </label>
+                  );
+                })}
               </div>
             </fieldset>
 
@@ -2016,6 +2032,7 @@ function ListingEditForm({ item, isProduct, keywords, categories, onDone }) {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editNegotiable, setEditNegotiable] = useState(Boolean(item.isNegotiable));
+  const [editKeywordSearch, setEditKeywordSearch] = useState("");
 
   async function save(event) {
     event.preventDefault();
@@ -2134,20 +2151,35 @@ function ListingEditForm({ item, isProduct, keywords, categories, onDone }) {
       />
 
       <fieldset className="rounded-xl border border-slate-200 p-3 sm:col-span-2">
-        <legend className="px-1 text-xs font-semibold text-forest">Select 3–10 predefined keywords</legend>
-        <div className="grid max-h-40 grid-cols-2 gap-2 overflow-auto sm:grid-cols-3">
-          {keywords.map((keyword) => (
-            <label key={keyword} className="flex items-center gap-2 text-xs">
-              <input
-                type="checkbox"
-                name="keywords"
-                value={keyword}
-                defaultChecked={item.keywords?.includes(keyword)}
-                className="checkbox checkbox-xs checkbox-success"
-              />
-              {keyword}
-            </label>
-          ))}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+          <legend className="px-1 text-xs font-semibold text-forest">Select 3–10 predefined keywords</legend>
+          <input
+            type="text"
+            placeholder="Search keywords (e.g. Pizza, Burger, Sharma)..."
+            value={editKeywordSearch}
+            onChange={(e) => setEditKeywordSearch(e.target.value)}
+            className="input input-xs input-bordered w-full sm:w-60 rounded-lg bg-cream/70 text-xs"
+          />
+        </div>
+        <div className="grid max-h-44 grid-cols-2 gap-2 overflow-auto sm:grid-cols-3">
+          {keywords.map((keyword) => {
+            const isMatch = !editKeywordSearch || keyword.toLowerCase().includes(editKeywordSearch.toLowerCase());
+            return (
+              <label
+                key={keyword}
+                className={isMatch ? "flex items-center gap-2 text-xs select-none cursor-pointer hover:text-emerald-800" : "hidden"}
+              >
+                <input
+                  type="checkbox"
+                  name="keywords"
+                  value={keyword}
+                  defaultChecked={item.keywords?.includes(keyword)}
+                  className="checkbox checkbox-xs checkbox-success"
+                />
+                <span>{keyword}</span>
+              </label>
+            );
+          })}
         </div>
       </fieldset>
       <label className="form-control gap-2 sm:col-span-2">

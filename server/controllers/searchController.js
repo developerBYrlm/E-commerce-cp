@@ -245,6 +245,7 @@ export const suggestions = asyncHandler(async (req, res) => {
     "clothing", "dress", "mens dress", "shirt", "pant", "fashion", "furniture", "table", "chair", "bed", "sofa",
     "electrician", "electric", "wiring", "repair", "tv repair", "fridge repair", "appliance", "plumbing",
     "cleaning", "beauty", "haircut", "salon", "groceries", "food", "bakery", "delivery", "carpentry", "maintenance",
+    "pizza", "burger", "shawarma", "sharma", "sandwich", "pasta", "fries", "fried chicken", "fast food", "snacks", "biryani", "kacchi", "grill", "kebab", "cake", "coffee", "tea", "juice",
     "pet", "cat", "dog", "bird", "pigeon", "parrot", "cockatiel", "lovebird", "budgie", "quail",
     "medicine", "pharmacy", "first aid", "vitamins", "supplements", "saline", "antiseptic", "gastric medicine", "cough syrup", "cold & flu", "inhaler",
     "book", "books", "library", "bookstore", "book shop", "stationery", "notebook", "novel", "textbook", "story book", "islamic books", "academic book", "reading space"
