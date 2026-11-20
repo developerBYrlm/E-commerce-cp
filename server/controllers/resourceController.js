@@ -68,6 +68,85 @@ export function resourceController(Model, { ownerField, populate = "", searchabl
       }
       const page = Math.max(1, Number.parseInt(req.query.page, 10) || 1);
       const limit = Math.min(100, Math.max(1, Number.parseInt(req.query.limit, 10) || 12));
+
+      // Discovery & catalog listings: handle logged-in user proximity sorting & guest random order
+      if (!isMineQuery && ["Product", "Service", "Shop"].includes(Model.modelName)) {
+        const rawItems = await Model.find(filter).populate(populate);
+        const total = rawItems.length;
+        let items = [...rawItems];
+
+        // 1. When logged in: sort by user location proximity (Area -> SubDistrict -> District -> Coordinates)
+        if (req.user && (req.user.area || req.user.subDistrict || req.user.district || (req.user.location?.coordinates?.[0] || req.user.location?.coordinates?.[1]))) {
+          const userArea = String(req.user.area || "").trim().toLowerCase();
+          const userSubDistrict = String(req.user.subDistrict || "").trim().toLowerCase();
+          const userDistrict = String(req.user.district || "").trim().toLowerCase();
+          const uCoords = req.user.location?.coordinates;
+
+          const scoreItem = (item) => {
+            const shopObj = item.shop && typeof item.shop === "object" ? item.shop : item;
+            const itemArea = String(shopObj.area || item.area || "").trim().toLowerCase();
+            const itemSub = String(shopObj.subDistrict || item.subDistrict || "").trim().toLowerCase();
+            const itemDist = String(shopObj.district || item.district || "").trim().toLowerCase();
+
+            let score = 0;
+            // Exact Area match (neighborhood / street)
+            if (userArea && itemArea && (userArea === itemArea || itemArea.includes(userArea) || userArea.includes(itemArea))) {
+              score += 1000;
+            }
+            // Same Sub-district / Thana / Upazila
+            if (userSubDistrict && itemSub && (userSubDistrict === itemSub || itemSub.includes(userSubDistrict) || userSubDistrict.includes(itemSub))) {
+              score += 500;
+            }
+            // Same District / City
+            if (userDistrict && itemDist && (userDistrict === itemDist || itemDist.includes(userDistrict) || userDistrict.includes(itemDist))) {
+              score += 200;
+            }
+            // Coordinates distance
+            const iCoords = shopObj.location?.coordinates || item.location?.coordinates;
+            if (
+              Array.isArray(uCoords) && uCoords.length === 2 && (uCoords[0] || uCoords[1]) &&
+              Array.isArray(iCoords) && iCoords.length === 2 && (iCoords[0] || iCoords[1])
+            ) {
+              const dLat = ((iCoords[1] - uCoords[1]) * Math.PI) / 180;
+              const dLon = ((iCoords[0] - uCoords[0]) * Math.PI) / 180;
+              const a =
+                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos((uCoords[1] * Math.PI) / 180) * Math.cos((iCoords[1] * Math.PI) / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+              const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+              const distKm = 6371 * c;
+              if (distKm < 50) {
+                score += Math.max(0, 100 - distKm * 2);
+              }
+            }
+            return score;
+          };
+
+          items.sort((a, b) => {
+            const diff = scoreItem(b) - scoreItem(a);
+            if (diff !== 0) return diff;
+            if (req.query.trending === "true") return (b.views || 0) - (a.views || 0);
+            if (req.query.popular === "true") return (b.rating || 0) - (a.rating || 0);
+            return new Date(b.createdAt) - new Date(a.createdAt);
+          });
+        } else if (!req.query.q && req.query.trending !== "true" && req.query.popular !== "true") {
+          // 2. Without login: randomly shuffle on every request so refresh continuously changes order
+          for (let i = items.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [items[i], items[j]] = [items[j], items[i]];
+          }
+        } else {
+          // Specific filter / query sorting
+          items.sort((a, b) => {
+            if (req.query.trending === "true") return (b.views || 0) - (a.views || 0);
+            if (req.query.popular === "true") return (b.rating || 0) - (a.rating || 0);
+            return new Date(b.createdAt) - new Date(a.createdAt);
+          });
+        }
+
+        const paginated = items.slice((page - 1) * limit, page * limit);
+        return res.json({ items: paginated, pagination: { page, limit, total, pages: Math.ceil(total / limit) } });
+      }
+
       const sort = req.query.trending === "true" && ["Product", "Service"].includes(Model.modelName)
         ? { views: -1, rating: -1, createdAt: -1 }
         : req.query.popular === "true" && Model.modelName === "Shop"

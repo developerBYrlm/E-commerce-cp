@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import { getImageUrl } from "../utils/imageUrl";
 import { useAuth } from "../contexts/AuthContext";
 
-export default function ShopCard({ shop }) {
+export default function ShopCard({ shop, isNearby = false }) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const isProduct = shop.shopType !== "service";
@@ -42,6 +42,11 @@ export default function ShopCard({ shop }) {
           {isProduct ? <ShoppingBag size={11} /> : <Wrench size={11} />}
           {isProduct ? "Products" : "Services"}
         </span>
+        {isNearby && (
+          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-700/95 px-2.5 py-1 text-[11px] font-bold text-white shadow-xs backdrop-blur">
+            📍 In your area
+          </span>
+        )}
       </div>
       <span className="absolute bottom-3 right-3 grid h-10 w-10 place-items-center rounded-2xl bg-white text-forest shadow-md overflow-hidden">{shop.logo ? <img src={getImageUrl(shop.logo)} alt="" className="h-full w-full object-cover" /> : <span className="font-bold">{shop.name?.slice(0, 1)}</span>}</span>
     </div>

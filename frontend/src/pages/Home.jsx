@@ -33,6 +33,7 @@ import { useCollection } from "../hooks/useApi";
 import { useAuth } from "../contexts/AuthContext";
 import { formatCurrency } from "../utils/currency";
 import { getImageUrl } from "../utils/imageUrl";
+import { calculateLocationScore } from "../utils/proximity";
 import Hero3DIsland from "../components/3d/Hero3DIsland";
 import DiscountDealsShowcase from "../components/DiscountDealsShowcase";
 import ServiceDealsShowcase from "../components/ServiceDealsShowcase";
@@ -854,7 +855,7 @@ export default function Home() {
             <div className="grid gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               {shops.map((shop) => (
                 <Card3DTilt key={shop._id} maxTilt={10} scale={1.02} className="rounded-3xl">
-                  <ShopCard shop={shop} />
+                  <ShopCard shop={shop} isNearby={Boolean(user && calculateLocationScore(shop, user) >= 500)} />
                 </Card3DTilt>
               ))}
             </div>
@@ -902,11 +903,18 @@ export default function Home() {
                     <div className="px-2 pb-2 pt-4">
                       <div className="flex items-center justify-between gap-1">
                         <p className="truncate font-bold text-forest">{item.name}</p>
-                        {item.soldCount > 0 && (
-                          <span className="shrink-0 rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-900 border border-amber-200">
-                            🔥 {item.soldCount} sold
-                          </span>
-                        )}
+                        <div className="flex items-center gap-1 shrink-0">
+                          {user && calculateLocationScore(item, user) >= 500 && (
+                            <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[9px] font-bold text-emerald-800 border border-emerald-200">
+                              📍 In your area
+                            </span>
+                          )}
+                          {item.soldCount > 0 && (
+                            <span className="rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-900 border border-amber-200">
+                              🔥 {item.soldCount} sold
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <p className="mt-1 text-sm text-slate-500">
                         {item.shop?.ownerName || item.shop?.name || "Independent maker"}
@@ -982,11 +990,18 @@ export default function Home() {
                     <div className="px-2 pb-2 pt-4">
                       <div className="flex items-center justify-between gap-1">
                         <p className="truncate font-bold text-forest">{item.name}</p>
-                        {item.bookingCount > 0 && (
-                          <span className="shrink-0 rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-900 border border-amber-200">
-                            ⭐ {item.bookingCount} booked
-                          </span>
-                        )}
+                        <div className="flex items-center gap-1 shrink-0">
+                          {user && calculateLocationScore(item, user) >= 500 && (
+                            <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[9px] font-bold text-emerald-800 border border-emerald-200">
+                              📍 In your area
+                            </span>
+                          )}
+                          {item.bookingCount > 0 && (
+                            <span className="shrink-0 rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-900 border border-amber-200">
+                              ⭐ {item.bookingCount} booked
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <p className="mt-1 text-sm text-slate-500">
                         {item.shop?.name || "Local professional"}

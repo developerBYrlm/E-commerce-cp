@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowUpRight, MapPin, MessageSquare, Search, SlidersHorizontal, Sparkles, Star } from "lucide-react";
+import { ArrowUpRight, MapPin, MessageSquare, Search, SlidersHorizontal, Sparkles, Star, Shuffle } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "../contexts/AuthContext";
 import { useCollection } from "../hooks/useApi";
@@ -11,6 +11,7 @@ import { CardSkeleton } from "../components/Loader";
 import ProductImageSlider from "../components/ProductImageSlider";
 import { formatCurrency } from "../utils/currency";
 import { getImageUrl } from "../utils/imageUrl";
+import { calculateLocationScore, sortItemsByProximity } from "../utils/proximity";
 
 const config = {
   shops: { path: "/shops", title: "Meet your local favorites", desc: "Independent shops with big neighborhood energy.", empty: "No shops found yet. Try another search or check back soon." },
@@ -21,11 +22,26 @@ const config = {
 export default function CollectionPage({ kind }) {
   const [params, setParams] = useSearchParams();
   const [showMap, setShowMap] = useState(false);
+  const [shuffleTick, setShuffleTick] = useState(0);
+  const { user } = useAuth();
   const current = config[kind] || config.shops;
   const q = params.get("q") || "";
   const query = useCollection(current.path, { q: q || undefined, shop: params.get("shop") || undefined, limit: 24 });
-  const items = query.data?.items || [];
+  const rawItems = query.data?.items || [];
+
+  // When logged in: sort by user location proximity (nearest home location first, then others)
+  // Without login: continuously shuffle/randomize on every page load or refresh
+  const displayItems = useMemo(() => {
+    if (!rawItems.length) return [];
+    return sortItemsByProximity(rawItems, user);
+  }, [rawItems, user, shuffleTick]);
+
   const setSearch = (value) => setParams(value ? { q: value } : {});
+
+  const handleShuffle = () => {
+    setShuffleTick((t) => t + 1);
+  };
+
   return <div className="mx-auto max-w-7xl px-5 py-10 sm:py-14 lg:px-8">
     <div className="rounded-[30px] bg-[#eaf0e4] dark:bg-[#12231b] px-6 py-10 sm:px-10 sm:py-12">
       <p className="text-xs font-bold uppercase tracking-[.2em] text-emerald-700">Out there, nearby</p><h1 className="mt-3 max-w-3xl text-4xl font-black tracking-tight text-forest sm:text-5xl">{current.title}</h1><p className="mt-3 text-slate-600">{current.desc}</p>
@@ -39,8 +55,37 @@ export default function CollectionPage({ kind }) {
         />
       </div>
     </div>
-    <div className="mb-7 mt-9 flex flex-wrap items-center justify-between gap-4"><div><p className="font-bold text-forest">{query.isLoading ? "Finding the good stuff…" : `${query.data?.pagination?.total || items.length} nearby ${kind}`}</p><p className="mt-1 text-xs text-slate-500">Showing what's available on LocalSphere</p></div><div className="flex gap-2"><button onClick={() => setShowMap(!showMap)} className={`btn btn-sm rounded-full ${showMap ? "bg-forest text-white" : "border-slate-200 bg-white text-forest"}`}><MapPin size={15} /> {showMap ? "Hide map" : "Map view"}</button><button className="btn btn-sm rounded-full border-slate-200 bg-white text-forest"><SlidersHorizontal size={15} /> Filters</button></div></div>
-    {showMap && <div className="mb-7"><MapView items={items} /></div>}
+    <div className="mb-7 mt-9 flex flex-wrap items-center justify-between gap-4">
+      <div>
+        <p className="font-bold text-forest">
+          {query.isLoading ? "Finding the good stuff…" : `${query.data?.pagination?.total || displayItems.length} nearby ${kind}`}
+        </p>
+        <p className="mt-1 text-xs text-slate-500 flex items-center gap-1.5 flex-wrap">
+          {user?.area || user?.subDistrict ? (
+            <span className="inline-flex items-center gap-1 font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+              <MapPin size={11} className="text-emerald-700" /> Prioritizing {user.area ? `${user.area}, ` : ""}{user.subDistrict || user.district}
+            </span>
+          ) : (
+            <span>Showing what's available on LocalSphere {!user && "(Randomized discovery)"}</span>
+          )}
+        </p>
+      </div>
+      <div className="flex gap-2">
+        {!user && (
+          <button
+            type="button"
+            onClick={handleShuffle}
+            title="Randomize / Shuffle cards"
+            className="btn btn-sm rounded-full border-slate-200 bg-white text-forest shadow-xs hover:bg-forest hover:text-white transition"
+          >
+            <Shuffle size={14} /> Refresh
+          </button>
+        )}
+        <button onClick={() => setShowMap(!showMap)} className={`btn btn-sm rounded-full ${showMap ? "bg-forest text-white" : "border-slate-200 bg-white text-forest"}`}><MapPin size={15} /> {showMap ? "Hide map" : "Map view"}</button>
+        <button className="btn btn-sm rounded-full border-slate-200 bg-white text-forest"><SlidersHorizontal size={15} /> Filters</button>
+      </div>
+    </div>
+    {showMap && <div className="mb-7"><MapView items={displayItems} /></div>}
     {query.isError ? (
       <div className="rounded-2xl bg-red-50 p-6 text-sm text-red-700">{query.error.message}</div>
     ) : query.isLoading ? (
@@ -49,15 +94,16 @@ export default function CollectionPage({ kind }) {
           <CardSkeleton key={n} />
         ))}
       </div>
-    ) : items.length ? (
+    ) : displayItems.length ? (
       <div className="grid gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {items.map((item) =>
-          kind === "shops" ? (
-            <ShopCard key={item._id} shop={item} />
+        {displayItems.map((item) => {
+          const isNearby = Boolean(user && calculateLocationScore(item, user) >= 500);
+          return kind === "shops" ? (
+            <ShopCard key={item._id} shop={item} isNearby={isNearby} />
           ) : (
-            <ItemCard key={item._id} item={item} kind={kind} />
-          )
-        )}
+            <ItemCard key={item._id} item={item} kind={kind} isNearby={isNearby} />
+          );
+        })}
       </div>
     ) : (
       <div className="rounded-3xl border border-dashed border-forest/20 bg-white p-12 text-center">
@@ -72,7 +118,7 @@ export default function CollectionPage({ kind }) {
   </div>;
 }
 
-function ItemCard({ item, kind }) {
+function ItemCard({ item, kind, isNearby = false }) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const route = kind === "products" ? "products" : "services";
@@ -120,6 +166,11 @@ function ItemCard({ item, kind }) {
             {item.shop?.name || (kind === "products" ? "Local shop" : "Local expert")}
           </p>
           <div className="flex items-center gap-2">
+            {isNearby && (
+              <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800 border border-emerald-200">
+                📍 In your area
+              </span>
+            )}
             {kind === "products" && item.soldCount > 0 && (
               <span className="rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-900 border border-amber-200">
                 🔥 {item.soldCount} sold
