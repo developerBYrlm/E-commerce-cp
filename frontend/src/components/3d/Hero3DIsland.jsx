@@ -10,8 +10,6 @@ import {
   RotateCw,
   Navigation,
   ArrowRight,
-  Maximize2,
-  Minimize2,
   X,
   Compass,
 } from "lucide-react";
@@ -176,7 +174,6 @@ export default function Hero3DIsland() {
   const [activeLandmark, setActiveLandmark] = useState(null);
   const [timeOfDay, setTimeOfDay] = useState("day"); // 'day' | 'sunset' | 'night'
   const [autoRotate, setAutoRotate] = useState(true);
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
 
   const sceneRef = useRef(null);
@@ -1543,17 +1540,11 @@ export default function Hero3DIsland() {
   }, []);
 
   return (
-    <div
-      className={`relative select-none transition-all duration-300 ${isFullscreen
-        ? "fixed inset-0 z-50 h-screen w-screen bg-[#F8F9FA] p-4 sm:p-6"
-        : "mx-auto h-[540px] w-full max-w-[700px] sm:h-[600px] lg:h-[640px]"
-        }`}
-    >
+    <div className="relative select-none transition-all duration-300 mx-auto h-[540px] w-full max-w-[700px] sm:h-[600px] lg:h-[640px]">
       {/* 3D WebGL Canvas */}
       <div
         ref={mountRef}
-        className={`h-full w-full overflow-hidden bg-[#F8F9FA] ring-1 ring-forest/10 cursor-grab active:cursor-grabbing transition-colors duration-500 shadow-2xl ${isFullscreen ? "rounded-[32px]" : "rounded-[36px]"
-          }`}
+        className="h-full w-full overflow-hidden bg-[#F8F9FA] ring-1 ring-forest/10 cursor-grab active:cursor-grabbing transition-colors duration-500 shadow-2xl rounded-[36px]"
       />
 
       {/* Top Left Status Pill */}
@@ -1567,7 +1558,7 @@ export default function Hero3DIsland() {
         </span>
       </div>
 
-      {/* Top Right Controls (Day / Sunset / Night & Fullscreen) */}
+      {/* Top Right Controls (Day / Sunset / Night) */}
       <div className="absolute right-4 top-4 z-10 flex items-center gap-1.5">
         <div className="flex items-center gap-1 rounded-full border border-forest/10 bg-white/92 p-1 shadow-sm backdrop-blur-md">
           <button
@@ -1604,16 +1595,6 @@ export default function Hero3DIsland() {
             <Moon size={14} />
           </button>
         </div>
-
-        {/* Fullscreen Expansion Button */}
-        <button
-          type="button"
-          onClick={() => setIsFullscreen((prev) => !prev)}
-          className="grid h-9 w-9 place-items-center rounded-full border border-forest/15 bg-white/92 text-forest shadow-sm backdrop-blur-md transition hover:bg-forest hover:text-white"
-          title={isFullscreen ? "Exit Fullscreen" : "Expand to Fullscreen"}
-        >
-          {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
-        </button>
       </div>
 
       {/* Bottom Control Dock */}
