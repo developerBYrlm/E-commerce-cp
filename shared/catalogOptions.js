@@ -49,6 +49,27 @@ export const SERVICE_KEYWORDS = [
   "Home Nursing", "Physiotherapy", "Diagnostic Test", "Ambulance Service",
   "Library", "Library Membership", "Book Rental", "Book Lending", "Reading Space",
   "Study Room", "Book Binding", "Photocopy & Print", "Stationery Supply", "Laminating & Scanning",
+  // Appliance & Home Equipment Repair
+  "TV Repair", "Television Repair", "Washing Machine Repair", "Microwave Oven Repair", "Oven Repair",
+  "Gas Stove Repair", "Gas Burner Repair", "Kitchen Chimney Repair", "Geyser Repair", "Water Heater Repair",
+  "Water Purifier Repair", "RO Water Filter Service", "Fan Repair", "Ceiling Fan Repair", "Air Cooler Repair",
+  "Deep Fridge Repair", "Blender & Grinder Repair",
+  // Electrical, Power & Security Equipment Repair
+  "IPS Repair", "UPS Repair", "Generator Repair", "Solar Panel Repair", "CCTV Repair", "CCTV Installation",
+  "Electric Wiring & Repair", "Circuit Breaker Repair", "Motor & Pump Repair", "Water Pump Repair",
+  // Gadgets, IT & Peripherals Repair
+  "Tablet Repair", "iPad Repair", "Printer Repair", "Scanner Repair", "Monitor Repair",
+  "Display & Screen Replacement", "Audio System Repair", "Speaker Repair", "Sound System Repair",
+  "Camera Repair", "Headphone Repair",
+  // Vehicle & Mobility Repair
+  "Motorcycle Repair", "Bike Repair", "Scooter Repair", "Bicycle Repair", "Cycle Repair",
+  "Car AC Repair", "Car Denting & Painting", "Tyre & Wheel Service", "Car Battery Service",
+  // Furniture, Locks & Structural Repair
+  "Furniture Repair", "Sofa Repair", "Carpentry Repair", "Door & Window Repair", "Door Lock Repair",
+  "Locksmith & Key Service", "Glass & Mirror Repair", "Sanitary Repair", "Roof Leakage Repair",
+  "Waterproofing Repair", "Handyman Service",
+  // Personal Goods Repair
+  "Watch Repair", "Clock Repair", "Shoe Repair", "Bag & Luggage Repair", "Suitcase Repair", "Sewing Machine Repair",
 ];
 
 export const MAX_LISTING_IMAGES = 5;

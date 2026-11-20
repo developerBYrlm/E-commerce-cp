@@ -160,8 +160,12 @@ const CATEGORIES_DATA = [
     badgeColor: "bg-sky-100 text-sky-900 border-sky-200",
     keywords: [
       "Repair Services", "Electrician", "Plumbing", "AC Repair", "Refrigerator Repair",
-      "Electronics Repair", "TV Repair", "Mobile Repair", "Phone Repair", "Computer Repair",
-      "Laptop Repair", "Home Cleaning", "Car Repair", "Car Wash", "Auto Service",
+      "Electronics Repair", "TV Repair", "Washing Machine Repair", "Oven Repair",
+      "Gas Stove Repair", "Geyser Repair", "Water Purifier Repair", "IPS Repair",
+      "Generator Repair", "CCTV Repair", "Mobile Repair", "Phone Repair", "Computer Repair",
+      "Laptop Repair", "Printer Repair", "Car Repair", "Bike Repair", "Motorcycle Repair",
+      "Bicycle Repair", "Car AC Repair", "Auto Service", "Furniture Repair", "Sofa Repair",
+      "Locksmith & Key Service", "Watch Repair", "Shoe Repair", "Home Cleaning",
       "Laundry", "Carpentry", "Maintenance", "Handyman", "Painter", "Freelance Services"
     ],
     matcher: (item) => {
@@ -179,9 +183,11 @@ const CATEGORIES_DATA = [
         .join(" ")
         .toLowerCase();
       const matchWords = [
-        "repair", "electric", "plumb", "ac", "refrigerator", "fridge", "tv",
-        "mobile", "phone", "computer", "laptop", "cleaning", "wash", "car",
-        "service", "laundry", "carpenter", "maintenance", "fix", "handyman", "technician"
+        "repair", "electric", "plumb", "ac", "refrigerator", "fridge", "tv", "television",
+        "washing", "oven", "microwave", "stove", "geyser", "purifier", "ips", "generator",
+        "cctv", "mobile", "phone", "computer", "laptop", "printer", "cleaning", "wash", "car",
+        "bike", "motorcycle", "cycle", "bicycle", "furniture", "sofa", "lock", "locksmith",
+        "watch", "shoe", "service", "laundry", "carpenter", "maintenance", "fix", "handyman", "technician"
       ];
       return matchWords.some((w) => text.includes(w));
     },

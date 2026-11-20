@@ -243,7 +243,13 @@ export const suggestions = asyncHandler(async (req, res) => {
 
   const ALL_PRESET_KEYWORDS = [
     "clothing", "dress", "mens dress", "shirt", "pant", "fashion", "furniture", "table", "chair", "bed", "sofa",
-    "electrician", "electric", "wiring", "repair", "tv repair", "fridge repair", "appliance", "plumbing",
+    "electrician", "electric", "wiring", "repair", "tv repair", "television repair", "fridge repair", "refrigerator repair",
+    "ac repair", "washing machine repair", "oven repair", "microwave repair", "gas stove repair", "geyser repair",
+    "water purifier repair", "ips repair", "ups repair", "generator repair", "cctv repair", "cctv installation",
+    "fan repair", "water pump repair", "mobile repair", "phone repair", "laptop repair", "computer repair", "printer repair",
+    "car repair", "bike repair", "motorcycle repair", "bicycle repair", "car ac repair", "auto service",
+    "furniture repair", "sofa repair", "locksmith", "door lock repair", "watch repair", "shoe repair", "bag repair",
+    "appliance", "plumbing", "sanitary repair", "handyman",
     "cleaning", "beauty", "haircut", "salon", "groceries", "food", "bakery", "delivery", "carpentry", "maintenance",
     "pizza", "burger", "shawarma", "sharma", "sandwich", "pasta", "fries", "fried chicken", "fast food", "snacks", "biryani", "kacchi", "grill", "kebab", "cake", "coffee", "tea", "juice",
     "pet", "cat", "dog", "bird", "pigeon", "parrot", "cockatiel", "lovebird", "budgie", "quail",
