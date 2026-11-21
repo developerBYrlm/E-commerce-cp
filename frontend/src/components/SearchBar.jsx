@@ -83,12 +83,12 @@ import { getImageUrl } from "../utils/imageUrl";
             {/* Search Input Box with Pixel-Perfect Icon & Placeholder Vertical Alignment */}
             <form
               onSubmit={handleFormSubmit}
-              className="group relative flex h-12 sm:h-14 w-full items-center rounded-2xl border border-forest/15 bg-white px-3.5 sm:px-4 shadow-sm transition-all focus-within:border-emerald-600 focus-within:ring-2 focus-within:ring-emerald-500/20"
+              className="group relative flex h-12 sm:h-14 w-full items-center rounded-2xl border border-forest/15 bg-white pl-3.5 pr-1.5 sm:pl-4 sm:pr-2 shadow-sm transition-all focus-within:border-emerald-600 focus-within:ring-2 focus-within:ring-emerald-500/20 dark:bg-slate-900/90 dark:border-forest/30"
             >
               {/* Search Icon - Perfectly vertically centered */}
               <Search
                 size={19}
-                className="shrink-0 text-emerald-800/70 transition group-focus-within:text-emerald-700 mr-2.5 sm:mr-3"
+                className="shrink-0 text-emerald-800/70 transition group-focus-within:text-emerald-700 mr-2.5 sm:mr-3 dark:text-emerald-400"
               />
 
               {/* Input Field - Same line-height and vertical center */}
@@ -103,7 +103,7 @@ import { getImageUrl } from "../utils/imageUrl";
                 onFocus={() => setFocused(true)}
                 placeholder={placeholder}
                 aria-label="Search listings"
-                className="h-full min-w-0 flex-1 border-0 bg-transparent text-sm sm:text-base text-forest outline-none placeholder:text-slate-400 placeholder:font-normal focus:outline-none"
+                className="h-full min-w-0 flex-1 border-0 bg-transparent text-sm sm:text-base text-forest outline-none placeholder:text-slate-400 placeholder:font-normal focus:outline-none dark:text-slate-100"
               />
 
               {/* Clear Button */}
@@ -114,20 +114,22 @@ import { getImageUrl } from "../utils/imageUrl";
                     setQuery("");
                     if (onSearch) onSearch("");
                   }}
-                  className="mr-2 grid h-6 w-6 place-items-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
+                  className="mr-2 grid h-6 w-6 place-items-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition dark:hover:bg-slate-800"
                   title="Clear search"
                 >
                   <X size={15} />
                 </button>
               )}
 
-              {/* Search Button */}
+              {/* Modern Search Button */}
               <button
                 type="submit"
-                className="btn btn-sm sm:btn-md h-9 sm:h-10 min-h-0 rounded-xl border-0 bg-forest px-3.5 sm:px-5 text-xs sm:text-sm font-bold text-white shadow-xs hover:bg-forest/90 transition flex items-center gap-1.5"
+                className="group/btn relative inline-flex h-9 sm:h-10 items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-[#1b3d30] via-[#244d3d] to-[#2e6e55] px-4 sm:px-5 text-xs sm:text-sm font-bold text-white shadow-md shadow-forest/20 transition-all duration-200 hover:shadow-lg hover:shadow-forest/30 hover:brightness-110 active:scale-[0.97] focus:outline-none focus:ring-2 focus:ring-emerald-500/40 select-none cursor-pointer dark:from-emerald-700 dark:via-emerald-600 dark:to-teal-700 dark:shadow-emerald-950/40"
               >
-                <Search size={14} className="hidden sm:inline" />
-                <span>Search</span>
+                {/* Subtle shine sweep on hover */}
+                <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 ease-out group-hover/btn:translate-x-full" />
+                <Search size={15} className="shrink-0 transition-transform duration-200 group-hover/btn:scale-110" />
+                <span className="tracking-tight">Search</span>
               </button>
             </form>
 
