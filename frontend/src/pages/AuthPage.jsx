@@ -13,7 +13,7 @@ import ModernAuthLoader from "../components/ModernAuthLoader";
 const MIN_LOADING_TIME = 1500;
 
 export default function AuthPage({ mode = "login" }) {
-  const { login, googleLogin, register: createAccount } = useAuth();
+  const { user, logout, login, googleLogin, register: createAccount } = useAuth();
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
@@ -36,6 +36,46 @@ export default function AuthPage({ mode = "login" }) {
   const categoryQuery = useCollection("/categories", { limit: 100 });
   const resetMode = mode === "forgot" || mode === "reset";
   const registerMode = mode === "register";
+
+  // If user is already authenticated, do not permit re-signing in until they sign out
+  if (user) {
+    return (
+      <div className="mx-auto max-w-lg px-5 py-24 text-center">
+        <div className="rounded-3xl border border-forest/10 bg-white p-8 shadow-xl dark:bg-slate-900">
+          <div className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-full bg-lime text-forest text-2xl font-black">
+            {user.name?.slice(0, 1).toUpperCase()}
+          </div>
+          <h2 className="text-2xl font-black text-forest dark:text-white">
+            আপনি ইতিমধ্যে সাইন ইন আছেন!
+          </h2>
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+            বর্তমানে <strong>{user.name}</strong> ({user.email}) অ্যাকাউন্টটি সক্রিয় রয়েছে। অন্য কোনো অ্যাকাউন্টে সাইন ইন বা রেজিস্ট্রেশন করতে প্রথমে বর্তমান অ্যাকাউন্ট থেকে সাইন আউট করুন।
+          </p>
+          <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+            <button
+              onClick={() => navigate("/dashboard")}
+              className="btn rounded-full bg-forest text-white hover:bg-forest/90 border-0"
+            >
+              ড্যাশবোর্ডে যান (Go to Dashboard)
+            </button>
+            <button
+              onClick={async () => {
+                try {
+                  await logout();
+                  toast.success("সফলভাবে সাইন আউট হয়েছেন");
+                } catch (e) {
+                  toast.error(e.message);
+                }
+              }}
+              className="btn btn-outline rounded-full border-rose-500 text-rose-500 hover:bg-rose-500 hover:text-white"
+            >
+              সাইন আউট করুন (Sign Out)
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   useEffect(() => {
     if (mode !== "login" || !googleClientId || !googleButtonRef.current) return undefined;
@@ -92,6 +132,10 @@ export default function AuthPage({ mode = "login" }) {
   }, [googleClientId, googleLogin, mode, navigate, redirectTarget]);
 
   async function onSubmit(values) {
+    if (user) {
+      toast.error("আপনি ইতিমধ্যে সাইন ইন আছেন। অন্য অ্যাকাউন্টে প্রবেশ করতে প্রথমে সাইন আউট করুন।");
+      return;
+    }
     if (registerMode) {
       if (!location.district || !location.subDistrict || !location.area?.trim()) {
         toast.error("Choose your district, sub-district, and area");

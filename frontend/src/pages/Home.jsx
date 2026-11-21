@@ -899,7 +899,10 @@ export default function Home() {
                 <Store className="mx-auto text-emerald-700" size={32} />
                 <p className="mt-3 font-bold text-forest">Your neighborhood is ready to meet you</p>
                 <p className="mt-1 text-sm text-slate-500">Be the first local business to join LocalSphere.</p>
-                <Link to="/register" className="btn mt-5 rounded-full border-0 bg-forest text-white">
+                <Link
+                  to={user ? (user.role === "owner" ? "/dashboard?tab=shop" : "/dashboard") : "/register"}
+                  className="btn mt-5 rounded-full border-0 bg-forest text-white"
+                >
                   Bring your business here
                 </Link>
               </div>
@@ -1164,12 +1167,21 @@ export default function Home() {
             >
               Explore nearby <MoveUpRight size={16} />
             </Link>
-            <Link
-              to="/register?role=owner"
-              className="btn rounded-full border border-white/20 bg-white/10 px-6 text-white backdrop-blur-md transition hover:bg-white/20"
-            >
-              I run a business <ArrowUpRight size={16} />
-            </Link>
+            {user ? (
+              <Link
+                to={user.role === "owner" ? "/dashboard?tab=shop" : "/dashboard"}
+                className="btn rounded-full border border-white/20 bg-white/10 px-6 text-white backdrop-blur-md transition hover:bg-white/20"
+              >
+                {user.role === "owner" ? "Manage my business" : "Go to dashboard"} <ArrowUpRight size={16} />
+              </Link>
+            ) : (
+              <Link
+                to="/register?role=owner"
+                className="btn rounded-full border border-white/20 bg-white/10 px-6 text-white backdrop-blur-md transition hover:bg-white/20"
+              >
+                I run a business <ArrowUpRight size={16} />
+              </Link>
+            )}
           </div>
         </div>
       </section >

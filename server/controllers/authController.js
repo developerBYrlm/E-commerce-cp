@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import { OAuth2Client } from "google-auth-library";
 import User from "../models/User.js";
@@ -29,6 +30,22 @@ function publicUser(user) {
 }
 
 export const register = asyncHandler(async (req, res) => {
+  const existingToken = req.cookies?.token || req.get("authorization")?.replace(/^Bearer\s+/i, "");
+  if (existingToken) {
+    try {
+      const payload = jwt.verify(existingToken, process.env.JWT_SECRET);
+      if (payload?.sub) {
+        const existingUser = await User.findById(payload.sub);
+        if (existingUser && existingUser.status === "active") {
+          return res.status(409).json({
+            message: `আপনি ইতিমধ্যে ${existingUser.name} (${existingUser.email}) হিসেবে সাইন ইন আছেন। নতুন অ্যাকাউন্ট তৈরি করতে প্রথমে সাইন আউট করুন।`,
+            alreadyLoggedIn: true,
+          });
+        }
+      }
+    } catch {}
+  }
+
   const { name, email, password, role = "customer" } = req.body;
   if (role && !["customer", "owner"].includes(role)) return res.status(403).json({ message: "Choose a supported account type" });
   if (!isValidBangladeshLocation(req.body)) return res.status(400).json({ message: "Choose a valid Bangladesh district and sub-district, then enter your area" });
@@ -67,6 +84,22 @@ export const register = asyncHandler(async (req, res) => {
 });
 
 export const login = asyncHandler(async (req, res) => {
+  const existingToken = req.cookies?.token || req.get("authorization")?.replace(/^Bearer\s+/i, "");
+  if (existingToken) {
+    try {
+      const payload = jwt.verify(existingToken, process.env.JWT_SECRET);
+      if (payload?.sub) {
+        const existingUser = await User.findById(payload.sub);
+        if (existingUser && existingUser.status === "active") {
+          return res.status(409).json({
+            message: `আপনি ইতিমধ্যে ${existingUser.name} (${existingUser.email}) হিসেবে সাইন ইন আছেন। অন্য অ্যাকাউন্টে প্রবেশ করতে প্রথমে সাইন আউট করুন।`,
+            alreadyLoggedIn: true,
+          });
+        }
+      }
+    } catch {}
+  }
+
   const user = await User.findOne({ email: req.body.email }).select("+password");
   if (!user || !user.password || !(await user.comparePassword(req.body.password))) return res.status(401).json({ message: "Invalid email or password" });
   if (user.status !== "active") return res.status(403).json({ message: "This account is unavailable" });
@@ -117,6 +150,22 @@ export const resetPassword = asyncHandler(async (req, res) => {
 });
 
 export const googleLogin = asyncHandler(async (req, res) => {
+  const existingToken = req.cookies?.token || req.get("authorization")?.replace(/^Bearer\s+/i, "");
+  if (existingToken) {
+    try {
+      const payload = jwt.verify(existingToken, process.env.JWT_SECRET);
+      if (payload?.sub) {
+        const existingUser = await User.findById(payload.sub);
+        if (existingUser && existingUser.status === "active") {
+          return res.status(409).json({
+            message: `আপনি ইতিমধ্যে ${existingUser.name} (${existingUser.email}) হিসেবে সাইন ইন আছেন। অন্য অ্যাকাউন্টে প্রবেশ করতে প্রথমে সাইন আউট করুন।`,
+            alreadyLoggedIn: true,
+          });
+        }
+      }
+    } catch {}
+  }
+
   if (!process.env.GOOGLE_CLIENT_ID) return res.status(503).json({ message: "Google sign-in is not configured" });
   const ticket = await new OAuth2Client(process.env.GOOGLE_CLIENT_ID).verifyIdToken({ idToken: req.body.credential, audience: process.env.GOOGLE_CLIENT_ID });
   const profile = ticket.getPayload();

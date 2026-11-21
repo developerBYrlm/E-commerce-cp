@@ -111,7 +111,10 @@ export default function CollectionPage({ kind }) {
         <Sparkles className="mx-auto text-emerald-700" />
         <h2 className="mt-4 font-bold text-forest">The neighborhood's still growing</h2>
         <p className="mt-2 text-sm text-slate-500">{current.empty}</p>
-        <Link to="/register" className="btn mt-5 rounded-full border-0 bg-forest text-white">
+        <Link
+          to={user ? "/dashboard" : "/register"}
+          className="btn mt-5 rounded-full border-0 bg-forest text-white"
+        >
           Help it grow
         </Link>
       </div>

@@ -38,6 +38,15 @@ function SessionGate({ children, roles }) {
   return children;
 }
 
+function GuestOnlyGate({ children }) {
+  const { user, loading } = useAuth();
+  if (loading) return <Loader />;
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  return children;
+}
+
 function VerifyEmailPage() {
   const token = new URLSearchParams(window.location.search).get("token");
   async function verify() {
@@ -58,9 +67,9 @@ export default function App() {
       <Routes>
         <Route element={<MainLayout />}>
     <Route index element={<Home />} />
-    <Route path="login" element={<AuthPage />} />
-    <Route path="auth" element={<AuthPage />} />
-    <Route path="register" element={<AuthPage mode="register" />} />
+    <Route path="login" element={<GuestOnlyGate><AuthPage /></GuestOnlyGate>} />
+    <Route path="auth" element={<GuestOnlyGate><AuthPage /></GuestOnlyGate>} />
+    <Route path="register" element={<GuestOnlyGate><AuthPage mode="register" /></GuestOnlyGate>} />
     <Route path="forgot-password" element={<AuthPage mode="forgot" />} />
     <Route path="reset-password" element={<AuthPage mode="reset" />} />
     <Route path="verify-email" element={<VerifyEmailPage />} />
