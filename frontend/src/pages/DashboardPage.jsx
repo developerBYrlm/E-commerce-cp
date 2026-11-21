@@ -129,6 +129,12 @@ export default function DashboardPage({ initialTab = "overview" }) {
 
   const unreadMessagesCount = inboxQuery.data?.counts?.unread || 0;
 
+  // Active subscription plan and Pro status
+  const [currentPlanId, setCurrentPlanId] = useState(() => {
+    return localStorage.getItem("ls_subscription_plan") || "starter";
+  });
+  const isProActive = Boolean(user?.role === "owner" && currentPlanId && currentPlanId !== "starter");
+
   // Real-time total followers count for owner
   const allShops = shops.data?.items || [];
   const allServices = services.data?.items || [];
@@ -302,8 +308,8 @@ export default function DashboardPage({ initialTab = "overview" }) {
             <p className="truncate font-bold text-forest">{user.name}</p>
             <div className="flex items-center gap-1.5">
               <p className="text-xs capitalize text-slate-500">{user.role} account</p>
-              {user.role === "owner" && (
-                <span className="inline-flex items-center gap-0.5 rounded-full bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 px-1.5 py-0.2 text-[9px] font-black uppercase text-white shadow-xs">
+              {isProActive && (
+                <span className="inline-flex items-center gap-0.5 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 px-1.5 py-0.2 text-[9px] font-black uppercase text-white shadow-xs">
                   <Crown size={9} /> PRO
                 </span>
               )}
@@ -369,50 +375,64 @@ export default function DashboardPage({ initialTab = "overview" }) {
                   setTab("pro");
                   setTargetShopFilter("");
                 }}
-                className={`group relative flex w-full items-center gap-3 overflow-hidden rounded-2xl p-[2.5px] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] animate-pro-glow ${tab === "pro"
-                  ? "ring-2 ring-amber-400 ring-offset-2 ring-offset-white dark:ring-offset-slate-900 shadow-xl shadow-amber-500/30"
+                className={`group relative flex w-full items-center gap-3 overflow-hidden rounded-2xl p-[1.5px] transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] animate-pro-glow ${tab === "pro"
+                  ? "ring-2 ring-emerald-500 ring-offset-2 ring-offset-white dark:ring-offset-slate-900 shadow-md shadow-emerald-500/25"
                   : ""
                   }`}
               >
-                {/* Colorful dynamic background gradient with constant glowing effect */}
-                <span className="absolute inset-0 bg-gradient-to-r from-amber-500 via-rose-500 to-emerald-500 rounded-2xl opacity-90 transition-opacity group-hover:opacity-100" />
+                {/* Modern green gradient border */}
+                <span
+                  className={`absolute inset-0 rounded-2xl transition-opacity ${
+                    tab === "pro"
+                      ? "bg-gradient-to-r from-forest via-emerald-600 to-teal-600 opacity-100"
+                      : "bg-gradient-to-r from-emerald-500/50 via-teal-500/40 to-forest/50 opacity-80 group-hover:opacity-100"
+                  }`}
+                />
 
                 {/* Inner button surface */}
                 <div
-                  className={`relative flex w-full items-center justify-between gap-2.5 rounded-[13px] px-3.5 py-3 font-bold transition-all ${tab === "pro"
-                    ? "bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 text-white shadow-inner"
-                    : "bg-white/95 text-slate-800 hover:bg-white dark:bg-slate-900/95 dark:text-slate-100"
-                    }`}
+                  className={`relative flex w-full items-center justify-between gap-2.5 rounded-[14px] px-3.5 py-2.5 font-bold transition-all ${
+                    tab === "pro"
+                      ? "bg-gradient-to-r from-forest via-emerald-700 to-teal-800 text-white shadow-inner"
+                      : "bg-white text-forest hover:bg-emerald-50/50 dark:bg-slate-900 dark:text-emerald-300 dark:hover:bg-slate-800"
+                  }`}
                 >
-                  {/* Continuous glowing shimmer sweep */}
-                  <span className="pointer-events-none absolute -inset-full bg-gradient-to-r from-transparent via-white/40 to-transparent -skew-x-12 animate-shimmer-sweep" />
+                  {/* Subtle soft shimmer sweep */}
+                  <span className="pointer-events-none absolute -inset-full bg-gradient-to-r from-transparent via-emerald-400/15 to-transparent -skew-x-12 animate-shimmer-sweep" />
 
                   <div className="flex items-center gap-2.5 min-w-0">
                     <span
-                      className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl shadow-xs transition-transform group-hover:scale-110 ${tab === "pro"
-                        ? "bg-white/25 text-white"
-                        : "bg-gradient-to-tr from-amber-500 to-orange-400 text-white shadow-amber-500/30"
-                        }`}
+                      className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl transition-transform group-hover:scale-105 ${
+                        tab === "pro"
+                          ? "bg-white/20 text-white shadow-xs"
+                          : "bg-emerald-500/15 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-300"
+                      }`}
                     >
-                      <Crown size={17} className="animate-bounce" style={{ animationDuration: "2s" }} />
+                      <Crown size={16} />
                     </span>
                     <div className="text-left leading-tight truncate">
                       <div className="flex items-center gap-1.5">
                         <span
-                          className={`text-sm font-black tracking-wide ${tab === "pro"
-                            ? "text-white"
-                            : "bg-gradient-to-r from-amber-600 via-rose-600 to-purple-600 bg-clip-text text-transparent dark:from-amber-400 dark:via-rose-400 dark:to-purple-400"
-                            }`}
+                          className={`text-sm font-black tracking-tight ${
+                            tab === "pro" ? "text-white" : "text-forest dark:text-white"
+                          }`}
                         >
                           Pro Mode
                         </span>
-                        <span className="inline-flex items-center rounded-full bg-amber-400/25 px-1.5 py-0.5 text-[9px] font-black uppercase text-amber-700 dark:text-amber-300">
+                        <span
+                          className={`inline-flex items-center rounded-full px-1.5 py-0.2 text-[9px] font-black uppercase tracking-wider ${
+                            tab === "pro"
+                              ? "bg-white/20 text-white"
+                              : "bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/25 dark:text-emerald-300"
+                          }`}
+                        >
                           PRO ⚡
                         </span>
                       </div>
                       <p
-                        className={`text-[10px] font-medium truncate ${tab === "pro" ? "text-amber-100" : "text-slate-500 dark:text-slate-400"
-                          }`}
+                        className={`text-[10px] font-medium truncate ${
+                          tab === "pro" ? "text-emerald-100" : "text-slate-500 dark:text-slate-400"
+                        }`}
                       >
                         Ads & Subscription
                       </p>
@@ -420,9 +440,10 @@ export default function DashboardPage({ initialTab = "overview" }) {
                   </div>
 
                   <Sparkles
-                    size={15}
-                    className={`shrink-0 transition-transform group-hover:rotate-12 ${tab === "pro" ? "text-amber-200" : "text-amber-500"
-                      }`}
+                    size={14}
+                    className={`shrink-0 transition-transform group-hover:rotate-12 ${
+                      tab === "pro" ? "text-emerald-200" : "text-emerald-500"
+                    }`}
                   />
                 </div>
               </button>
@@ -499,6 +520,7 @@ export default function DashboardPage({ initialTab = "overview" }) {
               setTargetShopFilter(shopId);
               setTab(type === "service" ? "services" : "products");
             }}
+            isProActive={isProActive}
           />
         )}
         {tab === "products" && (
@@ -512,6 +534,7 @@ export default function DashboardPage({ initialTab = "overview" }) {
             initialShopFilter={targetShopFilter}
             fields={["name", "price", "stock"]}
             salesMap={productSalesMap}
+            isProActive={isProActive}
           />
         )}
         {tab === "services" && (
@@ -525,6 +548,7 @@ export default function DashboardPage({ initialTab = "overview" }) {
             initialShopFilter={targetShopFilter}
             fields={["name", "price"]}
             salesMap={serviceBookingsMap}
+            isProActive={isProActive}
           />
         )}
         {tab === "orders" && (
@@ -555,6 +579,8 @@ export default function DashboardPage({ initialTab = "overview" }) {
             shops={shops.data?.items || []}
             products={products.data?.items || []}
             services={services.data?.items || []}
+            currentPlanId={currentPlanId}
+            setCurrentPlanId={setCurrentPlanId}
           />
         )}
         {tab === "inbox" && <MessagesPage />}
@@ -1109,7 +1135,7 @@ function DeviceMultiImagePicker({
 
 // ----------------- SHOP MANAGEMENT & CREATION -----------------
 
-function ShopManagement({ shops, products, services, productSalesMap, serviceBookingsMap, onManageShop }) {
+function ShopManagement({ shops, products, services, productSalesMap, serviceBookingsMap, onManageShop, isProActive }) {
   const [filterType, setFilterType] = useState("all"); // "all", "product", "service"
   const [editingId, setEditingId] = useState("");
   const [viewingShopId, setViewingShopId] = useState("");
@@ -1243,7 +1269,7 @@ function ShopManagement({ shops, products, services, productSalesMap, serviceBoo
                       <h3 className="font-extrabold text-lg text-forest truncate group-hover/info:text-emerald-700 transition">
                         {shop.name}
                       </h3>
-                      {shop.verified && <BadgeCheck size={16} className="text-emerald-600 shrink-0" />}
+                      {(shop.verified || isProActive) && <BadgeCheck size={16} className="text-sky-500 shrink-0" title="Verified Shop" />}
                     </div>
                     <p className="mt-1 text-xs text-slate-500 line-clamp-2">
                       {shop.description || "No shop description provided yet."}
@@ -1375,8 +1401,11 @@ function ShopManagement({ shops, products, services, productSalesMap, serviceBoo
 
                               <div className="mt-3">
                                 <div className="flex items-start justify-between gap-1.5">
-                                  <h5 className="font-bold text-sm text-forest group-hover:text-emerald-700 transition line-clamp-1">
-                                    {item.name}
+                                  <h5 className="font-bold text-sm text-forest group-hover:text-emerald-700 transition line-clamp-1 flex items-center gap-1">
+                                    <span>{item.name}</span>
+                                    {(shop.verified || isProActive) && (
+                                      <BadgeCheck size={14} className="text-sky-500 shrink-0 inline" title="Verified Owner Item" />
+                                    )}
                                   </h5>
                                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-semibold shrink-0 capitalize">
                                     {isProductShop ? (item.condition || "new") : "Service"}
@@ -1780,7 +1809,7 @@ function ShopEditForm({ shop, onDone }) {
 
 // ----------------- PRODUCTS & SERVICES MANAGEMENT -----------------
 
-function ResourceManagement({ title, icon: Icon, items = [], loading, createPath, shops = [], initialShopFilter = "", fields, salesMap }) {
+function ResourceManagement({ title, icon: Icon, items = [], loading, createPath, shops = [], initialShopFilter = "", fields, salesMap, isProActive }) {
   const isProduct = createPath === "/products";
   const keywords = useMemo(() => (isProduct ? PRODUCT_KEYWORDS : SERVICE_KEYWORDS).slice().sort((a, b) => a.localeCompare(b)), [isProduct]);
   const categories = useCollection("/categories", { type: isProduct ? "product" : "service", limit: 100 });
@@ -1938,7 +1967,10 @@ function ResourceManagement({ title, icon: Icon, items = [], loading, createPath
                 >
                   <div className="flex items-center gap-2">
                     <p className="font-bold text-forest truncate group-hover/title:text-emerald-700 transition flex items-center gap-1.5">
-                      {item.name}
+                      <span>{item.name}</span>
+                      {isProActive && (
+                        <BadgeCheck size={15} className="text-sky-500 shrink-0 inline" title="Verified Owner Listing" />
+                      )}
                       <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded opacity-0 group-hover/title:opacity-100 transition">
                         📇 3D Card
                       </span>
@@ -4462,14 +4494,9 @@ function DataList({ title, query, type, user, onUpdate, onRefund, onReconcileRef
 
 // ----------------- PRO MODE SECTION (SUBSCRIPTIONS & RUN ADS) -----------------
 
-function ProModeSection({ user, shops = [], products = [], services = [] }) {
+function ProModeSection({ user, shops = [], products = [], services = [], currentPlanId = "starter", setCurrentPlanId }) {
   const [proTab, setProTab] = useState("subscription"); // 'subscription' | 'ads'
   const [billingCycle, setBillingCycle] = useState("monthly"); // 'monthly' | 'yearly'
-
-  // Current active plan
-  const [currentPlanId, setCurrentPlanId] = useState(() => {
-    return localStorage.getItem("ls_subscription_plan") || "starter";
-  });
 
   // Modal checkout state
   const [checkoutPlan, setCheckoutPlan] = useState(null);
@@ -4511,7 +4538,9 @@ function ProModeSection({ user, shops = [], products = [], services = [] }) {
         placementLabel: "3D Diorama Spotlight",
         radius: "1 km",
         dailyBudget: 500,
-        days: 7,
+        paidDays: 7,
+        bonusDays: 7,
+        days: 14,
         status: "active",
         impressions: 5420,
         clicks: 489,
@@ -4526,7 +4555,9 @@ function ProModeSection({ user, shops = [], products = [], services = [] }) {
         placementLabel: "Top of Search Results",
         radius: "3 km",
         dailyBudget: 300,
-        days: 5,
+        paidDays: 5,
+        bonusDays: 7,
+        days: 12,
         status: "active",
         impressions: 3120,
         clicks: 304,
@@ -4551,6 +4582,7 @@ function ProModeSection({ user, shops = [], products = [], services = [] }) {
       badge: "Free Tier",
       monthlyPrice: 0,
       yearlyPrice: 0,
+      extraAdDays: 0,
       description: "সব শপ ও সেলারদের জন্য বেসিক ডিরেক্টরি লিস্টিং সুবিধা।",
       features: [
         "১টি সক্রিয় শপ লিস্টিং (1 Active Shop)",
@@ -4560,10 +4592,11 @@ function ProModeSection({ user, shops = [], products = [], services = [] }) {
         "কমিউনিটি সাপোর্ট ও বেসিক ড্যাশবোর্ড",
       ],
       disabledFeatures: [
+        "কোনো এক্সট্রা ফ্রি অ্যাড দিন নেই (০ দিন)",
         "৩ডি ডায়োরামা স্পটলাইট ও গ্লোয়িং পিন",
         "ব্লু ভেরিফাইড ব্যাজ (Blue Tick)",
         "সরাসরি হোয়াটসঅ্যাপ কাস্টমার চ্যাট",
-        "মাসিক ফ্রি অ্যাড ক্রেডিট",
+        "এআই চ্যাটবট সুবিধা",
       ],
       btnText: "Current Plan / রানিং প্ল্যান",
     },
@@ -4572,23 +4605,24 @@ function ProModeSection({ user, shops = [], products = [], services = [] }) {
       name: "Growth Pro",
       popular: true,
       badge: "MOST POPULAR ⭐",
-      monthlyPrice: 999,
-      yearlyPrice: 9590,
+      monthlyPrice: 499,
+      yearlyPrice: 5600,
+      extraAdDays: 7,
       description: "বেশি কাস্টমার, বেশি সেলস এবং ভেরিফাইড ট্রাস্টের জন্য সেরা প্যাকেজ।",
       features: [
         "৩টি সক্রিয় শপ ও আউটলেট লিস্টিং",
         "আনলিমিটেড প্রোডাক্ট ও সার্ভিস লিস্টিং",
+        "💎 ওনারের সকল শপ ও প্রোডাক্টের নামের পাশে ব্লু ভেরিফাইড ব্যাজ",
+        "🎁 প্রতিটি বিজ্ঞাপনে এক্সট্রা ৭ দিন ফ্রি অ্যাডস চলবে (৭ দিনে মোট ১৪ দিন!)",
+        "🤖 এআই চ্যাটবট সুবিধা (স্মার্ট অটো-রিপ্লাই ও কাস্টমার অ্যাসিস্ট্যান্ট)",
+        "📉 মাত্র ২.৫% প্ল্যাটফর্ম কমিশন (৫০% ছাড়)",
         "🌟 ৩ডি ডায়োরামা গ্লোয়িং স্পটলাইট পিন",
-        "💎 শপ ও প্রোডাক্টে ব্লু ভেরিফাইড ব্যাজ",
-        "📉 মাত্র ২% প্ল্যাটফর্ম কমিশন (৮০% ছাড়)",
-        "🎁 প্রতি মাসে ৳৫০০ ফ্রি অ্যাড ক্রেডিট",
         "⚡ ওয়ান-ক্লিক সরাসরি হোয়াটসঅ্যাপ কাস্টমার চ্যাট",
         "📊 রিয়েল-টাইম ভিজিটর অ্যানালিটিক্স ও হিটম্যাপ",
         "🚀 ২৪/৭ প্রায়োরিটি কাস্টমার সাপোর্ট",
       ],
       disabledFeatures: [
         "লোকাল এরিয়ায় গ্যারান্টেড #১ টপ সার্চ র‍্যাংকিং",
-        "৩ডি ডায়োরামা বিলবোর্ড ব্যানার",
       ],
       btnText: "Upgrade to Growth Pro",
     },
@@ -4596,18 +4630,20 @@ function ProModeSection({ user, shops = [], products = [], services = [] }) {
       id: "elite",
       name: "Business Elite",
       badge: "VIP SCALE 👑",
-      monthlyPrice: 2499,
-      yearlyPrice: 23990,
+      monthlyPrice: 849,
+      yearlyPrice: 9500,
+      extraAdDays: 21,
       description: "পুরো এলাকায় আপনার শপকে ব্র্যান্ড হিসেবে প্রতিষ্ঠিত করার ভিআইপি সল্যুশন।",
       features: [
         "আনলিমিটেড শপ ও মাল্টি-ব্রাঞ্চ আউটলেট",
         "আনলিমিটেড প্রোডাক্ট ও সার্ভিস লিস্টিং",
+        "💎 ওনারের সকল শপ ও প্রোডাক্টের নামের পাশে ব্লু ভেরিফাইড ব্যাজ",
+        "🎁 প্রতিটি বিজ্ঞাপনে এক্সট্রা ২১ দিন ফ্রি অ্যাডস চলবে (৭ দিনে মোট ২৮ দিন!)",
+        "🤖 এআই চ্যাটবট সুবিধা (অ্যাডভান্সড স্মার্ট অটো-রেসপন্স)",
+        "📉 মাত্র ১.৫% প্ল্যাটফর্ম কমিশন (৭০% ছাড়)",
         "👑 পুরো এলাকায় গ্যারান্টেড #১ টপ সার্চ র‍্যাংকিং",
-        "🏢 ৩ডি ডায়োরামা বিলবোর্ড ব্যানার স্পনসরশিপ",
-        "🔥 ০% প্ল্যাটফর্ম কমিশন (১০০% আয় আপনার)",
-        "🎁 প্রতি মাসে ৳২,০০০ ফ্রি অ্যাড ক্রেডিট",
-        "🎯 স্বয়ংক্রিয় লোকাল এরিয়া এসএমএস মার্কেটিং",
-        "🤝 ডেডিকেটেড ভিআইপি অ্যাকাউন্ট ম্যানেজার",
+        "🌟 ৩ডি ডায়োরামা গ্লোয়িং স্পটলাইট পিন",
+        "⚡ ওয়ান-ক্লিক সরাসরি হোয়াটসঅ্যাপ কাস্টমার চ্যাট",
         "⚡ ইন্সট্যান্ট ব্যাংক ও বিকাশ পে-আউট সেটেলমেন্ট",
       ],
       disabledFeatures: [],
@@ -4631,26 +4667,49 @@ function ProModeSection({ user, shops = [], products = [], services = [] }) {
       return;
     }
     setIsPaying(true);
-    setTimeout(() => {
+    setTimeout(async () => {
       setIsPaying(false);
       setCurrentPlanId(checkoutPlan.id);
       localStorage.setItem("ls_subscription_plan", checkoutPlan.id);
+      if (user?._id) {
+        localStorage.setItem("ls_verified_owner_" + user._id, "true");
+      }
 
-      // Add bonus ad credits
-      const bonus = checkoutPlan.id === "elite" ? 2000 : 500;
-      setAdCredits((prev) => {
-        const updated = prev + bonus;
-        localStorage.setItem("ls_ad_credits", String(updated));
-        return updated;
-      });
+      // Update owner shops to verified in MongoDB
+      if (shops && shops.length > 0) {
+        for (const s of shops) {
+          try {
+            await api.put(`/shops/${s._id}`, { verified: true });
+          } catch (e) { }
+        }
+      }
 
       toast.success(
-        `🎉 অভিনন্দন! আপনার শপ সফলভাবে ${checkoutPlan.name} সাবস্ক্রিপশনে আপগ্রেড হয়েছে! প্রো ফিচারসমূহ চালু হয়েছে।`,
+        `🎉 অভিনন্দন! আপনার শপ সফলভাবে ${checkoutPlan.name} সাবস্ক্রিপশনে আপগ্রেড হয়েছে! সকল শপ ও প্রোডাক্টে ভেরিফাইড ব্যাজ চালু হয়েছে।`,
         { duration: 5000 }
       );
       setCheckoutPlan(null);
     }, 1200);
   };
+
+  const handleCancelSubscription = async () => {
+    setCurrentPlanId("starter");
+    localStorage.setItem("ls_subscription_plan", "starter");
+    if (user?._id) {
+      localStorage.removeItem("ls_verified_owner_" + user._id);
+    }
+    if (shops && shops.length > 0) {
+      for (const s of shops) {
+        try {
+          await api.put(`/shops/${s._id}`, { verified: false });
+        } catch (e) { }
+      }
+    }
+    toast.success("সাবস্ক্রিপশন ক্যানসেল করা হয়েছে। স্টার্টার প্ল্যানে ফিরে যাওয়া হয়েছে।");
+  };
+
+  const planExtraDays = currentPlanId === "elite" ? 21 : currentPlanId === "growth" ? 7 : 0;
+  const totalCampaignDays = Number(campDays) + planExtraDays;
 
   const handleLaunchCampaign = (e) => {
     e.preventDefault();
@@ -4671,7 +4730,9 @@ function ProModeSection({ user, shops = [], products = [], services = [] }) {
       placementLabel,
       radius: campRadius,
       dailyBudget: Number(campBudget),
-      days: Number(campDays),
+      paidDays: Number(campDays),
+      bonusDays: planExtraDays,
+      days: totalCampaignDays,
       status: "active",
       impressions: 12,
       clicks: 1,
@@ -4682,7 +4743,9 @@ function ProModeSection({ user, shops = [], products = [], services = [] }) {
     setCampaigns((prev) => [newCamp, ...prev]);
     setShowCreateCampaign(false);
     setCampName("");
-    toast.success("🚀 অ্যাড ক্যাম্পেইন সফলভাবে চালু হয়েছে! এখন ৩ডি ম্যাপ ও লোকাল সার্চে প্রদর্শিত হচ্ছে।");
+    toast.success(
+      `🚀 অ্যাড ক্যাম্পেইন সফলভাবে চালু হয়েছে! মোট ${totalCampaignDays} দিন (${campDays} দিন + ${planExtraDays} দিন ফ্রি বোনাস) প্রদর্শিত হবে।`
+    );
   };
 
   const handleToggleStatus = (id) => {
@@ -4786,11 +4849,7 @@ function ProModeSection({ user, shops = [], products = [], services = [] }) {
                 </span>
                 <button
                   type="button"
-                  onClick={() => {
-                    setCurrentPlanId("starter");
-                    localStorage.setItem("ls_subscription_plan", "starter");
-                    toast.success("সাবস্ক্রিপশন ক্যানসেল করা হয়েছে");
-                  }}
+                  onClick={handleCancelSubscription}
                   className="btn btn-ghost btn-xs text-xs text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30"
                 >
                   Cancel Plan
@@ -4966,7 +5025,7 @@ function ProModeSection({ user, shops = [], products = [], services = [] }) {
                 </span>
                 <h5 className="mt-3 text-sm font-bold text-slate-900 dark:text-white">কমিশনে বড় সাশ্রয়</h5>
                 <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                  স্ট্যান্ডার্ড ৫% কমিশনের জায়গায় মাত্র ২% বা ০% কমিশন, অর্থাৎ প্রতি মাসে হাজার টাকা সাশ্রয়।
+                  স্ট্যান্ডার্ড ৫% কমিশনের জায়গায় মাত্র ২.৫% বা ১.৫% কমিশন, অর্থাৎ প্রতি মাসে হাজার টাকা সাশ্রয়।
                 </p>
               </div>
             </div>
@@ -5238,10 +5297,10 @@ function ProModeSection({ user, shops = [], products = [], services = [] }) {
                     onChange={(e) => setCampDays(Number(e.target.value))}
                     className="mt-1.5 w-full rounded-2xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold focus:border-forest focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   >
-                    <option value={3}>3 Days (৳{campBudget * 3})</option>
-                    <option value={7}>7 Days (৳{campBudget * 7})</option>
-                    <option value={14}>14 Days (৳{campBudget * 14})</option>
-                    <option value={30}>30 Days (৳{campBudget * 30})</option>
+                    <option value={3}>3 Days (৳{campBudget * 3}){planExtraDays > 0 ? ` + ${planExtraDays}d Pro Bonus = ${3 + planExtraDays} Days!` : ""}</option>
+                    <option value={7}>7 Days (৳{campBudget * 7}){planExtraDays > 0 ? ` + ${planExtraDays}d Pro Bonus = ${7 + planExtraDays} Days!` : ""}</option>
+                    <option value={14}>14 Days (৳{campBudget * 14}){planExtraDays > 0 ? ` + ${planExtraDays}d Pro Bonus = ${14 + planExtraDays} Days!` : ""}</option>
+                    <option value={30}>30 Days (৳{campBudget * 30}){planExtraDays > 0 ? ` + ${planExtraDays}d Pro Bonus = ${30 + planExtraDays} Days!` : ""}</option>
                   </select>
                 </div>
               </div>
@@ -5254,11 +5313,11 @@ function ProModeSection({ user, shops = [], products = [], services = [] }) {
                   </span>
                   <div>
                     <p className="text-xs font-bold text-slate-900 dark:text-white">
-                      আনুমানিক পৌঁছাবে: ~{(campBudget * campDays * 12).toLocaleString()} -{" "}
-                      {(campBudget * campDays * 22).toLocaleString()} স্থানীয় কাস্টমারের কাছে
+                      আনুমানিক পৌঁছাবে: ~{(campBudget * totalCampaignDays * 12).toLocaleString()} -{" "}
+                      {(campBudget * totalCampaignDays * 22).toLocaleString()} স্থানীয় কাস্টমারের কাছে
                     </p>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                      মোট খরচ: ৳{(campBudget * campDays).toLocaleString()} (বাজেট থেকে স্বয়ংক্রিয়ভাবে ব্যালেন্স অ্যাডজাস্ট হবে)
+                      ক্যাম্পেইন চলবে: {campDays} দিন {planExtraDays > 0 ? `+ ${planExtraDays} দিন ফ্রি বোনাস = মোট ${totalCampaignDays} দিন!` : ""} (খরচ হবে মাত্র {campDays} দিনের বাজেট ৳{(campBudget * campDays).toLocaleString()})
                     </p>
                   </div>
                 </div>
@@ -5320,6 +5379,9 @@ function ProModeSection({ user, shops = [], products = [], services = [] }) {
                         <td className="px-5 py-4">
                           <span className="font-extrabold text-forest dark:text-emerald-400">৳{camp.dailyBudget}</span>
                           <span className="text-[11px] text-slate-400">/day</span>
+                          <div className="text-[11px] text-slate-500 font-medium">
+                            {camp.days} days {camp.bonusDays > 0 && <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-1 py-0.2 rounded dark:bg-emerald-950/60 dark:text-emerald-300">+{camp.bonusDays}d Free</span>}
+                          </div>
                         </td>
                         <td className="px-5 py-4">
                           <div className="text-xs">

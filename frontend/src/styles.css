@@ -37,14 +37,14 @@ canvas { outline: none; -webkit-tap-highlight-color: transparent; }
 
 @keyframes proGlow {
   0%, 100% {
-    box-shadow: 0 4px 20px -2px rgba(245, 158, 11, 0.4), 0 0 12px rgba(249, 115, 22, 0.25);
+    box-shadow: 0 4px 14px -1px rgba(16, 185, 129, 0.2), 0 0 8px rgba(16, 185, 129, 0.12);
   }
   50% {
-    box-shadow: 0 6px 28px 0px rgba(245, 158, 11, 0.7), 0 0 20px rgba(244, 63, 94, 0.45);
+    box-shadow: 0 4px 18px 0px rgba(16, 185, 129, 0.35), 0 0 12px rgba(45, 212, 191, 0.2);
   }
 }
 .animate-pro-glow {
-  animation: proGlow 2.4s ease-in-out infinite;
+  animation: proGlow 3s ease-in-out infinite;
 }
 
 /* ========================================================

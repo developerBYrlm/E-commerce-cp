@@ -356,8 +356,10 @@ async function comment(event, postId) {
                           to={`/shops/${shop._id}`}
                           className="font-extrabold text-xl text-forest hover:text-emerald-700 transition flex items-center gap-1.5"
                         >
-                          {shop.name}
-                          {shop.verified && <BadgeCheck size={18} className="text-emerald-600 shrink-0" />}
+                          <span>{shop.name}</span>
+                          {(shop.verified || (typeof window !== "undefined" && localStorage.getItem("ls_verified_owner_" + (shop.owner?._id || shop.owner)) === "true")) && (
+                            <BadgeCheck size={18} className="text-sky-500 shrink-0" title="Verified Shop" />
+                          )}
                         </Link>
                         {shop.category?.name && (
                           <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600">

@@ -381,8 +381,8 @@ function ProductAdWindowFrame({
                       >
                         {shop.name || "Local Shop Partner"}
                       </Link>
-                      {shop.verified && (
-                        <BadgeCheck className="h-3.5 w-3.5 flex-shrink-0 text-sky-500" />
+                      {(shop.verified || (typeof window !== "undefined" && localStorage.getItem("ls_verified_owner_" + (shop.owner?._id || shop.owner)) === "true")) && (
+                        <BadgeCheck className="h-3.5 w-3.5 flex-shrink-0 text-sky-500" title="Verified Shop" />
                       )}
                     </div>
                     {(shop.area || shop.district) && (
@@ -421,8 +421,11 @@ function ProductAdWindowFrame({
                 </div>
 
                 <Link to={`/products/${currentDeal._id}`} className="group/title block">
-                  <h4 className="truncate text-lg font-black text-forest transition group-hover/title:text-emerald-600 dark:text-white dark:group-hover/title:text-lime sm:text-xl">
-                    {currentDeal.name}
+                  <h4 className="truncate text-lg font-black text-forest transition group-hover/title:text-emerald-600 dark:text-white dark:group-hover/title:text-lime sm:text-xl flex items-center gap-1.5">
+                    <span>{currentDeal.name}</span>
+                    {(shop.verified || (typeof window !== "undefined" && localStorage.getItem("ls_verified_owner_" + (shop.owner?._id || shop.owner)) === "true")) && (
+                      <BadgeCheck className="h-4 w-4 flex-shrink-0 text-sky-500" title="Verified Owner Product" />
+                    )}
                   </h4>
                 </Link>
                 {currentDeal.description ? (

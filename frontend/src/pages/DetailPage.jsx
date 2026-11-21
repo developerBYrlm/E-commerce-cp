@@ -74,8 +74,10 @@ function ShopDetail({ shop, user, followShop }) {
             </span>
             <div>
               <h1 className="flex items-center gap-2 text-3xl font-extrabold text-forest">
-                {shop.name}
-                {shop.verified && <BadgeCheck className="text-emerald-600" />}
+                <span>{shop.name}</span>
+                {(shop.verified || (typeof window !== "undefined" && localStorage.getItem("ls_verified_owner_" + (shop.owner?._id || shop.owner)) === "true")) && (
+                  <BadgeCheck className="text-sky-500" title="Verified Shop" />
+                )}
               </h1>
               <p className="mt-1 text-sm text-slate-500">{shop.category?.name || "Local business"}</p>
             </div>
@@ -348,7 +350,19 @@ function ItemDetail({ item, kind, user, toggleWishlist, followService }) {
             </div>
           )}
         </div>
-        <div className="py-3"><p className="text-xs font-bold uppercase tracking-[.18em] text-emerald-700">{item.shop?.name || "LocalSphere independent"}</p><h1 className="mt-3 text-4xl font-extrabold tracking-tight text-forest">{item.name}</h1>
+        <div className="py-3">
+          <p className="text-xs font-bold uppercase tracking-[.18em] text-emerald-700 flex items-center gap-1.5">
+            <span>{item.shop?.name || "LocalSphere independent"}</span>
+            {(item.shop?.verified || (typeof window !== "undefined" && localStorage.getItem("ls_verified_owner_" + (item.shop?.owner?._id || item.shop?.owner)) === "true")) && (
+              <BadgeCheck size={14} className="text-sky-500 shrink-0" title="Verified Shop" />
+            )}
+          </p>
+          <h1 className="mt-3 text-4xl font-extrabold tracking-tight text-forest flex items-center gap-2">
+            <span>{item.name}</span>
+            {(item.shop?.verified || (typeof window !== "undefined" && localStorage.getItem("ls_verified_owner_" + (item.shop?.owner?._id || item.shop?.owner)) === "true")) && (
+              <BadgeCheck size={26} className="text-sky-500 shrink-0" title="Verified Owner Listing" />
+            )}
+          </h1>
           <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-slate-500">
             <span className="flex items-center gap-1.5 font-semibold text-forest">
               <Star size={16} className="fill-amber-400 text-amber-400" />
