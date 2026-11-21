@@ -91,6 +91,15 @@ export const followShop = asyncHandler(async (req, res) => {
     shop.followers.addToSet(req.user._id);
   }
   await Promise.all([req.user.save(), shop.save()]);
+  const io = req.app.get("io");
+  if (io && shop.owner) {
+    io.to(`user:${shop.owner}`).emit("shop:followerUpdate", {
+      shopId: String(shop._id),
+      followerCount: shop.followers.length,
+      action: following ? "unfollow" : "follow",
+      userId: String(req.user._id),
+    });
+  }
   res.json({ following: !following, followerCount: shop.followers.length });
 });
 
@@ -98,7 +107,7 @@ export const followService = asyncHandler(async (req, res) => {
   if (req.user.role !== "customer") {
     return res.status(403).json({ message: "Only customers can follow services" });
   }
-  const service = await Service.findOne({ _id: req.params.serviceId, status: "active" });
+  const service = await Service.findOne({ _id: req.params.serviceId, status: "active" }).populate("shop");
   if (!service) return res.status(404).json({ message: "Service not found" });
   if (!Array.isArray(req.user.followingServices)) req.user.followingServices = [];
   if (!Array.isArray(service.followers)) service.followers = [];
@@ -111,6 +120,16 @@ export const followService = asyncHandler(async (req, res) => {
     service.followers.addToSet(req.user._id);
   }
   await Promise.all([req.user.save(), service.save()]);
+  const io = req.app.get("io");
+  const ownerId = service.owner || service.shop?.owner;
+  if (io && ownerId) {
+    io.to(`user:${ownerId}`).emit("service:followerUpdate", {
+      serviceId: String(service._id),
+      followerCount: service.followers.length,
+      action: following ? "unfollow" : "follow",
+      userId: String(req.user._id),
+    });
+  }
   res.json({ following: !following, followerCount: service.followers.length });
 });
 

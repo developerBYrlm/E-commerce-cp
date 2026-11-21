@@ -38,6 +38,7 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { io } from "socket.io-client";
 import { useAuth } from "../contexts/AuthContext";
 import { useCollection } from "../hooks/useApi";
 import { Loader } from "../components/Loader";
@@ -118,6 +119,40 @@ export default function DashboardPage({ initialTab = "overview" }) {
   const inboxQuery = useCollection("/chat/inbox");
 
   const unreadMessagesCount = inboxQuery.data?.counts?.unread || 0;
+
+  // Real-time total followers count for owner
+  const allShops = shops.data?.items || [];
+  const allServices = services.data?.items || [];
+  const totalFollowers = useMemo(() => {
+    const shopFollowers = allShops.reduce((sum, s) => sum + (s.followers?.length || 0), 0);
+    const serviceFollowers = allServices.reduce((sum, s) => sum + (s.followers?.length || 0), 0);
+    return shopFollowers + serviceFollowers;
+  }, [allShops, allServices]);
+
+  // Live real-time socket listener for follower count updates
+  useEffect(() => {
+    if (!user || user.role !== "owner") return;
+    const socket = io(import.meta.env.VITE_SOCKET_URL || undefined, { withCredentials: true });
+
+    socket.on("shop:followerUpdate", (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/shops"] });
+      if (data?.action === "follow") {
+        toast.success("🎉 Someone just followed your shop!", { id: "live-follower-alert", duration: 3500 });
+      }
+    });
+
+    socket.on("service:followerUpdate", (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/services"] });
+      queryClient.invalidateQueries({ queryKey: ["/shops"] });
+      if (data?.action === "follow") {
+        toast.success("🎉 Someone just followed your service!", { id: "live-follower-alert", duration: 3500 });
+      }
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [user, queryClient]);
 
   // Incomplete orders: all orders whose status is NOT "completed" and NOT "cancelled"
   const incompleteOrdersCount = useMemo(() => {
@@ -320,11 +355,35 @@ export default function DashboardPage({ initialTab = "overview" }) {
                 {tab === "overview" ? `Hello, ${user.name?.split(" ")[0]}` : tabs.find(([id]) => id === tab)?.[1]}
               </h1>
             </div>
-            {user.role === "owner" && tab !== "shop" && (
-              <button onClick={() => setTab("shop")} className="btn rounded-full border-0 bg-forest text-white">
-                <Plus size={16} /> Add a new shop
-              </button>
-            )}
+            <div className="flex flex-wrap items-center gap-3">
+              {user.role === "owner" && (
+                <div
+                  className="inline-flex items-center gap-2 rounded-full border border-forest/15 bg-white px-3.5 py-1.5 shadow-xs transition hover:border-emerald-300 dark:border-forest/30 dark:bg-slate-800"
+                  title="Live auto-updated total followers count"
+                >
+                  <span className="grid h-6 w-6 place-items-center rounded-full bg-lime/40 text-forest dark:bg-emerald-500/20 dark:text-emerald-300">
+                    <Users size={13} />
+                  </span>
+                  <div className="flex items-baseline gap-1 text-xs">
+                    <span className="text-sm font-extrabold tracking-tight text-forest dark:text-white">
+                      {totalFollowers}
+                    </span>
+                    <span className="font-semibold text-slate-500 dark:text-slate-400">
+                      Followers
+                    </span>
+                  </div>
+                  <span className="relative flex h-2 w-2 ml-0.5" title="Live real-time synced">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                  </span>
+                </div>
+              )}
+              {user.role === "owner" && tab !== "shop" && (
+                <button onClick={() => setTab("shop")} className="btn rounded-full border-0 bg-forest text-white">
+                  <Plus size={16} /> Add a new shop
+                </button>
+              )}
+            </div>
           </div>
         )}
 
@@ -2248,7 +2307,6 @@ function Overview({ user, stats, shops, products, services, orders, bookings, in
           ["Service Shops", serviceShops.length, Wrench, "shop"],
           ["Total Services", services.data?.items?.length ?? "—", Wrench, "services"],
           ["Bookings", bookings.data?.items?.length ?? "—", CalendarDays, "bookings", incompleteBookingsCount],
-          ["Total Followers", allShops.reduce((sum, s) => sum + (s.followers?.length || 0), 0), Users, "shop"],
         ];
 
   return (
