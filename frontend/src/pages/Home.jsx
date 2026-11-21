@@ -51,12 +51,8 @@ const CATEGORIES_DATA = [
     glowColor: "border-amber-300 shadow-amber-500/10",
     badgeColor: "bg-amber-100 text-amber-900 border-amber-200",
     keywords: [
-      "Food", "Grocery", "Restaurant", "Cafe", "Super Shop", "Bakery",
-      "Sweets", "Snacks", "Medicine", "Pharmacy", "Beverage", "Cooking",
-      "Organic Food", "Catering", "Breakfast", "Fast Food",
-      "Pizza", "Burger", "Shawarma", "Sharma", "Sandwich", "Pasta", "French Fries",
-      "Fried Chicken", "Chicken Roll", "Biryani", "Kacchi Biryani", "Grill Chicken",
-      "Kebab", "Cake", "Pastry", "Coffee", "Tea", "Juice", "Milkshake", "Cold Drinks"
+      "Restaurant", "Fast Food", "Cafe", "Bakery", "Biryani",
+      "Burger", "Pizza", "Coffee", "Sweets", "Grocery"
     ],
     matcher: (item) => {
       const text = [
@@ -74,8 +70,7 @@ const CATEGORIES_DATA = [
         "snack", "beverage", "super shop", "cooking", "catering", "burger",
         "pizza", "shawarma", "sharma", "sandwich", "pasta", "fries", "fried chicken",
         "roll", "biryani", "kacchi", "grill", "kebab", "tea", "coffee", "juice",
-        "cake", "pastry", "donut", "misti", "shake", "fruit", "vegetable", "meat", "fish", "rice",
-        "medicine", "pharmacy"
+        "cake", "pastry", "donut", "misti", "shake", "fruit", "vegetable", "meat", "fish", "rice"
       ];
       return matchWords.some((w) => text.includes(w));
     },
@@ -89,14 +84,8 @@ const CATEGORIES_DATA = [
     glowColor: "border-emerald-300 shadow-emerald-500/10",
     badgeColor: "bg-emerald-100 text-emerald-900 border-emerald-200",
     keywords: [
-      "Health & Beauty", "Medicine", "Pharmacy", "Healthcare", "Doctor Appointment",
-      "First Aid", "Vitamins", "Supplements", "Pain Relief", "Gastric Medicine",
-      "Cough Syrup", "Cold & Flu", "Antiseptic", "Oral Saline", "Diabetes Care",
-      "Blood Pressure Monitor", "Thermometer", "Nebulizer", "Surgical Mask",
-      "Medical Equipment", "Herbal Medicine", "Eye Drops", "Inhaler", "Baby Healthcare",
-      "Home Nursing", "Physiotherapy", "Diagnostic Test", "Ambulance Service",
-      "Beauty", "Cosmetics", "Beauty Salon", "Hair Cutting", "Spa", "Skincare",
-      "Fitness", "Yoga", "Personal Care", "Dental", "Herbal", "Wellness"
+      "Medicine", "Pharmacy", "Healthcare", "Doctor Appointment", "First Aid",
+      "Beauty Salon", "Cosmetics", "Skincare", "Spa", "Fitness"
     ],
     matcher: (item) => {
       const text = [
@@ -128,9 +117,8 @@ const CATEGORIES_DATA = [
     glowColor: "border-teal-300 shadow-teal-500/10",
     badgeColor: "bg-teal-100 text-teal-900 border-teal-200",
     keywords: [
-      "Furniture", "Home Decor", "Table", "Bed", "Chair", "Sofa",
-      "Fashion", "Clothing", "Shoes", "Watch", "Accessories", "Dress",
-      "Mens Dress", "Fabrics", "Wardrobe", "Home Appliances", "Bedding", "Interior"
+      "Furniture", "Home Decor", "Sofa", "Bed", "Home Appliances",
+      "Fashion", "Clothing", "Shoes", "Watch", "Accessories"
     ],
     matcher: (item) => {
       const text = [
@@ -160,21 +148,8 @@ const CATEGORIES_DATA = [
     glowColor: "border-sky-300 shadow-sky-500/10",
     badgeColor: "bg-sky-100 text-sky-900 border-sky-200",
     keywords: [
-      "Construction", "Builder", "Building Construction", "House Construction", "Building Contractor", "Civil Contractor",
-      "Architectural Design", "Interior Design", "Renovation Service", "Home Renovation", "Masonry Service", "Tiles Fitting",
-      "Painter Service", "Steel Fabrication & Grill",
-      "Repair Services", "Car Service", "Car Servicing", "Car Repair", "Auto Service",
-      "Bike Service", "Bike Servicing", "Bike Repair", "Motorcycle Servicing",
-      "Plumber", "Plumbing", "Plumbing Service", "Electrician", "AC Repair", "Car AC Repair",
-      "TV Repair", "TV Installation", "Smart TV Setup", "LED TV Repair",
-      "Fridge Repair", "Fridge Servicing", "Refrigerator Repair", "Refrigerator Servicing",
-      "Furniture Service", "Furniture Repair", "Furniture Polish", "Sofa Repair", "Sofa Cleaning",
-      "WiFi Service", "Broadband Service", "Internet Service", "WiFi Setup",
-      "Electronics Repair", "Washing Machine Repair", "Oven Repair",
-      "Gas Stove Repair", "Geyser Repair", "Water Purifier Repair", "IPS Repair",
-      "Generator Repair", "CCTV Repair", "Mobile Repair", "Phone Repair", "Computer Repair",
-      "Laptop Repair", "Printer Repair", "Locksmith & Key Service", "Watch Repair", "Shoe Repair", "Home Cleaning",
-      "Laundry", "Carpentry", "Carpentry Service", "Maintenance", "Handyman", "Painter", "Freelance Services"
+      "Construction", "Builder", "Car Service", "Bike Service", "Electrician",
+      "Plumber", "AC Repair", "Electronics Repair", "Home Cleaning", "Laundry"
     ],
     matcher: (item) => {
       if (item.shopType === "service" || item.durationMinutes !== undefined || item.bookingCount !== undefined) {
@@ -211,10 +186,8 @@ const CATEGORIES_DATA = [
     glowColor: "border-purple-300 shadow-purple-500/10",
     badgeColor: "bg-purple-100 text-purple-900 border-purple-200",
     keywords: [
-      "Photography", "Graphic Design", "Handicrafts", "Handmade", "Pottery",
-      "Painting", "Artwork", "Jewelry", "Flowers", "Gift Shop", "Stationery",
-      "Books & Stationery", "Bookstore", "Library", "Book Shop", "Books", "Notebook",
-      "Custom Crafts", "Tailoring", "Printing", "Decoration", "Art"
+      "Gift Shop", "Handicrafts", "Painting", "Jewelry", "Flowers",
+      "Books & Stationery", "Photography", "Graphic Design", "Tailoring", "Artwork"
     ],
     matcher: (item) => {
       const text = [
@@ -244,13 +217,8 @@ const CATEGORIES_DATA = [
     glowColor: "border-rose-300 shadow-rose-500/10",
     badgeColor: "bg-rose-100 text-rose-900 border-rose-200",
     keywords: [
-      "Pet", "Cat", "Dog", "Bird", "Pigeon", "Parrot", "Cockatiel", "Lovebird", "Budgerigar", "Budgie",
-      "Finch", "Canary", "Macaw", "Cockatoo", "Conure", "Dove", "Myna", "Quail", "Duck", "Chicken",
-      "Bird Cage", "Bird Accessories", "Pet Care", "Pet Food", "Cat Food", "Dog Food", "Bird Food",
-      "Pet Accessories", "Fish & Aquarium", "Veterinary", "Pet Grooming", "Pet Training", "Pet Sitting",
-      "Education", "Tuition", "Coaching", "Toys", "Baby Care", "Kids & Family", "Books",
-      "Library", "Bookstore", "Book Shop", "Books & Stationery", "Stationery", "Textbook",
-      "Sports & Fitness", "Hotel Booking", "Resort Booking", "Travel Agency"
+      "Pet Care", "Pet Food", "Cat", "Dog", "Bird",
+      "Fish & Aquarium", "Veterinary", "Pet Grooming", "Baby Care", "Toys"
     ],
     matcher: (item) => {
       const text = [
@@ -627,7 +595,7 @@ export default function Home() {
                     )}
                   </div>
                   <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                    {activeCategory.keywords.map((kw) => {
+                    {activeCategory.keywords.slice(0, 10).map((kw) => {
                       const isKwActive = selectedKeywordFilter?.toLowerCase() === kw.toLowerCase();
                       return (
                         <button
