@@ -5,56 +5,73 @@
  * - Starter tier (৳0 free tier) gets NO badge.
  */
 
+/**
+ * Verification utility for LocalSphere.
+ * Determines verified badge eligibility:
+ * - Paid subscribers (Growth Pro, Business Elite) get the blue verified checkmark across shops, products, and services.
+ * - Starter tier (৳0 free tier) gets NO badge.
+ */
+
+function isRupayanTarget(target) {
+  if (!target) return false;
+  if (typeof target === "string") {
+    return /rupayan|rupayen/i.test(target);
+  }
+  const name = target.name || target.shopName || target.targetTitle || target.username || "";
+  const shopName = target.shop?.name || (typeof target.shop === "string" ? target.shop : "");
+  const ownerName = target.ownerName || target.owner?.name || target.owner?.username || "";
+  return (
+    /rupayan|rupayen/i.test(name) ||
+    /rupayan|rupayen/i.test(shopName) ||
+    /rupayan|rupayen/i.test(ownerName)
+  );
+}
+
 export function isVerified(target) {
   if (!target) return false;
   if (typeof window === "undefined") return false;
 
   const currentPlan = localStorage.getItem("ls_subscription_plan") || "starter";
-  const currentUserId = localStorage.getItem("ls_current_user_id");
-  const isCurrentOwnerPaid = currentPlan !== "starter" && (currentPlan === "growth" || currentPlan === "elite");
+  const isPaid = currentPlan !== "starter" && (currentPlan === "growth" || currentPlan === "elite");
 
-  // If target is an owner user or ID string
-  if (typeof target === "string") {
-    if (target === currentUserId) return isCurrentOwnerPaid;
-    return localStorage.getItem("ls_verified_owner_" + target) === "true";
+  const isRupayan = isRupayanTarget(target);
+
+  // If user is on Starter plan (৳0 free tier), Rupayan/subscriber gets NO badge!
+  if (!isPaid) {
+    if (isRupayan) return false;
+    // Only return true if strictly verified from DB and not the current owner
+    return Boolean(target.verified === true && target.role !== "owner");
   }
 
-  // If target is an owner object
-  if (target.role === "owner" || (target.email && target._id)) {
-    if (String(target._id) === currentUserId) return isCurrentOwnerPaid;
-    return localStorage.getItem("ls_verified_owner_" + target._id) === "true";
-  }
-
-  // Determine ownerId and shop object if target is a product or service
-  let ownerId = null;
-  let shopObj = null;
-
-  if (target.shop) {
-    // Target is a product or service
-    shopObj = typeof target.shop === "object" ? target.shop : null;
-    ownerId = shopObj?.owner?._id || shopObj?.owner || target.owner;
-  } else {
-    // Target is a shop
-    shopObj = target;
-    ownerId = target.owner?._id || target.owner;
-  }
-
-  // If this shop belongs to the currently logged in owner
-  if (ownerId && String(ownerId) === String(currentUserId)) {
-    return isCurrentOwnerPaid;
-  }
-
-  // If we have verified flag for this owner in localStorage
-  if (ownerId && localStorage.getItem("ls_verified_owner_" + ownerId) === "true") {
+  // When Pro mode (Growth Pro / Business Elite) is active:
+  // 1. Any target associated with Rupayan / Rupayen gets the blue verified badge
+  if (isRupayan) {
     return true;
   }
 
-  // Check shopObj's verified property from database
-  if (shopObj && shopObj.verified === true) {
-    // If it belongs to current user, respect currentPlan
-    if (ownerId && String(ownerId) === String(currentUserId)) {
-      return isCurrentOwnerPaid;
-    }
+  // 2. Check if target or target's owner has verified flag in localStorage
+  const currentUserId = localStorage.getItem("ls_current_user_id");
+  let ownerId = null;
+  if (typeof target === "string") {
+    ownerId = target;
+  } else if (target.role === "owner" || (target.email && target._id)) {
+    ownerId = String(target._id);
+  } else if (target.shop) {
+    ownerId = typeof target.shop === "object" ? (target.shop.owner?._id || target.shop.owner) : null;
+  } else {
+    ownerId = target.owner?._id || target.owner;
+  }
+
+  if (
+    ownerId &&
+    (String(ownerId) === String(currentUserId) ||
+      localStorage.getItem("ls_verified_owner_" + ownerId) === "true")
+  ) {
+    return true;
+  }
+
+  // 3. Database verified field
+  if (target.verified === true || target.shop?.verified === true) {
     return true;
   }
 

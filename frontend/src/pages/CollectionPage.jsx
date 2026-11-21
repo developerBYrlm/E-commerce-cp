@@ -165,7 +165,7 @@ function ItemCard({ item, kind, isNearby = false }) {
         <div className="flex items-center justify-between gap-2">
           <p className="truncate text-xs font-semibold uppercase tracking-wide text-emerald-700 flex items-center gap-1.5">
             <span className="truncate">{item.shop?.name || (kind === "products" ? "Local shop" : "Local expert")}</span>
-            {isVerified(item.shop) && <VerifiedBadge size={13} title="Verified Shop" />}
+            {isVerified(item.shop || item) && <VerifiedBadge size={13} title="Verified Shop" />}
           </p>
           <div className="flex items-center gap-2">
             {isNearby && (

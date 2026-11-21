@@ -511,7 +511,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ADS CLIPS (REELS / SHORTS STYLE VIDEO SHOWCASE) */}
+      {/* ADS CLIPS (VIDEO SHOWCASE) */}
       <ClipsErrorBoundary>
         <AdsClipsShowcase />
       </ClipsErrorBoundary>

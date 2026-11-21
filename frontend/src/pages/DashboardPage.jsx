@@ -4514,6 +4514,7 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
   const [showCreateCampaign, setShowCreateCampaign] = useState(false);
   const [campName, setCampName] = useState("");
   const [campTarget, setCampTarget] = useState("");
+  const [campTargetArea, setCampTargetArea] = useState("সকল এলাকা");
   const [campPlacements, setCampPlacements] = useState(["3d_spotlight", "ads_clips"]);
   const [campRadius, setCampRadius] = useState("1 km");
   const [campBudget, setCampBudget] = useState(25);
@@ -4700,15 +4701,28 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
   // Toggle individual placement selection in multi-select mode
   const handleTogglePlacement = (id) => {
     setCampPlacements((prev) => {
+      let next;
       if (prev.includes(id)) {
         if (prev.length === 1) {
           toast.error("বিজ্ঞাপনের জন্য অন্তত একটি স্থান সিলেক্ট থাকতে হবে!");
           return prev;
         }
-        return prev.filter((p) => p !== id);
+        next = prev.filter((p) => p !== id);
       } else {
-        return [...prev, id];
+        next = [...prev, id];
       }
+
+      // If ads_clips selection changed, automatically adjust budget according to discount rule:
+      // Regular with ads_clips: 25, 50, 80
+      // Discount without ads_clips: 25->20 (5 off), 50->40 (10 off), 80->65 (15 off)
+      const hasClips = next.includes("ads_clips");
+      if (!hasClips) {
+        setCampBudget((curr) => (curr === 25 ? 20 : curr === 50 ? 40 : curr === 80 ? 65 : 20));
+      } else {
+        setCampBudget((curr) => (curr === 20 ? 25 : curr === 40 ? 50 : curr === 65 ? 80 : 25));
+      }
+
+      return next;
     });
   };
 
@@ -4781,6 +4795,7 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
       placements: campPlacements,
       placement: campPlacements[0],
       placementLabel: placementLabels.join(" + "),
+      targetArea: campTargetArea || "সকল এলাকা",
       videoUrl: campVideoUrl || "",
       caption: campCaption.trim() || "",
       radius: campRadius,
@@ -5282,8 +5297,8 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
                     },
                     {
                       id: "ads_clips",
-                      title: "Ads Clips (শর্টস / রিলস)",
-                      desc: "হোম পেজের রিলস সেকশনে আপনার ভিডিও চলবে এবং সরাসরি লাইক, শেয়ার ও চ্যাট মেসেজ পাবে।",
+                      title: "Ads Clips (ক্লিপস)",
+                      desc: "হোম পেজের ক্লিপস সেকশনে আপনার ভিডিও চলবে এবং সরাসরি লাইক, শেয়ার ও চ্যাট মেসেজ পাবে।",
                       badge: "Viral 9:16 Format 🔥",
                       icon: Video,
                       iconColor: "text-rose-500",
@@ -5339,7 +5354,7 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
                           অ্যাড ক্লিপস শর্ট ভিডিও আপলোড (সর্বোচ্চ ৪০ MB)
                         </h4>
                         <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                          হোম পেজের রিলস সেকশনে প্রদর্শনের জন্য ৯:১৬ ফরম্যাটের ভিডিও (MP4, WebM, MOV)
+                          হোম পেজের ক্লিপস সেকশনে প্রদর্শনের জন্য ৯:১৬ ফরম্যাটের ভিডিও (MP4, WebM, MOV)
                         </p>
                       </div>
                     </div>
@@ -5415,8 +5430,37 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
                 </div>
               )}
 
-              {/* Radius and Budget */}
-              <div className="mt-5 grid gap-5 sm:grid-cols-3">
+              {/* Target Location / Area, Radius, Budget, and Duration */}
+              <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {/* 1. Target Area / District */}
+                <div>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    টার্গেট এলাকা / জেলা (Target Area)
+                  </label>
+                  <select
+                    value={campTargetArea}
+                    onChange={(e) => setCampTargetArea(e.target.value)}
+                    className="mt-1.5 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold focus:border-forest focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  >
+                    <option value="সকল এলাকা">🌐 সকল এলাকা (দেশব্যাপী)</option>
+                    <option value="Dhaka">Dhaka (ঢাকা)</option>
+                    <option value="Chattogram">Chattogram (চট্টগ্রাম)</option>
+                    <option value="Sylhet">Sylhet (সিলেট)</option>
+                    <option value="Rajshahi">Rajshahi (রাজশাহী)</option>
+                    <option value="Khulna">Khulna (খুলনা)</option>
+                    <option value="Barishal">Barishal (বরিশাল)</option>
+                    <option value="Rangpur">Rangpur (রংপুর)</option>
+                    <option value="Mymensingh">Mymensingh (ময়মনসিংহ)</option>
+                    <option value="Gazipur">Gazipur (গাজীপুর)</option>
+                    <option value="Narayanganj">Narayanganj (নারায়ণগঞ্জ)</option>
+                    <option value="Cumilla">Cumilla (কুমিল্লা)</option>
+                    <option value="Demra">Demra (ডেমরা)</option>
+                    <option value="Dohar">Dohar (দোহার)</option>
+                    <option value="Uttara">Uttara (উত্তরা)</option>
+                  </select>
+                </div>
+
+                {/* 2. Target Radius */}
                 <div>
                   <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
                     টার্গেট ব্যাসার্ধ (Target Radius)
@@ -5427,8 +5471,8 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
                         key={rad}
                         type="button"
                         onClick={() => setCampRadius(rad)}
-                        className={`flex-1 rounded-xl py-2 text-xs font-bold transition-all ${campRadius === rad
-                            ? "bg-forest text-white"
+                        className={`flex-1 rounded-2xl py-2 text-xs font-bold transition-all ${campRadius === rad
+                            ? "bg-forest text-white shadow-xs"
                             : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
                           }`}
                       >
@@ -5438,33 +5482,54 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
                   </div>
                 </div>
 
+                {/* 3. Daily Budget with Placement-based dynamic discount */}
                 <div>
                   <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
                     দৈনিক বাজেট (Daily Budget ৳)
                   </label>
                   <div className="mt-1.5 flex gap-2">
-                    {[25, 50, 80].map((b) => (
+                    {(campPlacements.includes("ads_clips")
+                      ? [
+                          { value: 25, label: "৳২৫", discount: 0 },
+                          { value: 50, label: "৳৫০", discount: 0 },
+                          { value: 80, label: "৳৮০", discount: 0 },
+                        ]
+                      : [
+                          { value: 20, label: "৳২০", discount: 5 },
+                          { value: 40, label: "৳৪০", discount: 10 },
+                          { value: 65, label: "৳৬৫", discount: 15 },
+                        ]
+                    ).map((tier) => (
                       <button
-                        key={b}
+                        key={tier.value}
                         type="button"
-                        onClick={() => setCampBudget(b)}
-                        className={`flex-1 rounded-xl py-2 text-xs font-bold transition-all ${campBudget === b
-                            ? "bg-forest text-white"
+                        onClick={() => setCampBudget(tier.value)}
+                        className={`flex-1 rounded-2xl py-1.5 px-1 text-center transition-all ${campBudget === tier.value
+                            ? "bg-forest text-white shadow-xs"
                             : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
                           }`}
                       >
-                        ৳{b}
+                        <span className="block text-xs font-black">{tier.label}</span>
+                        {tier.discount > 0 && (
+                          <span
+                            className={`block text-[9px] font-bold ${campBudget === tier.value ? "text-emerald-200" : "text-emerald-600 dark:text-emerald-400"
+                              }`}
+                          >
+                            -৳{tier.discount} ছাড়
+                          </span>
+                        )}
                       </button>
                     ))}
                   </div>
                 </div>
 
+                {/* 4. Duration */}
                 <div>
                   <label className="text-xs font-bold text-slate-700 dark:text-slate-300">মেয়াদ (Duration)</label>
                   <select
                     value={campDays}
                     onChange={(e) => setCampDays(Number(e.target.value))}
-                    className="mt-1.5 w-full rounded-2xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold focus:border-forest focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    className="mt-1.5 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold focus:border-forest focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   >
                     <option value={3}>3 Days (৳{campBudget * 3}){planExtraDays > 0 ? ` + ${planExtraDays}d Pro Bonus = ${3 + planExtraDays} Days!` : ""}</option>
                     <option value={7}>7 Days (৳{campBudget * 7}){planExtraDays > 0 ? ` + ${planExtraDays}d Pro Bonus = ${7 + planExtraDays} Days!` : ""}</option>
@@ -5514,29 +5579,32 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
           {/* Campaigns Table */}
           <div className="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
+              <table className="min-w-full text-left text-sm whitespace-nowrap">
                 <thead className="border-b border-slate-100 bg-slate-50/75 text-[11px] font-black uppercase tracking-wider text-slate-500 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-400">
-                  <tr>
-                    <th className="px-5 py-3.5">Campaign Name & Target</th>
-                    <th className="px-5 py-3.5">Placements</th>
-                    <th className="px-5 py-3.5">Radius</th>
-                    <th className="px-5 py-3.5">Daily Budget</th>
-                    <th className="px-5 py-3.5">Reach (Views) / Clicks (Messages)</th>
-                    <th className="px-5 py-3.5">Likes</th>
-                    <th className="px-5 py-3.5">Status</th>
-                    <th className="px-5 py-3.5 text-right">Actions</th>
+                  <tr className="whitespace-nowrap">
+                    <th className="px-4 py-3.5 whitespace-nowrap">Campaign Name & Target</th>
+                    <th className="px-4 py-3.5 whitespace-nowrap">Placements</th>
+                    <th className="px-4 py-3.5 whitespace-nowrap">Target Area & Radius</th>
+                    <th className="px-4 py-3.5 whitespace-nowrap">Daily Budget</th>
+                    <th className="px-4 py-3.5 whitespace-nowrap">Reach (Views) / Clicks (Messages)</th>
+                    <th className="px-4 py-3.5 whitespace-nowrap">Likes / Shares</th>
+                    <th className="px-4 py-3.5 whitespace-nowrap">Status</th>
+                    <th className="px-4 py-3.5 text-right whitespace-nowrap">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                   {campaigns.length > 0 ? (
                     campaigns.map((camp) => (
-                      <tr key={camp.id} className="transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
-                        <td className="px-5 py-4">
-                          <p className="font-bold text-slate-900 dark:text-white">{camp.name}</p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400">🎯 {camp.targetTitle}</p>
+                      <tr key={camp.id} className="transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/40 whitespace-nowrap">
+                        <td className="px-4 py-3.5 whitespace-nowrap">
+                          <div className="flex items-center gap-1.5 whitespace-nowrap">
+                            <span className="font-bold text-slate-900 dark:text-white">{camp.name}</span>
+                            <span className="text-slate-400">·</span>
+                            <span className="text-xs text-slate-500 dark:text-slate-400">🎯 {camp.targetTitle}</span>
+                          </div>
                         </td>
-                        <td className="px-5 py-4">
-                          <div className="flex flex-wrap gap-1">
+                        <td className="px-4 py-3.5 whitespace-nowrap">
+                          <div className="flex items-center gap-1 whitespace-nowrap">
                             {(camp.placements || [camp.placement]).map((pId) => (
                               <span
                                 key={pId}
@@ -5561,34 +5629,41 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
                             ))}
                           </div>
                         </td>
-                        <td className="px-5 py-4 text-xs font-bold text-slate-600 dark:text-slate-300">
-                          {camp.radius}
-                        </td>
-                        <td className="px-5 py-4">
-                          <span className="font-extrabold text-forest dark:text-emerald-400">৳{camp.dailyBudget}</span>
-                          <span className="text-[11px] text-slate-400">/day</span>
-                          <div className="text-[11px] text-slate-500 font-medium">
-                            {camp.days} days {camp.bonusDays > 0 && <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-1 py-0.2 rounded dark:bg-emerald-950/60 dark:text-emerald-300">+{camp.bonusDays}d Free</span>}
+                        <td className="px-4 py-3.5 whitespace-nowrap text-xs font-bold text-slate-700 dark:text-slate-200">
+                          <div className="flex items-center gap-1 whitespace-nowrap">
+                            <span>{camp.targetArea || "সকল এলাকা"}</span>
+                            <span className="text-slate-400 font-normal">({camp.radius || "1 km"})</span>
                           </div>
                         </td>
-                        <td className="px-5 py-4">
-                          <div className="text-xs">
-                            <span className="font-bold text-slate-800 dark:text-white">{(camp.impressions || 0).toLocaleString()}</span>{" "}
-                            <span className="text-slate-400">views</span>
-                            <span className="mx-1 text-slate-300">|</span>
-                            <span className="font-bold text-emerald-600">{(camp.clicks || 0).toLocaleString()}</span>{" "}
-                            <span className="text-slate-400">clicks</span>
+                        <td className="px-4 py-3.5 whitespace-nowrap">
+                          <div className="flex items-center gap-1.5 whitespace-nowrap text-xs">
+                            <span className="font-extrabold text-forest dark:text-emerald-400">৳{camp.dailyBudget}/day</span>
+                            <span className="text-slate-400">·</span>
+                            <span className="text-slate-600 dark:text-slate-300 font-medium">
+                              {camp.days} days{camp.bonusDays > 0 && <span className="ml-1 text-[10px] text-emerald-600 font-bold bg-emerald-50 px-1 py-0.2 rounded dark:bg-emerald-950/60 dark:text-emerald-300">+{camp.bonusDays}d Free</span>}
+                            </span>
                           </div>
                         </td>
-                        <td className="px-5 py-4">
-                          <div className="flex items-center gap-1.5 text-xs">
+                        <td className="px-4 py-3.5 whitespace-nowrap">
+                          <div className="flex items-center gap-1.5 whitespace-nowrap text-xs">
+                            <span className="font-bold text-slate-800 dark:text-white">{(camp.impressions || 0).toLocaleString()} views</span>
+                            <span className="text-slate-300">|</span>
+                            <span className="font-bold text-emerald-600">{(camp.clicks || 0).toLocaleString()} clicks</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3.5 whitespace-nowrap">
+                          <div className="flex items-center gap-2 whitespace-nowrap text-xs">
                             <span className="inline-flex items-center gap-1 font-bold text-rose-600 dark:text-rose-400" title="Likes">
                               <Heart size={13} className="fill-rose-500 text-rose-500" />
                               {(camp.likes || 0).toLocaleString()}
                             </span>
+                            <span className="inline-flex items-center gap-1 font-bold text-blue-600 dark:text-blue-400" title="Shares">
+                              <Share2 size={13} />
+                              {(camp.shares || 0).toLocaleString()}
+                            </span>
                           </div>
                         </td>
-                        <td className="px-5 py-4">
+                        <td className="px-4 py-3.5 whitespace-nowrap">
                           {camp.status === "active" ? (
                             <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400">
                               <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -5601,7 +5676,7 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
                             </span>
                           )}
                         </td>
-                        <td className="px-5 py-4 text-right">
+                        <td className="px-4 py-3.5 text-right whitespace-nowrap">
                           <div className="flex items-center justify-end gap-1.5">
                             <button
                               type="button"

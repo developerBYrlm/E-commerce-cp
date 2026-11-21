@@ -34,17 +34,24 @@ export default function AdsClipsShowcase() {
       const saved = localStorage.getItem("ls_ad_campaigns");
       if (saved) {
         const campaigns = JSON.parse(saved);
+        // User's current location district/area for targeted ads
+        const userArea = (user?.address?.district || user?.address?.area || user?.district || "").toLowerCase().trim();
+
         // Only include active campaigns that have a real videoUrl uploaded and are NOT demo campaigns
         return campaigns
-          .filter(
-            (c) =>
-              c.status === "active" &&
-              c.id !== "camp-101" &&
-              c.id !== "camp-102" &&
-              c.videoUrl &&
-              typeof c.videoUrl === "string" &&
-              c.videoUrl.trim().length > 0
-          )
+          .filter((c) => {
+            if (c.status !== "active" || c.id === "camp-101" || c.id === "camp-102") return false;
+            if (!c.videoUrl || typeof c.videoUrl !== "string" || c.videoUrl.trim().length === 0) return false;
+
+            // Target area matching: if camp specifies an area other than "সকল এলাকা", show to users matching that area
+            if (c.targetArea && c.targetArea !== "সকল এলাকা" && userArea) {
+              const campArea = c.targetArea.toLowerCase().trim();
+              if (!campArea.includes(userArea) && !userArea.includes(campArea)) {
+                return false;
+              }
+            }
+            return true;
+          })
           .map((c, idx) => ({
             id: c.id || `camp-clip-${idx}`,
             shopName: c.targetTitle || "Local Business",
@@ -61,6 +68,7 @@ export default function AdsClipsShowcase() {
             likes: Number(c.likes || 0),
             shares: Number(c.shares || 0),
             views: Number(c.impressions || 0),
+            targetArea: c.targetArea || "সকল এলাকা",
             status: "active",
           }));
       }
@@ -117,7 +125,7 @@ export default function AdsClipsShowcase() {
   // Sound muted state (default true for web autoplay compliance)
   const [isMuted, setIsMuted] = useState(true);
 
-  // Full-screen Shorts/Reels Modal state
+  // Full-screen Shorts/Clips Modal state
   const [activeModalClipIndex, setActiveModalClipIndex] = useState(null);
 
   // Handle Like Button click
@@ -219,7 +227,7 @@ export default function AdsClipsShowcase() {
 
   return (
     <section className="relative z-10 mx-auto max-w-7xl px-5 py-6 sm:py-8 lg:px-8">
-      {/* Section Header (Reels / Shorts Style) */}
+      {/* Section Header (Clips Style) */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="relative grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-tr from-rose-500 via-pink-500 to-amber-500 text-white shadow-md shadow-pink-500/25">
@@ -229,10 +237,10 @@ export default function AdsClipsShowcase() {
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-xl font-black tracking-tight text-forest dark:text-white sm:text-2xl">
-                ক্লিপস অ্যাডস (Ads Clips)
+                ক্লিপস অ্যাডস
               </h2>
-              <span className="rounded-full bg-gradient-to-r from-rose-500 to-amber-500 px-2 py-0.5 text-[10px] font-black uppercase text-white shadow-xs">
-                REELS 🔥
+              <span className="rounded-full bg-gradient-to-r from-rose-500 to-amber-500 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-white shadow-xs">
+                CLIPS 🔥
               </span>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -327,7 +335,7 @@ export default function AdsClipsShowcase() {
                     </h3>
                   </div>
 
-                  {/* Vertical Reels Action Column */}
+                  {/* Vertical Clips Action Column */}
                   <div className="flex flex-col items-center gap-2.5 shrink-0">
                     <button
                       type="button"
@@ -411,7 +419,7 @@ export default function AdsClipsShowcase() {
         </div>
       )}
 
-      {/* ===================== FULL SCREEN SHORTS / REELS MODAL ===================== */}
+      {/* ===================== FULL SCREEN CLIPS MODAL ===================== */}
       {activeClip && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-2 backdrop-blur-md sm:p-4 animate-fadeIn"
@@ -435,7 +443,7 @@ export default function AdsClipsShowcase() {
                 setActiveModalClipIndex((prev) => Math.max(0, prev - 1));
               }}
               className="absolute left-2 top-1/2 z-50 -translate-y-1/2 rounded-full bg-white/10 p-2.5 text-white backdrop-blur-md transition hover:bg-white/20 sm:left-6"
-              title="Previous reel"
+              title="পূর্ববর্তী ক্লিপ (Previous clip)"
             >
               <ChevronLeft size={24} />
             </button>
@@ -450,7 +458,7 @@ export default function AdsClipsShowcase() {
                 setActiveModalClipIndex((prev) => Math.min(clips.length - 1, prev + 1));
               }}
               className="absolute right-2 top-1/2 z-50 -translate-y-1/2 rounded-full bg-white/10 p-2.5 text-white backdrop-blur-md transition hover:bg-white/20 sm:right-6"
-              title="Next reel"
+              title="পরবর্তী ক্লিপ (Next clip)"
             >
               <ChevronRight size={24} />
             </button>
@@ -489,7 +497,7 @@ export default function AdsClipsShowcase() {
               {/* Center Title Badge */}
               <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-rose-500/80 via-pink-500/80 to-amber-500/80 px-3 py-1 text-[11px] font-black uppercase tracking-wider text-white shadow-xs backdrop-blur-md border border-white/20">
                 <Sparkles size={12} className="text-amber-200" />
-                <span>Ads Clips · Reels</span>
+                <span>Ads Clips</span>
               </span>
 
               {/* Right Controls: Sound Toggle + Close Button */}
