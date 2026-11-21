@@ -325,52 +325,52 @@ export default function DashboardPage({ initialTab = "overview" }) {
           {tabs
             .filter(([id]) => id !== "pro")
             .map(([id, label, Icon]) => {
-            let badge = null;
-            if (id === "inbox" && unreadMessagesCount > 0) {
-              badge = (
-                <span className="ml-auto flex items-center gap-1.5 shrink-0">
-                  <span className="h-2 w-2 rounded-full bg-rose-500 animate-ping" />
-                  <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-600 px-1.5 text-[10px] font-extrabold text-white shadow-xs">
-                    {unreadMessagesCount > 99 ? "99+" : unreadMessagesCount}
+              let badge = null;
+              if (id === "inbox" && unreadMessagesCount > 0) {
+                badge = (
+                  <span className="ml-auto flex items-center gap-1.5 shrink-0">
+                    <span className="h-2 w-2 rounded-full bg-rose-500 animate-ping" />
+                    <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-600 px-1.5 text-[10px] font-extrabold text-white shadow-xs">
+                      {unreadMessagesCount > 99 ? "99+" : unreadMessagesCount}
+                    </span>
                   </span>
-                </span>
-              );
-            } else if (id === "orders" && incompleteOrdersCount > 0) {
-              badge = (
-                <span className="ml-auto flex items-center gap-1.5 shrink-0">
-                  <span className="h-2 w-2 rounded-full bg-rose-500 animate-pulse" />
-                  <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-600 px-1.5 text-[10px] font-extrabold text-white shadow-xs">
-                    {incompleteOrdersCount}
+                );
+              } else if (id === "orders" && incompleteOrdersCount > 0) {
+                badge = (
+                  <span className="ml-auto flex items-center gap-1.5 shrink-0">
+                    <span className="h-2 w-2 rounded-full bg-rose-500 animate-pulse" />
+                    <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-600 px-1.5 text-[10px] font-extrabold text-white shadow-xs">
+                      {incompleteOrdersCount}
+                    </span>
                   </span>
-                </span>
-              );
-            } else if (id === "bookings" && incompleteBookingsCount > 0) {
-              badge = (
-                <span className="ml-auto flex items-center gap-1.5 shrink-0">
-                  <span className="h-2 w-2 rounded-full bg-rose-500 animate-pulse" />
-                  <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-600 px-1.5 text-[10px] font-extrabold text-white shadow-xs">
-                    {incompleteBookingsCount}
+                );
+              } else if (id === "bookings" && incompleteBookingsCount > 0) {
+                badge = (
+                  <span className="ml-auto flex items-center gap-1.5 shrink-0">
+                    <span className="h-2 w-2 rounded-full bg-rose-500 animate-pulse" />
+                    <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-600 px-1.5 text-[10px] font-extrabold text-white shadow-xs">
+                      {incompleteBookingsCount}
+                    </span>
                   </span>
-                </span>
-              );
-            }
+                );
+              }
 
-            return (
-              <button
-                key={id}
-                onClick={() => {
-                  setTab(id);
-                  setTargetShopFilter("");
-                }}
-                className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-semibold transition ${tab === id ? "bg-forest text-white" : "text-slate-500 hover:bg-cream hover:text-forest"
-                  }`}
-              >
-                <Icon size={17} className="shrink-0" />
-                <span className="truncate flex-1">{label}</span>
-                {badge}
-              </button>
-            );
-          })}
+              return (
+                <button
+                  key={id}
+                  onClick={() => {
+                    setTab(id);
+                    setTargetShopFilter("");
+                  }}
+                  className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-semibold transition ${tab === id ? "bg-forest text-white" : "text-slate-500 hover:bg-cream hover:text-forest"
+                    }`}
+                >
+                  <Icon size={17} className="shrink-0" />
+                  <span className="truncate flex-1">{label}</span>
+                  {badge}
+                </button>
+              );
+            })}
 
           {user.role === "owner" && (
             <div className="pt-2">
@@ -387,57 +387,51 @@ export default function DashboardPage({ initialTab = "overview" }) {
               >
                 {/* Modern green gradient border */}
                 <span
-                  className={`absolute inset-0 rounded-2xl transition-opacity ${
-                    tab === "pro"
+                  className={`absolute inset-0 rounded-2xl transition-opacity ${tab === "pro"
                       ? "bg-gradient-to-r from-forest via-emerald-600 to-teal-600 opacity-100"
                       : "bg-gradient-to-r from-emerald-500/50 via-teal-500/40 to-forest/50 opacity-80 group-hover:opacity-100"
-                  }`}
+                    }`}
                 />
 
                 {/* Inner button surface */}
                 <div
-                  className={`relative flex w-full items-center justify-between gap-2.5 rounded-[14px] px-3.5 py-2.5 font-bold transition-all ${
-                    tab === "pro"
+                  className={`relative flex w-full items-center justify-between gap-2.5 rounded-[14px] px-3.5 py-2.5 font-bold transition-all ${tab === "pro"
                       ? "bg-gradient-to-r from-forest via-emerald-700 to-teal-800 text-white shadow-inner"
                       : "bg-white text-forest hover:bg-emerald-50/50 dark:bg-slate-900 dark:text-emerald-300 dark:hover:bg-slate-800"
-                  }`}
+                    }`}
                 >
                   {/* Subtle soft shimmer sweep */}
                   <span className="pointer-events-none absolute -inset-full bg-gradient-to-r from-transparent via-emerald-400/15 to-transparent -skew-x-12 animate-shimmer-sweep" />
 
                   <div className="flex items-center gap-2.5 min-w-0">
                     <span
-                      className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl transition-transform group-hover:scale-105 ${
-                        tab === "pro"
+                      className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl transition-transform group-hover:scale-105 ${tab === "pro"
                           ? "bg-white/20 text-white shadow-xs"
                           : "bg-emerald-500/15 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-300"
-                      }`}
+                        }`}
                     >
                       <Crown size={16} />
                     </span>
                     <div className="text-left leading-tight truncate">
                       <div className="flex items-center gap-1.5">
                         <span
-                          className={`text-sm font-black tracking-tight ${
-                            tab === "pro" ? "text-white" : "text-forest dark:text-white"
-                          }`}
+                          className={`text-sm font-black tracking-tight ${tab === "pro" ? "text-white" : "text-forest dark:text-white"
+                            }`}
                         >
                           Pro Mode
                         </span>
                         <span
-                          className={`inline-flex items-center rounded-full px-1.5 py-0.2 text-[9px] font-black uppercase tracking-wider ${
-                            tab === "pro"
+                          className={`inline-flex items-center rounded-full px-1.5 py-0.2 text-[9px] font-black uppercase tracking-wider ${tab === "pro"
                               ? "bg-white/20 text-white"
                               : "bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/25 dark:text-emerald-300"
-                          }`}
+                            }`}
                         >
                           PRO ⚡
                         </span>
                       </div>
                       <p
-                        className={`text-[10px] font-medium truncate ${
-                          tab === "pro" ? "text-emerald-100" : "text-slate-500 dark:text-slate-400"
-                        }`}
+                        className={`text-[10px] font-medium truncate ${tab === "pro" ? "text-emerald-100" : "text-slate-500 dark:text-slate-400"
+                          }`}
                       >
                         Ads & Subscription
                       </p>
@@ -446,9 +440,8 @@ export default function DashboardPage({ initialTab = "overview" }) {
 
                   <Sparkles
                     size={14}
-                    className={`shrink-0 transition-transform group-hover:rotate-12 ${
-                      tab === "pro" ? "text-emerald-200" : "text-emerald-500"
-                    }`}
+                    className={`shrink-0 transition-transform group-hover:rotate-12 ${tab === "pro" ? "text-emerald-200" : "text-emerald-500"
+                      }`}
                   />
                 </div>
               </button>
@@ -3773,27 +3766,24 @@ function FollowingPanel({ followShop, followService }) {
         <button
           type="button"
           onClick={() => setFilter("all")}
-          className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition ${
-            filter === "all" ? "bg-forest text-white shadow-xs" : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
-          }`}
+          className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition ${filter === "all" ? "bg-forest text-white shadow-xs" : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
+            }`}
         >
           All ({totalCount})
         </button>
         <button
           type="button"
           onClick={() => setFilter("shops")}
-          className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition flex items-center gap-1.5 ${
-            filter === "shops" ? "bg-emerald-700 text-white shadow-xs" : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
-          }`}
+          className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition flex items-center gap-1.5 ${filter === "shops" ? "bg-emerald-700 text-white shadow-xs" : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
+            }`}
         >
           <Store size={13} /> Followed Shops ({shops.length})
         </button>
         <button
           type="button"
           onClick={() => setFilter("services")}
-          className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition flex items-center gap-1.5 ${
-            filter === "services" ? "bg-sky-700 text-white shadow-xs" : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
-          }`}
+          className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition flex items-center gap-1.5 ${filter === "services" ? "bg-sky-700 text-white shadow-xs" : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
+            }`}
         >
           <Wrench size={13} /> Followed Services ({services.length})
         </button>
@@ -4802,7 +4792,7 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
       return;
     }
     const targetTitle = campTarget || shops[0]?.name || products[0]?.name || "My Storefront";
-    
+
     const placementLabels = campPlacements.map((p) => {
       if (p === "3d_spotlight") return "3D Spotlight";
       if (p === "search_top") return "Search Top";
@@ -4891,11 +4881,10 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
             <button
               type="button"
               onClick={() => setProTab("subscription")}
-              className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-extrabold transition-all duration-200 ${
-                proTab === "subscription"
+              className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-extrabold transition-all duration-200 ${proTab === "subscription"
                   ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md shadow-amber-500/30"
                   : "text-slate-300 hover:text-white"
-              }`}
+                }`}
             >
               <Crown size={15} />
               <span>সাবস্ক্রিপশন (Subscription)</span>
@@ -4903,11 +4892,10 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
             <button
               type="button"
               onClick={() => setProTab("ads")}
-              className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-extrabold transition-all duration-200 ${
-                proTab === "ads"
+              className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-extrabold transition-all duration-200 ${proTab === "ads"
                   ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md shadow-emerald-500/30"
                   : "text-slate-300 hover:text-white"
-              }`}
+                }`}
             >
               <Megaphone size={15} />
               <span>রান অ্যাডস (Run Ads)</span>
@@ -4965,22 +4953,20 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
               <button
                 type="button"
                 onClick={() => setBillingCycle("monthly")}
-                className={`rounded-full px-4 py-1.5 text-xs font-extrabold transition-all ${
-                  billingCycle === "monthly"
+                className={`rounded-full px-4 py-1.5 text-xs font-extrabold transition-all ${billingCycle === "monthly"
                     ? "bg-forest text-white shadow-xs"
                     : "text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
-                }`}
+                  }`}
               >
                 মাসিক (Monthly)
               </button>
               <button
                 type="button"
                 onClick={() => setBillingCycle("yearly")}
-                className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-extrabold transition-all ${
-                  billingCycle === "yearly"
+                className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-extrabold transition-all ${billingCycle === "yearly"
                     ? "bg-forest text-white shadow-xs"
                     : "text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
-                }`}
+                  }`}
               >
                 <span>বাৎসরিক (Yearly)</span>
                 <span className="rounded-full bg-amber-400 px-1.5 py-0.2 text-[10px] font-black text-slate-900">
@@ -5000,11 +4986,10 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
               return (
                 <div
                   key={p.id}
-                  className={`relative flex flex-col justify-between rounded-3xl p-6 transition-all duration-300 ${
-                    p.popular
+                  className={`relative flex flex-col justify-between rounded-3xl p-6 transition-all duration-300 ${p.popular
                       ? "border-2 border-amber-400 bg-white shadow-xl shadow-amber-500/10 dark:border-amber-400 dark:bg-slate-900"
                       : "border border-slate-200 bg-white/80 shadow-sm dark:border-slate-800 dark:bg-slate-900/80"
-                  } ${isCurrent ? "ring-2 ring-emerald-500" : ""}`}
+                    } ${isCurrent ? "ring-2 ring-emerald-500" : ""}`}
                 >
                   {/* Top Badge */}
                   {p.popular && (
@@ -5074,11 +5059,10 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
                       <button
                         type="button"
                         onClick={() => handleStartUpgrade(p)}
-                        className={`group relative btn w-full overflow-hidden rounded-2xl border-0 font-black text-white shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] ${
-                          p.popular
+                        className={`group relative btn w-full overflow-hidden rounded-2xl border-0 font-black text-white shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] ${p.popular
                             ? "bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 shadow-amber-500/25"
                             : "bg-forest hover:bg-forest/90 shadow-forest/20"
-                        }`}
+                          }`}
                       >
                         <span className="relative z-10 flex items-center justify-center gap-2">
                           <Zap size={16} />
@@ -5341,11 +5325,10 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
                       <div
                         key={pl.id}
                         onClick={() => handleTogglePlacement(pl.id)}
-                        className={`cursor-pointer rounded-2xl border p-3.5 transition-all select-none ${
-                          isSelected
+                        className={`cursor-pointer rounded-2xl border p-3.5 transition-all select-none ${isSelected
                             ? "border-forest bg-forest/5 ring-1.5 ring-forest dark:border-emerald-400 dark:bg-emerald-950/20"
                             : "border-slate-200 bg-white hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800"
-                        }`}
+                          }`}
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex items-center gap-1.5">
@@ -5474,11 +5457,10 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
                         key={rad}
                         type="button"
                         onClick={() => setCampRadius(rad)}
-                        className={`flex-1 rounded-xl py-2 text-xs font-bold transition-all ${
-                          campRadius === rad
+                        className={`flex-1 rounded-xl py-2 text-xs font-bold transition-all ${campRadius === rad
                             ? "bg-forest text-white"
                             : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
-                        }`}
+                          }`}
                       >
                         {rad}
                       </button>
@@ -5496,11 +5478,10 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
                         key={b}
                         type="button"
                         onClick={() => setCampBudget(b)}
-                        className={`flex-1 rounded-xl py-2 text-xs font-bold transition-all ${
-                          campBudget === b
+                        className={`flex-1 rounded-xl py-2 text-xs font-bold transition-all ${campBudget === b
                             ? "bg-forest text-white"
                             : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
-                        }`}
+                          }`}
                       >
                         ৳{b}
                       </button>
@@ -5599,12 +5580,12 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
                                   {pId === "3d_spotlight"
                                     ? "3D Spotlight"
                                     : pId === "search_top"
-                                    ? "Search Top"
-                                    : pId === "feed_sponsored"
-                                    ? "Feed"
-                                    : pId === "ads_clips"
-                                    ? "Ads Clips"
-                                    : pId}
+                                      ? "Search Top"
+                                      : pId === "feed_sponsored"
+                                        ? "Feed"
+                                        : pId === "ads_clips"
+                                          ? "Ads Clips"
+                                          : pId}
                                 </span>
                               </span>
                             ))}
@@ -5736,11 +5717,10 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
                 <button
                   type="button"
                   onClick={() => setMfsProvider("bkash")}
-                  className={`flex items-center justify-center gap-2 rounded-2xl border-2 py-3 text-xs font-extrabold transition-all ${
-                    mfsProvider === "bkash"
+                  className={`flex items-center justify-center gap-2 rounded-2xl border-2 py-3 text-xs font-extrabold transition-all ${mfsProvider === "bkash"
                       ? "border-pink-500 bg-pink-50 text-pink-700 dark:bg-pink-950/20 dark:text-pink-400 shadow-xs"
                       : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
-                  }`}
+                    }`}
                 >
                   <span className="h-3 w-3 rounded-full bg-pink-600" />
                   <span>bKash (বিকাশ)</span>
@@ -5748,11 +5728,10 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
                 <button
                   type="button"
                   onClick={() => setMfsProvider("nagad")}
-                  className={`flex items-center justify-center gap-2 rounded-2xl border-2 py-3 text-xs font-extrabold transition-all ${
-                    mfsProvider === "nagad"
+                  className={`flex items-center justify-center gap-2 rounded-2xl border-2 py-3 text-xs font-extrabold transition-all ${mfsProvider === "nagad"
                       ? "border-orange-500 bg-orange-50 text-orange-700 dark:bg-orange-950/20 dark:text-orange-400 shadow-xs"
                       : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
-                  }`}
+                    }`}
                 >
                   <span className="h-3 w-3 rounded-full bg-orange-500" />
                   <span>Nagad (নগদ)</span>
@@ -5802,11 +5781,10 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
                 type="button"
                 disabled={isPaying}
                 onClick={handleConfirmPayment}
-                className={`btn flex-1 rounded-2xl border-0 font-bold text-white ${
-                  mfsProvider === "bkash"
+                className={`btn flex-1 rounded-2xl border-0 font-bold text-white ${mfsProvider === "bkash"
                     ? "bg-pink-600 hover:bg-pink-700"
                     : "bg-orange-600 hover:bg-orange-700"
-                }`}
+                  }`}
               >
                 {isPaying ? (
                   <span className="loading loading-spinner loading-xs" />
@@ -5849,11 +5827,10 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
                     key={amt}
                     type="button"
                     onClick={() => setRechargeAmount(amt)}
-                    className={`rounded-xl py-2 text-xs font-bold transition-all ${
-                      rechargeAmount === amt
+                    className={`rounded-xl py-2 text-xs font-bold transition-all ${rechargeAmount === amt
                         ? "bg-forest text-white"
                         : "border border-slate-200 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
-                    }`}
+                      }`}
                   >
                     ৳{amt}
                   </button>

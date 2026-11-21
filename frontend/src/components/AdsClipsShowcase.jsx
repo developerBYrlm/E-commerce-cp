@@ -8,108 +8,40 @@ import {
   Heart,
   MessageCircle,
   Share2,
-  BadgeCheck,
   Sparkles,
   X,
   ChevronLeft,
   ChevronRight,
   Store,
   Flame,
+  Eye,
+  Video,
+  Plus,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "../contexts/AuthContext";
 import { getImageUrl } from "../utils/imageUrl";
 import { VerifiedBadge } from "../utils/verification";
 
-// 4 High Quality Sample Video Clips (using reliable verified 200 OK HTML5 streaming video assets)
-const DEFAULT_CLIPS = [
-  {
-    id: "clip-1",
-    shopName: "Rupayan Artisan Bakery",
-    shopId: "shop-bakery-1",
-    ownerId: "owner-bakery",
-    shopLogo: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=150&auto=format&fit=crop&q=80",
-    verified: true,
-    title: "ক্রিস্পি ফ্রেশ ফ্রেঞ্চ বাটার ক্রসাঁ ও এক্সপ্রেসো কম্বো 🥐☕",
-    caption: "আজকের স্পেশাল অফারে যেকোনো কফির সাথে ক্রসাঁ মাত্র ৳১২০! হোম ডেলিভারি এভেইলেবল।",
-    productName: "French Butter Croissant",
-    productLink: "/shops",
-    videoUrl: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
-    poster: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&auto=format&fit=crop&q=80",
-    likes: 1420,
-    shares: 312,
-    views: 18400,
-    status: "active",
-  },
-  {
-    id: "clip-2",
-    shopName: "Dhaka Royal Heritage",
-    shopId: "shop-fashion-2",
-    ownerId: "owner-fashion",
-    shopLogo: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=150&auto=format&fit=crop&q=80",
-    verified: true,
-    title: "প্রিমিয়াম হ্যান্ডক্রাফটেড শেরওয়ানি ও এক্সক্লুসিভ পাঞ্জাবি কালেকশন ✨",
-    caption: "সম্পূর্ণ খাঁটি সুতি ও সিল্কের কারুকাজ করা নতুন কালেকশন। বিয়ের সিজনের জন্য প্রি-অর্ডার চলছে।",
-    productName: "Royal Heritage Panjabi",
-    productLink: "/shops",
-    videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
-    poster: "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=600&auto=format&fit=crop&q=80",
-    likes: 2850,
-    shares: 640,
-    views: 34200,
-    status: "active",
-  },
-  {
-    id: "clip-3",
-    shopName: "Badda Tech & Gadget Zone",
-    shopId: "shop-tech-3",
-    ownerId: "owner-tech",
-    shopLogo: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=150&auto=format&fit=crop&q=80",
-    verified: true,
-    title: "আল্ট্রা ক্লিয়ার সাউন্ড ANC ওয়্যারলেস ইয়ারবাডস আনবক্সিং 🎧🔥",
-    caption: "অ্যাক্টিভ নয়েজ ক্যান্সেলেশন ও ৪০ ঘণ্টা ব্যাটারি লাইফ। সীমিত সময়ের জন্য ফ্ল্যাট ২৫% ডিসকাউন্ট!",
-    productName: "ANC Pro Wireless Earbuds",
-    productLink: "/shops",
-    videoUrl: "https://www.w3schools.com/tags/movie.mp4",
-    poster: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=600&auto=format&fit=crop&q=80",
-    likes: 980,
-    shares: 245,
-    views: 12500,
-    status: "active",
-  },
-  {
-    id: "clip-4",
-    shopName: "Green Life Bonsai & Plants",
-    shopId: "shop-plants-4",
-    ownerId: "owner-plants",
-    shopLogo: "https://images.unsplash.com/photo-1463936575829-25148e1db1b8?w=150&auto=format&fit=crop&q=80",
-    verified: true,
-    title: "ইনডোর এয়ার পিউরিফাইং এক্সোটিক বনসাই ও ডেকোরেশন প্ল্যান্টস 🌿",
-    caption: "ঘরের সৌন্দর্য বৃদ্ধি ও ফ্রেশ বাতাসের জন্য জীবন্ত মিনি ফাইকাস বনসাই। সাথে পাচ্ছেন সিরামিক পট ফ্রি।",
-    productName: "Miniature Ficus Bonsai",
-    productLink: "/shops",
-    videoUrl: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/friday.mp4",
-    poster: "https://images.unsplash.com/photo-1509423350716-97f9360b4e09?w=600&auto=format&fit=crop&q=80",
-    likes: 1140,
-    shares: 198,
-    views: 15300,
-    status: "active",
-  },
-];
-
 export default function AdsClipsShowcase() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // Load clips from default + any active owner campaign clips
+  // Load only real active campaign clips from localStorage (NO demo/fake clips)
   const [clips, setClips] = useState(() => {
     try {
       const saved = localStorage.getItem("ls_ad_campaigns");
       if (saved) {
         const campaigns = JSON.parse(saved);
-        // Find campaigns that have video or are active
-        const campaignClips = campaigns
-          .filter((c) => c.status === "active" && (c.videoUrl || c.isClip || (c.placement && c.placement.includes("3d_spotlight"))))
+        // Only include active campaigns that have a real videoUrl uploaded
+        return campaigns
+          .filter(
+            (c) =>
+              c.status === "active" &&
+              c.videoUrl &&
+              typeof c.videoUrl === "string" &&
+              c.videoUrl.trim().length > 0
+          )
           .map((c, idx) => ({
             id: c.id || `camp-clip-${idx}`,
             shopName: c.targetTitle || "Local Business",
@@ -117,31 +49,20 @@ export default function AdsClipsShowcase() {
             ownerId: c.ownerId || user?._id || "owner-demo",
             shopLogo: c.shopLogo || "",
             verified: true,
-            title: c.name || "Exclusive Local Offer",
-            caption: c.caption || "Special neighborhood sponsored ad clip. Contact seller for instant booking.",
-            productName: c.targetTitle || "Featured Product",
+            title: c.name || "Special Neighborhood Offer",
+            caption: c.caption || "",
+            productName: c.targetTitle || "Featured Item",
             productLink: "/shops",
-            videoUrl: c.videoUrl || DEFAULT_CLIPS[idx % DEFAULT_CLIPS.length].videoUrl,
-            poster: c.poster || DEFAULT_CLIPS[idx % DEFAULT_CLIPS.length].poster,
-            likes: c.likes || 120 + idx * 45,
-            shares: c.shares || 35 + idx * 12,
-            views: c.impressions || 1500,
+            videoUrl: c.videoUrl,
+            poster: c.poster || "",
+            likes: Number(c.likes || 0),
+            shares: Number(c.shares || 0),
+            views: Number(c.impressions || 0),
             status: "active",
           }));
-
-        if (campaignClips.length > 0) {
-          // Merge custom campaign clips first, filling up to 4 with defaults
-          const merged = [...campaignClips];
-          for (const d of DEFAULT_CLIPS) {
-            if (merged.length < 4 && !merged.some((m) => m.id === d.id)) {
-              merged.push(d);
-            }
-          }
-          return merged.slice(0, 4);
-        }
       }
     } catch (e) {}
-    return DEFAULT_CLIPS;
+    return [];
   });
 
   // Track liked status per clip in localStorage
@@ -165,7 +86,9 @@ export default function AdsClipsShowcase() {
     const isCurrentlyLiked = Boolean(likedMap[clipId]);
     const updatedMap = { ...likedMap, [clipId]: !isCurrentlyLiked };
     setLikedMap(updatedMap);
-    localStorage.setItem("ls_clips_liked_map", JSON.stringify(updatedMap));
+    try {
+      localStorage.setItem("ls_clips_liked_map", JSON.stringify(updatedMap));
+    } catch (err) {}
 
     setClips((prev) =>
       prev.map((c) =>
@@ -213,7 +136,6 @@ export default function AdsClipsShowcase() {
       prev.map((c) => (c.id === clip.id ? { ...c, shares: c.shares + 1 } : c))
     );
 
-    // Sync share count to campaign in localStorage
     try {
       const saved = localStorage.getItem("ls_ad_campaigns");
       if (saved) {
@@ -262,160 +184,191 @@ export default function AdsClipsShowcase() {
               </span>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              আপনার আশেপাশের ভেরিফাইড দোকান ও প্রোডাক্টের আকর্ষণীয় শর্ট ভিডিও ও স্পেশাল অফার
+              আপনার আশেপাশের ভেরিফাইড দোকান ও প্রোডাক্টের শর্ট ভিডিও বিজ্ঞাপন ও স্পেশাল অফার
             </p>
           </div>
         </div>
 
-        {/* Global Sound & Controls */}
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setIsMuted(!isMuted)}
-            className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-bold text-slate-700 shadow-2xs transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
-            title={isMuted ? "সাউন্ড অন করুন" : "সাউন্ড মিউট করুন"}
-          >
-            {isMuted ? <VolumeX size={14} className="text-rose-500" /> : <Volume2 size={14} className="text-emerald-500" />}
-            <span>{isMuted ? "সাউন্ড অফ" : "সাউন্ড অন"}</span>
-          </button>
-        </div>
+        {clips.length > 0 && (
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setIsMuted(!isMuted)}
+              className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-bold text-slate-700 shadow-2xs transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              title={isMuted ? "সাউন্ড অন করুন" : "সাউন্ড মিউট করুন"}
+            >
+              {isMuted ? <VolumeX size={14} className="text-rose-500" /> : <Volume2 size={14} className="text-emerald-500" />}
+              <span>{isMuted ? "সাউন্ড অফ" : "সাউন্ড অন"}</span>
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Exactly 4 Vertical Reels / Shorts Cards Grid */}
-      <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-2 md:grid-cols-4 sm:gap-5">
-        {clips.map((clip, index) => {
-          const isLiked = Boolean(likedMap[clip.id]);
+      {/* When there are active uploaded clips */}
+      {clips.length > 0 ? (
+        <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-2 md:grid-cols-4 sm:gap-5">
+          {clips.map((clip, index) => {
+            const isLiked = Boolean(likedMap[clip.id]);
 
-          return (
-            <div
-              key={clip.id}
-              onClick={() => setActiveModalClipIndex(index)}
-              className="group relative flex aspect-[9/16] cursor-pointer flex-col justify-between overflow-hidden rounded-3xl bg-slate-900 p-3 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/25 sm:p-4"
-            >
-              {/* HTML5 Autoplay Looping Video */}
-              <video
-                src={clip.videoUrl}
-                poster={clip.poster}
-                autoPlay
-                loop
-                muted={isMuted}
-                playsInline
-                className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-              />
+            return (
+              <div
+                key={clip.id}
+                onClick={() => setActiveModalClipIndex(index)}
+                className="group relative flex aspect-[9/16] cursor-pointer flex-col justify-between overflow-hidden rounded-3xl bg-slate-900 p-3 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/25 sm:p-4"
+              >
+                {/* HTML5 Autoplay Looping Video */}
+                <video
+                  src={clip.videoUrl}
+                  poster={clip.poster}
+                  autoPlay
+                  loop
+                  muted={isMuted}
+                  playsInline
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
 
-              {/* Gradient overlays for contrast & modern aesthetic */}
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-black/60" />
+                {/* Gradient overlays */}
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-black/60" />
 
-              {/* Top Header Row on Card */}
-              <div className="relative z-10 flex items-center justify-between">
-                <span className="inline-flex items-center gap-1 rounded-full bg-black/55 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-amber-300 backdrop-blur-md">
-                  <Sparkles size={11} className="text-amber-400" />
-                  <span>Sponsored</span>
-                </span>
+                {/* Top Header Row on Card */}
+                <div className="relative z-10 flex items-center justify-between">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-black/55 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-amber-300 backdrop-blur-md">
+                    <Sparkles size={11} className="text-amber-400" />
+                    <span>Sponsored</span>
+                  </span>
 
-                <span className="inline-flex items-center gap-1 rounded-full bg-black/50 px-2 py-0.5 text-[10px] font-bold text-white/90 backdrop-blur-md">
-                  <Eye size={11} />
-                  <span>{(clip.views / 1000).toFixed(1)}k</span>
-                </span>
-              </div>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-black/50 px-2 py-0.5 text-[10px] font-bold text-white/90 backdrop-blur-md">
+                    <Eye size={11} />
+                    <span>{clip.views > 1000 ? `${(clip.views / 1000).toFixed(1)}k` : clip.views || 0}</span>
+                  </span>
+                </div>
 
-              {/* Center Play Indicator on Hover */}
-              <div className="pointer-events-none absolute inset-0 grid place-items-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                <span className="grid h-12 w-12 place-items-center rounded-full bg-white/30 text-white backdrop-blur-md transition-transform group-hover:scale-110">
-                  <Play size={22} className="ml-1 fill-white" />
-                </span>
-              </div>
+                {/* Center Play Indicator on Hover */}
+                <div className="pointer-events-none absolute inset-0 grid place-items-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                  <span className="grid h-12 w-12 place-items-center rounded-full bg-white/30 text-white backdrop-blur-md transition-transform group-hover:scale-110">
+                    <Play size={22} className="ml-1 fill-white" />
+                  </span>
+                </div>
 
-              {/* Bottom Info & Action Buttons */}
-              <div className="relative z-10 flex items-end justify-between gap-2 pt-8">
-                {/* Shop & Product Details */}
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-1.5">
-                    <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-white/60 bg-white/20 text-xs font-bold text-white backdrop-blur-xs overflow-hidden">
-                      {clip.shopLogo ? (
-                        <img src={getImageUrl(clip.shopLogo)} alt="" className="h-full w-full object-cover" />
-                      ) : (
-                        <span>{clip.shopName.slice(0, 1)}</span>
-                      )}
-                    </span>
-                    <p className="truncate text-xs font-black text-white flex items-center gap-1 drop-shadow-sm">
-                      <span className="truncate">{clip.shopName}</span>
-                      {clip.verified && (
-                        <VerifiedBadge size={14} title="Verified Seller" />
-                      )}
-                    </p>
+                {/* Bottom Info & Action Buttons */}
+                <div className="relative z-10 flex items-end justify-between gap-2 pt-8">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5">
+                      <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-white/60 bg-white/20 text-xs font-bold text-white backdrop-blur-xs overflow-hidden">
+                        {clip.shopLogo ? (
+                          <img src={getImageUrl(clip.shopLogo)} alt="" className="h-full w-full object-cover" />
+                        ) : (
+                          <span>{clip.shopName.slice(0, 1)}</span>
+                        )}
+                      </span>
+                      <p className="truncate text-xs font-black text-white flex items-center gap-1 drop-shadow-sm">
+                        <span className="truncate">{clip.shopName}</span>
+                        {clip.verified && (
+                          <VerifiedBadge size={14} title="Verified Seller" />
+                        )}
+                      </p>
+                    </div>
+
+                    <h3 className="mt-1.5 line-clamp-2 text-xs font-extrabold leading-snug text-white/95 drop-shadow-sm group-hover:text-amber-300 transition-colors">
+                      {clip.title}
+                    </h3>
                   </div>
 
-                  <h3 className="mt-1.5 line-clamp-2 text-xs font-extrabold leading-snug text-white/95 drop-shadow-sm group-hover:text-amber-300 transition-colors">
-                    {clip.title}
-                  </h3>
-                </div>
-
-                {/* Vertical Reels Action Column (Instagram/FB style) */}
-                <div className="flex flex-col items-center gap-2.5 shrink-0">
-                  {/* Like Button */}
-                  <button
-                    type="button"
-                    onClick={(e) => handleToggleLike(e, clip.id)}
-                    className="group/btn flex flex-col items-center transition-transform active:scale-125"
-                    title={isLiked ? "Unlike" : "Like"}
-                  >
-                    <span
-                      className={`grid h-8 w-8 place-items-center rounded-full backdrop-blur-md transition-all ${
-                        isLiked
-                          ? "bg-rose-600 text-white shadow-md shadow-rose-600/50"
-                          : "bg-black/50 text-white hover:bg-black/70"
-                      }`}
+                  {/* Vertical Reels Action Column */}
+                  <div className="flex flex-col items-center gap-2.5 shrink-0">
+                    <button
+                      type="button"
+                      onClick={(e) => handleToggleLike(e, clip.id)}
+                      className="group/btn flex flex-col items-center transition-transform active:scale-125"
+                      title={isLiked ? "Unlike" : "Like"}
                     >
-                      <Heart size={16} className={isLiked ? "fill-white" : ""} />
-                    </span>
-                    <span className="mt-0.5 text-[10px] font-black text-white drop-shadow-md">
-                      {clip.likes >= 1000 ? `${(clip.likes / 1000).toFixed(1)}k` : clip.likes}
-                    </span>
-                  </button>
+                      <span
+                        className={`grid h-8 w-8 place-items-center rounded-full backdrop-blur-md transition-all ${
+                          isLiked
+                            ? "bg-rose-600 text-white shadow-md shadow-rose-600/50"
+                            : "bg-black/50 text-white hover:bg-black/70"
+                        }`}
+                      >
+                        <Heart size={16} className={isLiked ? "fill-white" : ""} />
+                      </span>
+                      <span className="mt-0.5 text-[10px] font-black text-white drop-shadow-md">
+                        {clip.likes >= 1000 ? `${(clip.likes / 1000).toFixed(1)}k` : clip.likes}
+                      </span>
+                    </button>
 
-                  {/* Message to Owner Button */}
-                  <button
-                    type="button"
-                    onClick={(e) => handleDirectMessage(e, clip)}
-                    className="group/btn flex flex-col items-center transition-transform active:scale-110"
-                    title="শপ ওনারকে ডিরেক্ট মেসেজ দিন"
-                  >
-                    <span className="grid h-8 w-8 place-items-center rounded-full bg-black/50 text-white backdrop-blur-md hover:bg-emerald-600 hover:text-white transition-colors">
-                      <MessageCircle size={15} />
-                    </span>
-                    <span className="mt-0.5 text-[9px] font-bold text-white drop-shadow-md">চ্যাট</span>
-                  </button>
+                    <button
+                      type="button"
+                      onClick={(e) => handleDirectMessage(e, clip)}
+                      className="group/btn flex flex-col items-center transition-transform active:scale-110"
+                      title="শপ ওনারকে ডিরেক্ট মেসেজ দিন"
+                    >
+                      <span className="grid h-8 w-8 place-items-center rounded-full bg-black/50 text-white backdrop-blur-md hover:bg-emerald-600 hover:text-white transition-colors">
+                        <MessageCircle size={15} />
+                      </span>
+                      <span className="mt-0.5 text-[9px] font-bold text-white drop-shadow-md">চ্যাট</span>
+                    </button>
 
-                  {/* Share Button */}
-                  <button
-                    type="button"
-                    onClick={(e) => handleShare(e, clip)}
-                    className="group/btn flex flex-col items-center transition-transform active:scale-110"
-                    title="ক্লিপস শেয়ার করুন"
-                  >
-                    <span className="grid h-8 w-8 place-items-center rounded-full bg-black/50 text-white backdrop-blur-md hover:bg-blue-600 hover:text-white transition-colors">
-                      <Share2 size={15} />
-                    </span>
-                    <span className="mt-0.5 text-[9px] font-bold text-white drop-shadow-md">
-                      {clip.shares}
-                    </span>
-                  </button>
+                    <button
+                      type="button"
+                      onClick={(e) => handleShare(e, clip)}
+                      className="group/btn flex flex-col items-center transition-transform active:scale-110"
+                      title="অ্যাড ক্লিপস শেয়ার করুন"
+                    >
+                      <span className="grid h-8 w-8 place-items-center rounded-full bg-black/50 text-white backdrop-blur-md hover:bg-white hover:text-slate-900 transition-colors">
+                        <Share2 size={15} />
+                      </span>
+                      <span className="mt-0.5 text-[9px] font-bold text-white drop-shadow-md">
+                        {clip.shares > 0 ? clip.shares : "শেয়ার"}
+                      </span>
+                    </button>
+                  </div>
                 </div>
               </div>
+            );
+          })}
+        </div>
+      ) : (
+        /* Blank Placeholder Frames (Exactly as requested by user) */
+        <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-2 md:grid-cols-4 sm:gap-5">
+          {[1, 2, 3, 4].map((slotIdx) => (
+            <div
+              key={slotIdx}
+              className="group relative flex aspect-[9/16] flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200/90 bg-white/70 p-4 text-center shadow-xs transition-all hover:border-emerald-400 hover:bg-white dark:border-slate-700/80 dark:bg-slate-800/40"
+            >
+              <div className="grid h-12 w-12 place-items-center rounded-2xl bg-slate-100 text-slate-400 transition-colors group-hover:bg-emerald-50 group-hover:text-emerald-600 dark:bg-slate-700/60 dark:text-slate-500">
+                <Video size={22} />
+              </div>
+              <h4 className="mt-3 text-xs font-bold text-slate-700 dark:text-slate-300">
+                Ads Clip Slot #{slotIdx}
+              </h4>
+              <p className="mt-1 text-[11px] text-slate-400">
+                খালি স্লট (ভিডিও আপলোড হলে এখানে দেখাবে)
+              </p>
+              {user?.role === "owner" && (
+                <Link
+                  to="/dashboard?tab=pro&proTab=ads"
+                  className="mt-3 inline-flex items-center gap-1 rounded-full bg-forest/10 px-3 py-1 text-[10px] font-bold text-forest transition hover:bg-forest hover:text-white dark:bg-emerald-950/40 dark:text-emerald-300"
+                >
+                  <Plus size={11} />
+                  <span>অ্যাড রান করুন</span>
+                </Link>
+              )}
             </div>
-          );
-        })}
-      </div>
+          ))}
+        </div>
+      )}
 
-      {/* ===================== FULL-SCREEN REELS / SHORTS VIEWER MODAL ===================== */}
+      {/* ===================== FULL SCREEN SHORTS / REELS MODAL ===================== */}
       {activeClip && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-3 backdrop-blur-md animate-fadeIn">
-          {/* Close Modal Button */}
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-2 backdrop-blur-md sm:p-4 animate-fadeIn"
+          onClick={() => setActiveModalClipIndex(null)}
+        >
           <button
             type="button"
             onClick={() => setActiveModalClipIndex(null)}
-            className="absolute right-4 top-4 z-50 grid h-10 w-10 place-items-center rounded-full bg-white/20 text-white backdrop-blur-md hover:bg-white/40 transition-colors"
+            className="absolute right-4 top-4 z-50 grid h-10 w-10 place-items-center rounded-full bg-white/10 text-white backdrop-blur-md transition hover:bg-rose-600"
+            title="Close viewer"
           >
             <X size={20} />
           </button>
@@ -424,9 +377,12 @@ export default function AdsClipsShowcase() {
           {activeModalClipIndex > 0 && (
             <button
               type="button"
-              onClick={() => setActiveModalClipIndex((prev) => prev - 1)}
-              className="absolute left-4 top-1/2 -translate-y-1/2 z-50 hidden sm:grid h-12 w-12 place-items-center rounded-full bg-white/20 text-white backdrop-blur-md hover:bg-white/40 transition"
-              title="পূর্ববর্তী ক্লিপ"
+              onClick={(e) => {
+                e.stopPropagation();
+                setActiveModalClipIndex((prev) => Math.max(0, prev - 1));
+              }}
+              className="absolute left-2 top-1/2 z-50 -translate-y-1/2 rounded-full bg-white/10 p-2.5 text-white backdrop-blur-md transition hover:bg-white/20 sm:left-6"
+              title="Previous reel"
             >
               <ChevronLeft size={24} />
             </button>
@@ -436,27 +392,32 @@ export default function AdsClipsShowcase() {
           {activeModalClipIndex < clips.length - 1 && (
             <button
               type="button"
-              onClick={() => setActiveModalClipIndex((prev) => prev + 1)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 z-50 hidden sm:grid h-12 w-12 place-items-center rounded-full bg-white/20 text-white backdrop-blur-md hover:bg-white/40 transition"
-              title="পরবর্তী ক্লিপ"
+              onClick={(e) => {
+                e.stopPropagation();
+                setActiveModalClipIndex((prev) => Math.min(clips.length - 1, prev + 1));
+              }}
+              className="absolute right-2 top-1/2 z-50 -translate-y-1/2 rounded-full bg-white/10 p-2.5 text-white backdrop-blur-md transition hover:bg-white/20 sm:right-6"
+              title="Next reel"
             >
               <ChevronRight size={24} />
             </button>
           )}
 
-          {/* 9:16 Full Shorts / Reels Frame */}
-          <div className="relative flex h-[85vh] max-h-[780px] w-full max-w-[420px] flex-col justify-between overflow-hidden rounded-[32px] bg-slate-950 shadow-2xl">
-            {/* Modal Video Player with Sound */}
+          {/* 9:16 Vertical Modal Card */}
+          <div
+            className="relative flex aspect-[9/16] h-[92vh] max-h-[820px] w-auto max-w-full flex-col justify-between overflow-hidden rounded-3xl bg-black shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
             <video
               src={activeClip.videoUrl}
               autoPlay
               loop
-              controls
+              muted={isMuted}
               playsInline
+              controls
               className="absolute inset-0 h-full w-full object-cover"
             />
 
-            {/* Gradient Mask for Overlay Content */}
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/95 via-transparent to-black/60" />
 
             {/* Top Bar inside Modal */}
@@ -498,9 +459,11 @@ export default function AdsClipsShowcase() {
                 <p className="mt-2 text-sm font-extrabold text-white leading-snug">
                   {activeClip.title}
                 </p>
-                <p className="mt-1 line-clamp-2 text-xs text-white/80">
-                  {activeClip.caption}
-                </p>
+                {activeClip.caption && (
+                  <p className="mt-1 line-clamp-2 text-xs text-white/80">
+                    {activeClip.caption}
+                  </p>
+                )}
 
                 {/* Direct Shop Link Button */}
                 <div className="mt-3 flex items-center gap-2">
@@ -523,15 +486,15 @@ export default function AdsClipsShowcase() {
                 </div>
               </div>
 
-              {/* Modal Right Column Actions */}
-              <div className="flex flex-col items-center gap-3 shrink-0">
+              {/* Vertical Actions inside Modal */}
+              <div className="flex flex-col items-center gap-3">
                 <button
                   type="button"
                   onClick={(e) => handleToggleLike(e, activeClip.id)}
-                  className="flex flex-col items-center transition-transform active:scale-125"
+                  className="flex flex-col items-center"
                 >
                   <span
-                    className={`grid h-11 w-11 place-items-center rounded-full backdrop-blur-md ${
+                    className={`grid h-10 w-10 place-items-center rounded-full backdrop-blur-md transition-all ${
                       likedMap[activeClip.id]
                         ? "bg-rose-600 text-white shadow-lg shadow-rose-600/50"
                         : "bg-black/60 text-white hover:bg-black/80"
@@ -539,31 +502,22 @@ export default function AdsClipsShowcase() {
                   >
                     <Heart size={20} className={likedMap[activeClip.id] ? "fill-white" : ""} />
                   </span>
-                  <span className="mt-1 text-xs font-black text-white">
+                  <span className="mt-1 text-xs font-black text-white drop-shadow">
                     {activeClip.likes >= 1000 ? `${(activeClip.likes / 1000).toFixed(1)}k` : activeClip.likes}
                   </span>
                 </button>
 
                 <button
                   type="button"
-                  onClick={(e) => handleDirectMessage(e, activeClip)}
-                  className="flex flex-col items-center transition-transform active:scale-110"
-                >
-                  <span className="grid h-11 w-11 place-items-center rounded-full bg-black/60 text-white backdrop-blur-md hover:bg-emerald-600 transition-colors">
-                    <MessageCircle size={19} />
-                  </span>
-                  <span className="mt-1 text-xs font-bold text-white">চ্যাট</span>
-                </button>
-
-                <button
-                  type="button"
                   onClick={(e) => handleShare(e, activeClip)}
-                  className="flex flex-col items-center transition-transform active:scale-110"
+                  className="flex flex-col items-center"
                 >
-                  <span className="grid h-11 w-11 place-items-center rounded-full bg-black/60 text-white backdrop-blur-md hover:bg-blue-600 transition-colors">
-                    <Share2 size={19} />
+                  <span className="grid h-10 w-10 place-items-center rounded-full bg-black/60 text-white backdrop-blur-md hover:bg-white hover:text-slate-900 transition-colors">
+                    <Share2 size={18} />
                   </span>
-                  <span className="mt-1 text-xs font-bold text-white">{activeClip.shares}</span>
+                  <span className="mt-1 text-xs font-black text-white drop-shadow">
+                    {activeClip.shares > 0 ? activeClip.shares : "Share"}
+                  </span>
                 </button>
               </div>
             </div>

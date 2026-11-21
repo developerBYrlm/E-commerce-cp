@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, Component } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowDownRight,
@@ -42,6 +42,16 @@ import Card3DTilt from "../components/3d/Card3DTilt";
 import Background3DParticles from "../components/3d/Background3DParticles";
 import AdsClipsShowcase from "../components/AdsClipsShowcase";
 import { VerifiedBadge, isVerified } from "../utils/verification";
+
+class ClipsErrorBoundary extends Component {
+  state = { hasError: false };
+  static getDerivedStateFromError() { return { hasError: true }; }
+  componentDidCatch(err) { console.warn("ClipsErrorBoundary caught:", err); }
+  render() {
+    if (this.state.hasError) return null;
+    return this.props.children;
+  }
+}
 
 const CATEGORIES_DATA = [
   {
@@ -502,7 +512,9 @@ export default function Home() {
       </section>
 
       {/* ADS CLIPS (REELS / SHORTS STYLE VIDEO SHOWCASE) */}
-      <AdsClipsShowcase />
+      <ClipsErrorBoundary>
+        <AdsClipsShowcase />
+      </ClipsErrorBoundary>
 
       {/* 3D CATEGORIES CAROUSEL WITH INTERACTIVE 3D DROPDOWN DRAWER */}
       <section className="relative z-10 bg-white py-16 sm:py-20">
