@@ -545,35 +545,35 @@ export default function Home() {
                   className="group block text-left w-full relative focus:outline-none"
                 >
                   <Card3DTilt
-                    maxTilt={16}
+                    maxTilt={14}
                     scale={isSelected ? 1.05 : 1.03}
-                    className={`h-full rounded-3xl border transition-all duration-300 p-5 cursor-pointer relative ${isSelected
-                      ? "border-forest bg-white shadow-xl ring-2 ring-forest/20"
-                      : "border-slate-100 bg-cream/70 shadow-sm hover:border-lime hover:bg-white hover:shadow-lg"
+                    className={`h-full min-h-[175px] rounded-3xl border transition-all duration-300 p-4 sm:p-5 cursor-pointer relative ${isSelected
+                      ? "border-forest bg-emerald-50/50 shadow-xl ring-2 ring-forest/20 dark:border-emerald-400 dark:bg-emerald-950/40"
+                      : "border-slate-200/90 bg-white shadow-xs hover:border-emerald-500 hover:bg-white hover:shadow-lg dark:border-slate-800 dark:bg-slate-900"
                       }`}
                   >
-                    <div className="flex flex-col items-start justify-between" style={{ transform: "translateZ(20px)" }}>
+                    <div className="flex flex-col items-start justify-between h-full" style={{ transform: "translateZ(20px)" }}>
                       <div className="flex w-full items-center justify-between">
                         <div
-                          className={`grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br ${category.color} text-3xl shadow-sm transition-transform duration-300 group-hover:scale-110`}
+                          className={`grid h-12 w-12 sm:h-13 sm:w-13 place-items-center rounded-2xl bg-gradient-to-br ${category.color} text-2xl sm:text-3xl shadow-xs transition-transform duration-300 group-hover:scale-110`}
                           style={{ transform: "translateZ(30px)" }}
                         >
                           {category.icon}
                         </div>
                         <span
                           className={`grid h-7 w-7 place-items-center rounded-full transition-all duration-300 ${isSelected
-                            ? "bg-forest text-white rotate-180"
-                            : "bg-slate-100 text-slate-500 group-hover:bg-lime group-hover:text-forest"
+                            ? "bg-forest text-white rotate-180 shadow-xs"
+                            : "bg-slate-100 text-slate-500 group-hover:bg-emerald-100 group-hover:text-forest dark:bg-slate-800 dark:text-slate-400"
                             }`}
                         >
                           <ChevronDown size={15} />
                         </span>
                       </div>
-                      <div className="mt-5" style={{ transform: "translateZ(15px)" }}>
-                        <p className={`text-sm font-bold transition-colors ${isSelected ? "text-emerald-800" : "text-forest group-hover:text-emerald-800"}`}>
+                      <div className="mt-4 w-full" style={{ transform: "translateZ(15px)" }}>
+                        <h3 className={`text-[15px] sm:text-base font-black tracking-tight leading-snug transition-colors ${isSelected ? "text-forest dark:text-emerald-400" : "text-slate-900 group-hover:text-forest dark:text-white dark:group-hover:text-emerald-400"}`}>
                           {category.title}
-                        </p>
-                        <p className="mt-1 text-[11px] text-slate-500">
+                        </h3>
+                        <p className="mt-1 text-xs font-semibold leading-normal text-slate-600 dark:text-slate-400">
                           {category.count}
                         </p>
                       </div>
