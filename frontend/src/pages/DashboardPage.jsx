@@ -4532,8 +4532,12 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        // Exclude old demo campaigns camp-101 and camp-102
-        return parsed.filter((c) => c.id !== "camp-101" && c.id !== "camp-102");
+        // Exclude old demo campaigns camp-101 and camp-102, and reset initial views to 0 as requested
+        const sanitized = parsed
+          .filter((c) => c.id !== "camp-101" && c.id !== "camp-102")
+          .map((c) => ({ ...c, impressions: 0 }));
+        localStorage.setItem("ls_ad_campaigns", JSON.stringify(sanitized));
+        return sanitized;
       } catch (e) { }
     }
     return [];
@@ -5200,6 +5204,14 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
                     টার্গেট এরিয়া ও প্লেসমেন্ট সিলেক্ট করে এখনই ক্যাম্পেইন লাইভ করুন।
                   </p>
                 </div>
+              </div>
+
+              {/* Informative Banner: Anyone can run ads directly without subscription */}
+              <div className="mt-4 flex items-center gap-2.5 rounded-2xl bg-emerald-50/80 px-4 py-2.5 text-xs font-semibold text-emerald-800 border border-emerald-200/80 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/40">
+                <Sparkles size={16} className="text-emerald-600 shrink-0" />
+                <span>
+                  💡 <strong>সাবস্ক্রিপশন ছাড়াই যেকেউ সরাসরি অ্যাড রান করতে পারবেন:</strong> কোনো পেইড প্যাকেজ কেনা ছাড়াও বিজ্ঞাপন চালু করা যাবে। তবে Growth Pro বা Elite প্যাকেজ থাকলে প্রতিটি বিজ্ঞাপনে স্বয়ংক্রিয়ভাবে অতিরিক্ত ৭ বা ২১ দিন ফ্রি বোনাস যুক্ত হবে!
+                </span>
               </div>
 
               <div className="mt-5 grid gap-5 md:grid-cols-2">
