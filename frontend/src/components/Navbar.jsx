@@ -35,17 +35,17 @@ export default function Navbar() {
         <span className="grid h-10 w-10 place-items-center rounded-2xl bg-forest text-lime"><Compass size={22} /></span>
         <span className="text-xl font-extrabold tracking-tight">local<span className="text-emerald-600">sphere</span></span>
       </Link>
-      <nav className="hidden items-center gap-1 lg:gap-2 md:flex">
+      <nav className="hidden items-center gap-6 lg:gap-8 md:flex">
         {links.map(([label, path]) => (
           <NavLink
             key={path}
             to={path}
             end={path === "/"}
             className={({ isActive }) =>
-              `relative inline-flex items-center justify-center rounded-full px-4 py-1.5 text-sm font-bold transition-all duration-200 select-none ${
+              `relative inline-flex items-center justify-center py-1 select-none transition-all duration-300 ease-out origin-center ${
                 isActive
-                  ? "bg-forest text-white shadow-sm shadow-forest/20 dark:bg-emerald-600 dark:text-white"
-                  : "text-slate-600 hover:text-forest hover:bg-forest/10 dark:text-slate-300 dark:hover:text-white dark:hover:bg-white/10 active:scale-95"
+                  ? "text-[15px] font-extrabold text-forest scale-110 drop-shadow-xs dark:text-emerald-400"
+                  : "text-sm font-medium text-slate-600 scale-95 opacity-80 hover:opacity-100 hover:text-forest hover:scale-105 dark:text-slate-300 dark:hover:text-white"
               }`
             }
           >
@@ -106,17 +106,14 @@ export default function Navbar() {
             to={path}
             end={path === "/"}
             className={({ isActive }) =>
-              `flex items-center justify-between rounded-xl px-4 py-2.5 text-sm font-bold transition ${
+              `flex items-center justify-between py-2 text-sm select-none transition-all duration-200 ${
                 isActive
-                  ? "bg-forest text-white shadow-xs dark:bg-emerald-600"
-                  : "text-forest hover:bg-forest/10 dark:text-slate-200 dark:hover:bg-white/10"
+                  ? "text-base font-extrabold text-forest scale-105 origin-left dark:text-emerald-400"
+                  : "font-medium text-slate-600 hover:text-forest hover:scale-102 origin-left dark:text-slate-300 dark:hover:text-white"
               }`
             }
           >
             <span>{label}</span>
-            {path === "/" ? (
-              <span className="text-xs opacity-75">Home</span>
-            ) : null}
           </NavLink>
         ))}
         {user ? <><Link onClick={() => setOpen(false)} to="/dashboard" className="px-3 py-3 font-medium">Dashboard</Link><Link onClick={() => setOpen(false)} to="/messages" className="px-3 py-3 font-medium">Messages</Link><Link onClick={() => setOpen(false)} to="/notifications" className="px-3 py-3 font-medium">Notifications</Link><Link onClick={() => setOpen(false)} to="/cart" className="px-3 py-3 font-medium">Cart ({itemCount})</Link><button className="px-3 py-3 text-left font-medium" onClick={handleLogout}>Sign out</button></> : <Link onClick={() => setOpen(false)} to="/login" className="px-3 py-3 font-medium">Log in / Sign up</Link>}</div>

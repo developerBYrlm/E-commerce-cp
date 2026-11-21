@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
 const Home = lazy(() => import("./pages/Home"));
@@ -17,6 +17,14 @@ import { Loader } from "./components/Loader";
 import { useAuth } from "./contexts/AuthContext";
 import api from "./api/client";
 import toast from "react-hot-toast";
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [pathname]);
+  return null;
+}
 
 function SessionGate({ children, roles }) {
   const { user, loading } = useAuth();
@@ -44,7 +52,11 @@ function RoleDashboard({ tab }) {
 }
 
 export default function App() {
-  return <Suspense fallback={<Loader />}><Routes><Route element={<MainLayout />}>
+  return (
+    <Suspense fallback={<Loader />}>
+      <ScrollToTop />
+      <Routes>
+        <Route element={<MainLayout />}>
     <Route index element={<Home />} />
     <Route path="login" element={<AuthPage />} />
     <Route path="auth" element={<AuthPage />} />
@@ -70,6 +82,9 @@ export default function App() {
     <Route path="notifications" element={<SessionGate><NotificationsPage /></SessionGate>} />
     <Route path="admin/*" element={<SessionGate roles={["admin"]}><DashboardPage initialTab="overview" /></SessionGate>} />
     <Route path="owner/*" element={<SessionGate roles={["owner"]}><DashboardPage initialTab="shop" /></SessionGate>} />
-    <Route path="*" element={<NotFound />} />
-  </Route></Routes></Suspense>;
+          <Route path="*" element={<NotFound />} />
+        </Route>
+      </Routes>
+    </Suspense>
+  );
 }
