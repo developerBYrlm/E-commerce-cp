@@ -29,50 +29,66 @@ function isRupayanTarget(target) {
 
 export function isVerified(target) {
   if (!target) return false;
-  if (typeof window === "undefined") return false;
 
-  const currentPlan = localStorage.getItem("ls_subscription_plan") || "starter";
-  const isPaid = currentPlan !== "starter" && (currentPlan === "growth" || currentPlan === "elite");
+  // 1. Database-backed verification flags (present for all visitors on any browser)
+  if (target.verified === true || target.isVerified === true) {
+    return true;
+  }
+  if (target.shop && (target.shop.verified === true || target.shop.isVerified === true)) {
+    return true;
+  }
+  if (target.owner && (target.owner.isVerified === true || target.owner.verified === true)) {
+    return true;
+  }
+  if (target.shop?.owner && (target.shop.owner.isVerified === true || target.shop.owner.verified === true)) {
+    return true;
+  }
 
+  // 2. Pro Subscription tier check on target / owner / shop
+  const targetPlan = target.subscriptionPlan || target.owner?.subscriptionPlan || target.shop?.subscriptionPlan || target.shop?.owner?.subscriptionPlan;
+  if (targetPlan === "growth" || targetPlan === "elite") {
+    return true;
+  }
+
+  // 3. Rupayan (Growth Pro seller) universal verified status across all browsers & devices
   const isRupayan = isRupayanTarget(target);
-
-  // If user is on Starter plan (৳0 free tier), Rupayan/subscriber gets NO badge!
-  if (!isPaid) {
-    if (isRupayan) return false;
-    // Only return true if strictly verified from DB and not the current owner
-    return Boolean(target.verified === true && target.role !== "owner");
-  }
-
-  // When Pro mode (Growth Pro / Business Elite) is active:
-  // 1. Any target associated with Rupayan / Rupayen gets the blue verified badge
   if (isRupayan) {
+    // If the currently logged-in owner in this exact browser actively chose the Starter plan, respect it
+    if (typeof window !== "undefined") {
+      const localPlan = localStorage.getItem("ls_subscription_plan");
+      const currentUserId = localStorage.getItem("ls_current_user_id");
+      const isCurrentOwner = target.role === "owner" && target._id && String(target._id) === String(currentUserId);
+      if (localPlan === "starter" && isCurrentOwner) {
+        return false;
+      }
+    }
+    // For all other users, guests, visitors, and other browsers, Rupayan is a verified Pro seller
     return true;
   }
 
-  // 2. Check if target or target's owner has verified flag in localStorage
-  const currentUserId = localStorage.getItem("ls_current_user_id");
-  let ownerId = null;
-  if (typeof target === "string") {
-    ownerId = target;
-  } else if (target.role === "owner" || (target.email && target._id)) {
-    ownerId = String(target._id);
-  } else if (target.shop) {
-    ownerId = typeof target.shop === "object" ? (target.shop.owner?._id || target.shop.owner) : null;
-  } else {
-    ownerId = target.owner?._id || target.owner;
-  }
+  // 4. Local storage checks for current session owner
+  if (typeof window !== "undefined") {
+    const currentPlan = localStorage.getItem("ls_subscription_plan") || "starter";
+    const isPaid = currentPlan === "growth" || currentPlan === "elite";
+    const currentUserId = localStorage.getItem("ls_current_user_id");
 
-  if (
-    ownerId &&
-    (String(ownerId) === String(currentUserId) ||
-      localStorage.getItem("ls_verified_owner_" + ownerId) === "true")
-  ) {
-    return true;
-  }
+    let ownerId = null;
+    if (typeof target === "string") {
+      ownerId = target;
+    } else if (target.role === "owner" || (target.email && target._id)) {
+      ownerId = String(target._id);
+    } else if (target.shop) {
+      ownerId = typeof target.shop === "object" ? (target.shop.owner?._id || target.shop.owner) : null;
+    } else {
+      ownerId = target.owner?._id || target.owner;
+    }
 
-  // 3. Database verified field
-  if (target.verified === true || target.shop?.verified === true) {
-    return true;
+    if (ownerId && isPaid && String(ownerId) === String(currentUserId)) {
+      return true;
+    }
+    if (ownerId && localStorage.getItem("ls_verified_owner_" + ownerId) === "true") {
+      return true;
+    }
   }
 
   return false;

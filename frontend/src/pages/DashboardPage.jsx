@@ -4565,6 +4565,21 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
     return () => window.removeEventListener("storage", syncCampaigns);
   }, []);
 
+  // Fetch campaigns from backend API so all browsers and sessions share real campaign state
+  useEffect(() => {
+    let isMounted = true;
+    async function loadBackendCampaigns() {
+      try {
+        const res = await api.get("/campaigns?all=true");
+        if (res.data?.campaigns?.length > 0 && isMounted) {
+          setCampaigns(res.data.campaigns);
+        }
+      } catch (e) { }
+    }
+    loadBackendCampaigns();
+    return () => { isMounted = false; };
+  }, []);
+
   // Subscription plans definitions
   const plans = [
     {
@@ -4666,13 +4681,11 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
         localStorage.setItem("ls_verified_owner_" + user._id, "true");
       }
 
-      // Update owner shops to verified in MongoDB
-      if (shops && shops.length > 0) {
-        for (const s of shops) {
-          try {
-            await api.put(`/shops/${s._id}`, { verified: true });
-          } catch (e) { }
-        }
+      // Persist subscription plan and verified status to server database
+      try {
+        await api.put("/users/subscription", { plan: checkoutPlan.id });
+      } catch (e) {
+        console.warn("Could not sync subscription to server:", e);
       }
 
       toast.success(
@@ -4689,12 +4702,10 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
     if (user?._id) {
       localStorage.removeItem("ls_verified_owner_" + user._id);
     }
-    if (shops && shops.length > 0) {
-      for (const s of shops) {
-        try {
-          await api.put(`/shops/${s._id}`, { verified: false });
-        } catch (e) { }
-      }
+    try {
+      await api.put("/users/subscription", { plan: "starter" });
+    } catch (e) {
+      console.warn("Could not cancel subscription on server:", e);
     }
     toast.success("সাবস্ক্রিপশন ক্যানসেল করা হয়েছে। স্টার্টার প্ল্যানে ফিরে যাওয়া হয়েছে।");
   };
@@ -4769,7 +4780,7 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
     }
   };
 
-  const handleLaunchCampaign = (e) => {
+  const handleLaunchCampaign = async (e) => {
     e.preventDefault();
     if (!campName.trim()) {
       toast.error("অনুগ্রহ করে একটি ক্যাম্পেইনের নাম দিন");
@@ -4816,6 +4827,30 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
       createdAt: "Just now",
     };
 
+    // Save to backend server API so all browsers and visitors immediately see this campaign
+    try {
+      const res = await api.post("/campaigns", {
+        title: campName.trim(),
+        target: targetTitle,
+        targetArea: campTargetArea || "সকল এলাকা",
+        radius: campRadius,
+        dailyBudget: Number(campBudget),
+        paidDays: Number(campDays),
+        bonusDays: planExtraDays,
+        days: totalCampaignDays,
+        placements: campPlacements,
+        placementLabel: placementLabels.join(" + "),
+        videoUrl: campVideoUrl || "",
+        caption: campCaption.trim() || "",
+        shopId: shops[0]?._id,
+      });
+      if (res.data?.campaign) {
+        newCamp.id = res.data.campaign.id || String(res.data.campaign._id);
+      }
+    } catch (err) {
+      console.warn("Could not save campaign to server, saved locally:", err);
+    }
+
     setCampaigns((prev) => [newCamp, ...prev]);
     setShowCreateCampaign(false);
     setCampName("");
@@ -4827,17 +4862,27 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
     );
   };
 
-  const handleToggleStatus = (id) => {
+  const handleToggleStatus = async (id) => {
     setCampaigns((prev) =>
       prev.map((c) =>
         c.id === id ? { ...c, status: c.status === "active" ? "paused" : "active" } : c
       )
     );
+    try {
+      await api.patch(`/campaigns/${id}/status`);
+    } catch (e) {
+      console.warn("Status toggle on server failed:", e);
+    }
     toast.success("ক্যাম্পেইন স্ট্যাটাস আপডেট হয়েছে");
   };
 
-  const handleDeleteCampaign = (id) => {
+  const handleDeleteCampaign = async (id) => {
     setCampaigns((prev) => prev.filter((c) => c.id !== id));
+    try {
+      await api.delete(`/campaigns/${id}`);
+    } catch (e) {
+      console.warn("Delete campaign on server failed:", e);
+    }
     toast.success("ক্যাম্পেইন ডিলিট করা হয়েছে");
   };
 

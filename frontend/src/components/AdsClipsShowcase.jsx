@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "../contexts/AuthContext";
+import api from "../api/client";
 import { getImageUrl } from "../utils/imageUrl";
 import { VerifiedBadge } from "../utils/verification";
 
@@ -83,6 +84,58 @@ export default function AdsClipsShowcase() {
     return [];
   });
 
+  // Fetch active campaigns from backend API so all users & browsers (logged in or guests) see live ad clips
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchCampaigns() {
+      try {
+        const res = await api.get("/campaigns");
+        const serverCampaigns = res.data?.campaigns || [];
+        if (serverCampaigns.length > 0 && isMounted) {
+          const userArea = (user?.address?.district || user?.address?.area || user?.district || "").toLowerCase().trim();
+          const mapped = serverCampaigns
+            .filter((c) => {
+              if (c.status !== "active") return false;
+              if (!c.videoUrl || typeof c.videoUrl !== "string" || c.videoUrl.trim().length === 0) return false;
+              if (c.targetArea && c.targetArea !== "সকল এলাকা" && userArea) {
+                const campArea = c.targetArea.toLowerCase().trim();
+                if (!campArea.includes(userArea) && !userArea.includes(campArea)) return false;
+              }
+              return true;
+            })
+            .map((c, idx) => ({
+              id: c.id || c._id || `camp-clip-${idx}`,
+              shopName: c.shopName || "RUPAYAN",
+              shopId: c.shop?._id || c.shop || "shop-main",
+              ownerId: c.owner?._id || c.owner || "owner-demo",
+              shopLogo: c.shopLogo || "",
+              verified: c.verified !== false,
+              title: c.title || c.name || "Special Neighborhood Offer",
+              caption: c.caption || "",
+              productName: c.target || "Featured Item",
+              productLink: "/shops",
+              videoUrl: c.videoUrl,
+              poster: c.poster || "",
+              likes: Number(c.likes || 0),
+              shares: Number(c.shares || 0),
+              views: Number(c.impressions || 0),
+              targetArea: c.targetArea || "সকল এলাকা",
+              status: "active",
+            }));
+          if (mapped.length > 0) {
+            setClips(mapped);
+          }
+        }
+      } catch (err) {
+        console.warn("Failed to load server campaigns, using fallback:", err);
+      }
+    }
+    fetchCampaigns();
+    return () => {
+      isMounted = false;
+    };
+  }, [user]);
+
   // Sound muted state (default true for web autoplay compliance)
   const [isMuted, setIsMuted] = useState(true);
 
@@ -101,6 +154,11 @@ export default function AdsClipsShowcase() {
         c.id === clip.id ? { ...c, views: (c.views || 0) + 1 } : c
       )
     );
+
+    // Call backend API to record view count persistently on server
+    if (clip.id) {
+      api.patch(`/campaigns/${clip.id}/interaction`, { action: "view" }).catch(() => {});
+    }
 
     // Increment impressions in localStorage ls_ad_campaigns
     try {
@@ -142,6 +200,9 @@ export default function AdsClipsShowcase() {
       )
     );
 
+    // Call backend API to record like/unlike persistently on server
+    api.patch(`/campaigns/${clipId}/interaction`, { action: isCurrentlyLiked ? "unlike" : "like" }).catch(() => {});
+
     // Sync likes to campaign in localStorage if it exists
     try {
       const saved = localStorage.getItem("ls_ad_campaigns");
@@ -170,6 +231,12 @@ export default function AdsClipsShowcase() {
   const handleShare = (e, clip) => {
     e.stopPropagation();
     const shareUrl = window.location.origin + `?clip=${clip.id}`;
+
+    // Call backend API to record share interaction persistently on server
+    if (clip.id) {
+      api.patch(`/campaigns/${clip.id}/interaction`, { action: "share" }).catch(() => {});
+    }
+
     if (navigator.clipboard) {
       navigator.clipboard.writeText(shareUrl);
       toast.success("🔗 অ্যাড ক্লিপস লিঙ্ক কপি করা হয়েছে!", { id: "clip-share" });

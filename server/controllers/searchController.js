@@ -187,7 +187,7 @@ export const suggestions = asyncHandler(async (req, res) => {
       status: "active",
       $or: [{ name: expression }, { description: expression }, { district: expression }, { area: expression }],
     })
-      .select("name slug logo coverImage shopType district area rating")
+      .select("name slug logo coverImage shopType district area rating verified")
       .limit(4)
       .lean(),
     Product.find({
@@ -195,7 +195,7 @@ export const suggestions = asyncHandler(async (req, res) => {
       shop: { $in: activeShopIds },
       $or: [{ name: expression }, { keywords: expression }, { description: expression }],
     })
-      .populate("shop", "name slug")
+      .populate("shop", "name slug logo verified")
       .select("name price discountPrice isNegotiable images keywords shop")
       .limit(6)
       .lean(),
@@ -204,7 +204,7 @@ export const suggestions = asyncHandler(async (req, res) => {
       shop: { $in: activeShopIds },
       $or: [{ name: expression }, { keywords: expression }, { description: expression }],
     })
-      .populate("shop", "name slug")
+      .populate("shop", "name slug logo verified")
       .select("name price isNegotiable images keywords shop")
       .limit(6)
       .lean(),

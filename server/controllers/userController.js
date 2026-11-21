@@ -194,3 +194,30 @@ export const updateUserStatus = asyncHandler(async (req, res) => {
   if (!user) return res.status(404).json({ message: "User not found" });
   res.json({ user });
 });
+
+export const updateSubscription = asyncHandler(async (req, res) => {
+  const { plan } = req.body;
+  if (!["starter", "growth", "elite"].includes(plan)) {
+    return res.status(400).json({ message: "Invalid subscription plan. Choose starter, growth, or elite" });
+  }
+
+  const isPaid = plan === "growth" || plan === "elite";
+  req.user.subscriptionPlan = plan;
+  req.user.isVerified = isPaid;
+  await req.user.save();
+
+  // Keep all shops owned by this user in sync
+  await Shop.updateMany({ owner: req.user._id }, { $set: { verified: isPaid } });
+
+  res.json({
+    message: `Plan successfully updated to ${plan}`,
+    user: {
+      id: req.user.id,
+      name: req.user.name,
+      email: req.user.email,
+      role: req.user.role,
+      isVerified: req.user.isVerified,
+      subscriptionPlan: req.user.subscriptionPlan,
+    },
+  });
+});

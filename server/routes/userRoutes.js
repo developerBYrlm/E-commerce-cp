@@ -1,9 +1,10 @@
 import { Router } from "express";
-import { adminUsers, followService, followShop, getDiscoveryHistory, getFollowing, getWishlist, toggleWishlist, updatePassword, updateProfile, updateUserStatus } from "../controllers/userController.js";
+import { adminUsers, followService, followShop, getDiscoveryHistory, getFollowing, getWishlist, toggleWishlist, updatePassword, updateProfile, updateSubscription, updateUserStatus } from "../controllers/userController.js";
 import { authorize, protect } from "../middlewares/authMiddleware.js";
 import { body } from "express-validator";
 import { validate } from "../middlewares/validate.js";
 const router = Router();
+router.put("/subscription", protect, updateSubscription);
 router.patch("/me", protect, body("email").optional().isEmail().normalizeEmail(), body("name").optional().isString().trim().isLength({ min: 2, max: 80 }), validate, updateProfile);
 router.patch("/me/password", protect, updatePassword);
 router.put("/follow/:shopId", protect, followShop);

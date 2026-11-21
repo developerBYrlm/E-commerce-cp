@@ -15,6 +15,7 @@ const userSchema = new mongoose.Schema({
   role: { type: String, enum: ["admin", "owner", "customer"], default: "customer" },
   status: { type: String, enum: ["active", "suspended"], default: "active" },
   isVerified: { type: Boolean, default: false },
+  subscriptionPlan: { type: String, enum: ["starter", "growth", "elite"], default: "starter" },
   verificationToken: String,
   resetPasswordToken: String,
   resetPasswordExpires: Date,

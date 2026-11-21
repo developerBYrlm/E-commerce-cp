@@ -29,9 +29,9 @@ function crudRouter(Model, options, { readRoles = [], writeRoles = ["owner"], ow
   return router;
 }
 
-export const shopRoutes = crudRouter(Shop, { ownerField: "owner", populate: [{ path: "category" }, { path: "categories" }, { path: "products" }, { path: "services" }, { path: "owner", select: "name avatar" }] }, { ownerField: "owner", writeRoles: ["owner", "admin"] });
-export const productRoutes = crudRouter(Product, { ownerField: "shop", populate: [{ path: "shop", populate: { path: "owner", select: "name avatar role" } }, { path: "category" }, { path: "owner", select: "name avatar role" }] }, { ownerField: "shop", writeRoles: ["owner", "admin"] });
-export const serviceRoutes = crudRouter(Service, { ownerField: "shop", populate: [{ path: "shop", populate: { path: "owner", select: "name avatar role" } }, { path: "category" }, { path: "owner", select: "name avatar role" }] }, { ownerField: "shop", writeRoles: ["owner", "admin"] });
+export const shopRoutes = crudRouter(Shop, { ownerField: "owner", populate: [{ path: "category" }, { path: "categories" }, { path: "products" }, { path: "services" }, { path: "owner", select: "name avatar isVerified role subscriptionPlan" }] }, { ownerField: "owner", writeRoles: ["owner", "admin"] });
+export const productRoutes = crudRouter(Product, { ownerField: "shop", populate: [{ path: "shop", select: "name slug logo verified ownerName category district subDistrict area", populate: { path: "owner", select: "name avatar role isVerified subscriptionPlan" } }, { path: "category" }, { path: "owner", select: "name avatar role isVerified subscriptionPlan" }] }, { ownerField: "shop", writeRoles: ["owner", "admin"] });
+export const serviceRoutes = crudRouter(Service, { ownerField: "shop", populate: [{ path: "shop", select: "name slug logo verified ownerName category district subDistrict area", populate: { path: "owner", select: "name avatar role isVerified subscriptionPlan" } }, { path: "category" }, { path: "owner", select: "name avatar role isVerified subscriptionPlan" }] }, { ownerField: "shop", writeRoles: ["owner", "admin"] });
 export const categoryRoutes = crudRouter(Category, {}, { writeRoles: ["admin"] });
 export const postRoutes = Router();
 postRoutes.get("/", optionalAuth, feed);
