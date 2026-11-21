@@ -11,6 +11,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { formatCurrency } from "../utils/currency";
 import { getImageUrl } from "../utils/imageUrl";
 import ProductImageSlider from "../components/ProductImageSlider";
+import { VerifiedBadge, isVerified } from "../utils/verification";
 
 export default function DetailPage({ kind }) {
   const { id } = useParams();
@@ -75,8 +76,8 @@ function ShopDetail({ shop, user, followShop }) {
             <div>
               <h1 className="flex items-center gap-2 text-3xl font-extrabold text-forest">
                 <span>{shop.name}</span>
-                {(shop.verified || (typeof window !== "undefined" && localStorage.getItem("ls_verified_owner_" + (shop.owner?._id || shop.owner)) === "true")) && (
-                  <BadgeCheck className="text-sky-500" title="Verified Shop" />
+                {isVerified(shop) && (
+                  <VerifiedBadge size={24} title="Verified Shop" />
                 )}
               </h1>
               <p className="mt-1 text-sm text-slate-500">{shop.category?.name || "Local business"}</p>
@@ -117,7 +118,10 @@ function ShopDetail({ shop, user, followShop }) {
                       rounded="rounded-xl"
                     />
                     <div className="mt-3">
-                      <h3 className="font-bold text-forest text-sm truncate">{prod.name}</h3>
+                      <h3 className="font-bold text-forest text-sm truncate flex items-center gap-1.5">
+                        <span className="truncate">{prod.name}</span>
+                        {isVerified(shop) && <VerifiedBadge size={13} title="Verified Product" />}
+                      </h3>
                       <div className="mt-1.5 flex items-center justify-between text-xs">
                         <span className="font-extrabold text-emerald-700 text-sm">
                           {formatCurrency(prod.price)}
@@ -159,7 +163,10 @@ function ShopDetail({ shop, user, followShop }) {
                       rounded="rounded-xl"
                     />
                     <div className="mt-3">
-                      <h3 className="font-bold text-forest text-sm truncate">{srv.name}</h3>
+                      <h3 className="font-bold text-forest text-sm truncate flex items-center gap-1.5">
+                        <span className="truncate">{srv.name}</span>
+                        {isVerified(shop) && <VerifiedBadge size={13} title="Verified Service" />}
+                      </h3>
                       <div className="mt-1.5 flex items-center justify-between text-xs">
                         <span className="font-extrabold text-forest text-sm">
                           {srv.isNegotiable ? (
@@ -353,14 +360,14 @@ function ItemDetail({ item, kind, user, toggleWishlist, followService }) {
         <div className="py-3">
           <p className="text-xs font-bold uppercase tracking-[.18em] text-emerald-700 flex items-center gap-1.5">
             <span>{item.shop?.name || "LocalSphere independent"}</span>
-            {(item.shop?.verified || (typeof window !== "undefined" && localStorage.getItem("ls_verified_owner_" + (item.shop?.owner?._id || item.shop?.owner)) === "true")) && (
-              <BadgeCheck size={14} className="text-sky-500 shrink-0" title="Verified Shop" />
+            {isVerified(item.shop) && (
+              <VerifiedBadge size={14} title="Verified Shop" />
             )}
           </p>
           <h1 className="mt-3 text-4xl font-extrabold tracking-tight text-forest flex items-center gap-2">
             <span>{item.name}</span>
-            {(item.shop?.verified || (typeof window !== "undefined" && localStorage.getItem("ls_verified_owner_" + (item.shop?.owner?._id || item.shop?.owner)) === "true")) && (
-              <BadgeCheck size={26} className="text-sky-500 shrink-0" title="Verified Owner Listing" />
+            {isVerified(item) && (
+              <VerifiedBadge size={26} title="Verified Owner Listing" />
             )}
           </h1>
           <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-slate-500">

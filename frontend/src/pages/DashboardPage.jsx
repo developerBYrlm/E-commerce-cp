@@ -55,6 +55,7 @@ import { io } from "socket.io-client";
 import { useAuth } from "../contexts/AuthContext";
 import { useCollection } from "../hooks/useApi";
 import { Loader } from "../components/Loader";
+import { VerifiedBadge, isVerified } from "../utils/verification";
 import api from "../api/client";
 import AdminManagement from "../components/AdminManagement";
 import CategoryManagement from "../components/CategoryManagement";
@@ -463,8 +464,11 @@ export default function DashboardPage({ initialTab = "overview" }) {
               <p className="text-xs font-bold uppercase tracking-[.18em] text-emerald-700">
                 {admin ? "Platform management" : customer ? "Your LocalSphere" : "Your businesses, nearby"}
               </p>
-              <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-forest">
-                {tab === "overview" ? `Hello, ${user.name?.split(" ")[0]}` : tabs.find(([id]) => id === tab)?.[1]}
+              <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-forest flex items-center gap-2">
+                <span>{tab === "overview" ? `Hello, ${user.name?.split(" ")[0]}` : tabs.find(([id]) => id === tab)?.[1]}</span>
+                {tab === "overview" && isProActive && (
+                  <VerifiedBadge size={24} title="Verified Pro Owner" />
+                )}
               </h1>
             </div>
             <div className="flex flex-wrap items-center gap-3">
@@ -1273,7 +1277,7 @@ function ShopManagement({ shops, products, services, productSalesMap, serviceBoo
                       <h3 className="font-extrabold text-lg text-forest truncate group-hover/info:text-emerald-700 transition">
                         {shop.name}
                       </h3>
-                      {(shop.verified || isProActive) && <BadgeCheck size={16} className="text-sky-500 shrink-0" title="Verified Shop" />}
+                      {isProActive && <VerifiedBadge size={16} title="Verified Pro Shop" />}
                     </div>
                     <p className="mt-1 text-xs text-slate-500 line-clamp-2">
                       {shop.description || "No shop description provided yet."}
@@ -1407,8 +1411,8 @@ function ShopManagement({ shops, products, services, productSalesMap, serviceBoo
                                 <div className="flex items-start justify-between gap-1.5">
                                   <h5 className="font-bold text-sm text-forest group-hover:text-emerald-700 transition line-clamp-1 flex items-center gap-1">
                                     <span>{item.name}</span>
-                                    {(shop.verified || isProActive) && (
-                                      <BadgeCheck size={14} className="text-sky-500 shrink-0 inline" title="Verified Owner Item" />
+                                    {isProActive && (
+                                      <VerifiedBadge size={14} title="Verified Pro Item" />
                                     )}
                                   </h5>
                                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-semibold shrink-0 capitalize">
@@ -1973,7 +1977,7 @@ function ResourceManagement({ title, icon: Icon, items = [], loading, createPath
                     <p className="font-bold text-forest truncate group-hover/title:text-emerald-700 transition flex items-center gap-1.5">
                       <span>{item.name}</span>
                       {isProActive && (
-                        <BadgeCheck size={15} className="text-sky-500 shrink-0 inline" title="Verified Owner Listing" />
+                        <VerifiedBadge size={15} title="Verified Pro Listing" />
                       )}
                       <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded opacity-0 group-hover/title:opacity-100 transition">
                         📇 3D Card
@@ -4610,7 +4614,7 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
         "১টি সক্রিয় শপ লিস্টিং (1 Active Shop)",
         "১০টি প্রোডাক্ট ও সার্ভিস পর্যন্ত লিস্টিং",
         "লোকাল ৩ডি ম্যাপে স্ট্যান্ডার্ড পিন",
-        "স্ট্যান্ডার্ড ৫% প্ল্যাটফর্ম ফি",
+        "স্ট্যান্ডার্ড ৫% প্ল্যাটফর্ম ফি (প্রতি ১০০ টাকার অর্ডারে ৫ টাকা ফি)",
         "কমিউনিটি সাপোর্ট ও বেসিক ড্যাশবোর্ড",
       ],
       disabledFeatures: [
@@ -4637,7 +4641,7 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
         "💎 ওনারের সকল শপ ও প্রোডাক্টের নামের পাশে ব্লু ভেরিফাইড ব্যাজ",
         "🎁 প্রতিটি বিজ্ঞাপনে এক্সট্রা ৭ দিন ফ্রি অ্যাডস চলবে (৭ দিনে মোট ১৪ দিন!)",
         "🤖 এআই চ্যাটবট সুবিধা (স্মার্ট অটো-রিপ্লাই ও কাস্টমার অ্যাসিস্ট্যান্ট)",
-        "📉 মাত্র ২.৫% প্ল্যাটফর্ম কমিশন (৫০% ছাড়)",
+        "📉 মাত্র ২.৫% প্ল্যাটফর্ম কমিশন (প্রতি ১০০ টাকার অর্ডারে মাত্র ২.৫ টাকা কমিশন)",
         "🌟 ৩ডি ডায়োরামা গ্লোয়িং স্পটলাইট পিন",
         "⚡ ওয়ান-ক্লিক সরাসরি হোয়াটসঅ্যাপ কাস্টমার চ্যাট",
         "📊 রিয়েল-টাইম ভিজিটর অ্যানালিটিক্স ও হিটম্যাপ",
@@ -4662,7 +4666,7 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
         "💎 ওনারের সকল শপ ও প্রোডাক্টের নামের পাশে ব্লু ভেরিফাইড ব্যাজ",
         "🎁 প্রতিটি বিজ্ঞাপনে এক্সট্রা ২১ দিন ফ্রি অ্যাডস চলবে (৭ দিনে মোট ২৮ দিন!)",
         "🤖 এআই চ্যাটবট সুবিধা (অ্যাডভান্সড স্মার্ট অটো-রেসপন্স)",
-        "📉 মাত্র ১.৫% প্ল্যাটফর্ম কমিশন (৭০% ছাড়)",
+        "📉 মাত্র ১.৫% প্ল্যাটফর্ম কমিশন (প্রতি ১০০ টাকার অর্ডারে মাত্র ১.৫ টাকা কমিশন)",
         "👑 পুরো এলাকায় গ্যারান্টেড #১ টপ সার্চ র‍্যাংকিং",
         "🌟 ৩ডি ডায়োরামা গ্লোয়িং স্পটলাইট পিন",
         "⚡ ওয়ান-ক্লিক সরাসরি হোয়াটসঅ্যাপ কাস্টমার চ্যাট",

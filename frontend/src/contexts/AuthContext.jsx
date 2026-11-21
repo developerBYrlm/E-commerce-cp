@@ -10,7 +10,14 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     let active = true;
-    api.get("/auth/me").then(({ data }) => { if (active) setUser(data.user); })
+    api.get("/auth/me").then(({ data }) => {
+      if (active) {
+        setUser(data.user);
+        if (data.user?._id) {
+          localStorage.setItem("ls_current_user_id", String(data.user._id));
+        }
+      }
+    })
       .catch((error) => { if (error.status !== 401) console.error("Unable to restore the saved session:", error); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
@@ -19,6 +26,9 @@ export function AuthProvider({ children }) {
   const authenticate = useCallback(async (endpoint, values) => {
     const { data } = await api.post(endpoint, values);
     setUser(data.user);
+    if (data.user?._id) {
+      localStorage.setItem("ls_current_user_id", String(data.user._id));
+    }
     return data.user;
   }, []);
   const login = useCallback((values) => authenticate("/auth/login", values), [authenticate]);

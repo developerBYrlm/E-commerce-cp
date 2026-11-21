@@ -28,6 +28,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { formatCurrency } from "../utils/currency";
 import { getImageUrl } from "../utils/imageUrl";
 import Card3DTilt from "./3d/Card3DTilt";
+import { VerifiedBadge, isVerified } from "../utils/verification";
 
 /**
  * Helper to pick a completely random deal that is neither the current one
@@ -381,8 +382,8 @@ function ProductAdWindowFrame({
                       >
                         {shop.name || "Local Shop Partner"}
                       </Link>
-                      {(shop.verified || (typeof window !== "undefined" && localStorage.getItem("ls_verified_owner_" + (shop.owner?._id || shop.owner)) === "true")) && (
-                        <BadgeCheck className="h-3.5 w-3.5 flex-shrink-0 text-sky-500" title="Verified Shop" />
+                      {isVerified(shop) && (
+                        <VerifiedBadge size={14} title="Verified Shop" />
                       )}
                     </div>
                     {(shop.area || shop.district) && (
@@ -423,8 +424,8 @@ function ProductAdWindowFrame({
                 <Link to={`/products/${currentDeal._id}`} className="group/title block">
                   <h4 className="truncate text-lg font-black text-forest transition group-hover/title:text-emerald-600 dark:text-white dark:group-hover/title:text-lime sm:text-xl flex items-center gap-1.5">
                     <span>{currentDeal.name}</span>
-                    {(shop.verified || (typeof window !== "undefined" && localStorage.getItem("ls_verified_owner_" + (shop.owner?._id || shop.owner)) === "true")) && (
-                      <BadgeCheck className="h-4 w-4 flex-shrink-0 text-sky-500" title="Verified Owner Product" />
+                    {isVerified(shop) && (
+                      <VerifiedBadge size={16} title="Verified Owner Product" />
                     )}
                   </h4>
                 </Link>

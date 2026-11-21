@@ -12,6 +12,7 @@ import ProductImageSlider from "../components/ProductImageSlider";
 import { formatCurrency } from "../utils/currency";
 import { getImageUrl } from "../utils/imageUrl";
 import { calculateLocationScore, sortItemsByProximity } from "../utils/proximity";
+import { VerifiedBadge, isVerified } from "../utils/verification";
 
 const config = {
   shops: { path: "/shops", title: "Meet your local favorites", desc: "Independent shops with big neighborhood energy.", empty: "No shops found yet. Try another search or check back soon." },
@@ -162,8 +163,9 @@ function ItemCard({ item, kind, isNearby = false }) {
       />
       <div className="p-5">
         <div className="flex items-center justify-between gap-2">
-          <p className="truncate text-xs font-semibold uppercase tracking-wide text-emerald-700">
-            {item.shop?.name || (kind === "products" ? "Local shop" : "Local expert")}
+          <p className="truncate text-xs font-semibold uppercase tracking-wide text-emerald-700 flex items-center gap-1.5">
+            <span className="truncate">{item.shop?.name || (kind === "products" ? "Local shop" : "Local expert")}</span>
+            {isVerified(item.shop) && <VerifiedBadge size={13} title="Verified Shop" />}
           </p>
           <div className="flex items-center gap-2">
             {isNearby && (
@@ -188,7 +190,10 @@ function ItemCard({ item, kind, isNearby = false }) {
           </div>
         </div>
 
-        <h2 className="mt-2 truncate text-lg font-bold text-forest">{item.name}</h2>
+        <h2 className="mt-2 truncate text-lg font-bold text-forest flex items-center gap-1.5">
+          <span className="truncate">{item.name}</span>
+          {isVerified(item) && <VerifiedBadge size={16} title="Verified Listing" />}
+        </h2>
         <p className="mt-1 line-clamp-2 min-h-10 text-sm text-slate-500">{item.description}</p>
 
         <div className="mt-4 flex items-baseline">

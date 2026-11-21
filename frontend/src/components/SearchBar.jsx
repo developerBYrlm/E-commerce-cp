@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import api from "../api/client";
 import { formatCurrency } from "../utils/currency";
 import { getImageUrl } from "../utils/imageUrl";
+import { VerifiedBadge, isVerified } from "../utils/verification";
 
   export default function SearchBar({
     large = false,
@@ -188,7 +189,10 @@ import { getImageUrl } from "../utils/imageUrl";
                                   )}
                                 </span>
                                 <div className="min-w-0">
-                                  <p className="truncate text-xs sm:text-sm font-bold text-forest">{shop.name}</p>
+                                  <p className="truncate text-xs sm:text-sm font-bold text-forest flex items-center gap-1.5">
+                                    <span className="truncate">{shop.name}</span>
+                                    {isVerified(shop) && <VerifiedBadge size={13} title="Verified Shop" />}
+                                  </p>
                                   <p className="truncate text-[11px] text-slate-500">
                                     {[shop.area, shop.district].filter(Boolean).join(", ") || "Local business"}
                                   </p>
@@ -229,7 +233,10 @@ import { getImageUrl } from "../utils/imageUrl";
                                   )}
                                 </span>
                                 <div className="min-w-0">
-                                  <p className="truncate text-xs sm:text-sm font-bold text-forest">{prod.name}</p>
+                                  <p className="truncate text-xs sm:text-sm font-bold text-forest flex items-center gap-1.5">
+                                    <span className="truncate">{prod.name}</span>
+                                    {isVerified(prod) && <VerifiedBadge size={13} title="Verified Product" />}
+                                  </p>
                                   <p className="truncate text-[11px] text-slate-500">
                                     {prod.shop?.name || "Local Shop"}
                                   </p>
@@ -272,7 +279,10 @@ import { getImageUrl } from "../utils/imageUrl";
                                   )}
                                 </span>
                                 <div className="min-w-0">
-                                  <p className="truncate text-xs sm:text-sm font-bold text-forest">{serv.name}</p>
+                                  <p className="truncate text-xs sm:text-sm font-bold text-forest flex items-center gap-1.5">
+                                    <span className="truncate">{serv.name}</span>
+                                    {isVerified(serv) && <VerifiedBadge size={13} title="Verified Service" />}
+                                  </p>
                                   <p className="truncate text-[11px] text-slate-500">
                                     {serv.shop?.name || "Local Professional"}
                                   </p>

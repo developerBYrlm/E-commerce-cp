@@ -23,6 +23,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../contexts/AuthContext";
 import { useCollection } from "../hooks/useApi";
 import api from "../api/client";
+import { VerifiedBadge, isVerified } from "../utils/verification";
 import { Loader } from "../components/Loader";
 import { getImageUrl } from "../utils/imageUrl";
 import { BANGLADESH_DISTRICTS } from "../../../shared/bangladeshAdministrativeData.js";
@@ -357,8 +358,8 @@ async function comment(event, postId) {
                           className="font-extrabold text-xl text-forest hover:text-emerald-700 transition flex items-center gap-1.5"
                         >
                           <span>{shop.name}</span>
-                          {(shop.verified || (typeof window !== "undefined" && localStorage.getItem("ls_verified_owner_" + (shop.owner?._id || shop.owner)) === "true")) && (
-                            <BadgeCheck size={18} className="text-sky-500 shrink-0" title="Verified Shop" />
+                          {isVerified(shop) && (
+                            <VerifiedBadge size={18} title="Verified Shop" />
                           )}
                         </Link>
                         {shop.category?.name && (

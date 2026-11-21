@@ -15,6 +15,7 @@ import {
   getSubDistrictsByDistrict,
 } from "../../../shared/bangladeshAdministrativeData.js";
 import { useState } from "react";
+import { VerifiedBadge, isVerified } from "../utils/verification";
 
 export default function SearchPage() {
   const { user } = useAuth();
@@ -319,10 +320,14 @@ function ResultCard({ item, kind }) {
         fallbackIcon={Store}
       />
       <div className="p-4">
-        <p className="truncate text-xs font-semibold text-emerald-700">
-          {item.shop?.name || "Independent local"}
+        <p className="truncate text-xs font-semibold text-emerald-700 flex items-center gap-1.5">
+          <span className="truncate">{item.shop?.name || "Independent local"}</span>
+          {isVerified(item.shop) && <VerifiedBadge size={13} title="Verified Shop" />}
         </p>
-        <h3 className="mt-1 truncate font-bold text-forest">{item.name}</h3>
+        <h3 className="mt-1 truncate font-bold text-forest flex items-center gap-1.5">
+          <span className="truncate">{item.name}</span>
+          {isVerified(item) && <VerifiedBadge size={15} title="Verified Listing" />}
+        </h3>
         <p className="mt-2 truncate text-xs text-slate-500">
           {item.shop?.ownerName ? `${item.shop.ownerName} · ` : ""}
           {[item.shop?.area, item.shop?.subDistrict, item.shop?.district].filter(Boolean).join(", ") ||

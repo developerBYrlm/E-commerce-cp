@@ -28,6 +28,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { formatCurrency } from "../utils/currency";
 import { getImageUrl } from "../utils/imageUrl";
 import Card3DTilt from "./3d/Card3DTilt";
+import { VerifiedBadge, isVerified } from "../utils/verification";
 
 /**
  * Helper to pick a completely random deal that is neither the current one
@@ -366,8 +367,8 @@ function ServiceAdWindowFrame({
                       >
                         {shop.name || "Local Service Center"}
                       </Link>
-                      {(shop.verified || (typeof window !== "undefined" && localStorage.getItem("ls_verified_owner_" + (shop.owner?._id || shop.owner)) === "true")) && (
-                        <BadgeCheck className="h-3.5 w-3.5 flex-shrink-0 text-cyan-500" title="Verified Service Shop" />
+                      {isVerified(shop) && (
+                        <VerifiedBadge size={14} title="Verified Service Shop" />
                       )}
                     </div>
                     {(shop.area || shop.district) && (
@@ -408,8 +409,8 @@ function ServiceAdWindowFrame({
                 <Link to={`/services/${currentDeal._id}`} className="group/title block">
                   <h4 className="truncate text-lg font-black text-forest transition group-hover/title:text-cyan-600 dark:text-white dark:group-hover/title:text-cyan-300 sm:text-xl flex items-center gap-1.5">
                     <span>{currentDeal.name}</span>
-                    {(shop.verified || (typeof window !== "undefined" && localStorage.getItem("ls_verified_owner_" + (shop.owner?._id || shop.owner)) === "true")) && (
-                      <BadgeCheck className="h-4 w-4 flex-shrink-0 text-cyan-500" title="Verified Owner Service" />
+                    {isVerified(shop) && (
+                      <VerifiedBadge size={16} title="Verified Owner Service" />
                     )}
                   </h4>
                 </Link>

@@ -41,6 +41,7 @@ import SpatialNeighborhoodRadar from "../components/3d/SpatialNeighborhoodRadar"
 import Card3DTilt from "../components/3d/Card3DTilt";
 import Background3DParticles from "../components/3d/Background3DParticles";
 import AdsClipsShowcase from "../components/AdsClipsShowcase";
+import { VerifiedBadge, isVerified } from "../utils/verification";
 
 const CATEGORIES_DATA = [
   {
@@ -923,7 +924,10 @@ export default function Home() {
                     />
                     <div className="px-2 pb-2 pt-4">
                       <div className="flex items-center justify-between gap-1">
-                        <p className="truncate font-bold text-forest">{item.name}</p>
+                        <p className="truncate font-bold text-forest flex items-center gap-1.5">
+                          <span className="truncate">{item.name}</span>
+                          {isVerified(item) && <VerifiedBadge size={14} title="Verified Product" />}
+                        </p>
                         <div className="flex items-center gap-1 shrink-0">
                           {user && calculateLocationScore(item, user) >= 500 && (
                             <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[9px] font-bold text-emerald-800 border border-emerald-200">
@@ -937,8 +941,9 @@ export default function Home() {
                           )}
                         </div>
                       </div>
-                      <p className="mt-1 text-sm text-slate-500">
-                        {item.shop?.ownerName || item.shop?.name || "Independent maker"}
+                      <p className="mt-1 text-sm text-slate-500 flex items-center gap-1.5">
+                        <span className="truncate">{item.shop?.ownerName || item.shop?.name || "Independent maker"}</span>
+                        {isVerified(item.shop) && <VerifiedBadge size={13} title="Verified Shop" />}
                       </p>
                       <p className="mt-1 truncate text-xs text-slate-400">
                         {[item.shop?.category?.name, item.shop?.area, item.shop?.subDistrict, item.shop?.district]
@@ -1010,7 +1015,10 @@ export default function Home() {
                     />
                     <div className="px-2 pb-2 pt-4">
                       <div className="flex items-center justify-between gap-1">
-                        <p className="truncate font-bold text-forest">{item.name}</p>
+                        <p className="truncate font-bold text-forest flex items-center gap-1.5">
+                          <span className="truncate">{item.name}</span>
+                          {isVerified(item) && <VerifiedBadge size={14} title="Verified Service" />}
+                        </p>
                         <div className="flex items-center gap-1 shrink-0">
                           {user && calculateLocationScore(item, user) >= 500 && (
                             <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[9px] font-bold text-emerald-800 border border-emerald-200">
@@ -1024,8 +1032,9 @@ export default function Home() {
                           )}
                         </div>
                       </div>
-                      <p className="mt-1 text-sm text-slate-500">
-                        {item.shop?.name || "Local professional"}
+                      <p className="mt-1 text-sm text-slate-500 flex items-center gap-1.5">
+                        <span className="truncate">{item.shop?.name || "Local professional"}</span>
+                        {isVerified(item.shop) && <VerifiedBadge size={13} title="Verified Shop" />}
                       </p>
                       <p className="mt-1 truncate text-xs text-slate-400">
                         {[item.shop?.category?.name, item.shop?.area, item.shop?.subDistrict, item.shop?.district]

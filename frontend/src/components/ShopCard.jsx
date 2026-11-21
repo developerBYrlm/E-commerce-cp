@@ -1,8 +1,9 @@
-import { ArrowUpRight, MapPin, Star, BadgeCheck, ShoppingBag, Wrench, MessageSquare } from "lucide-react";
+import { ArrowUpRight, MapPin, Star, ShoppingBag, Wrench, MessageSquare } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { getImageUrl } from "../utils/imageUrl";
 import { useAuth } from "../contexts/AuthContext";
+import { VerifiedBadge, isVerified } from "../utils/verification";
 
 export default function ShopCard({ shop, isNearby = false }) {
   const navigate = useNavigate();
@@ -53,8 +54,8 @@ export default function ShopCard({ shop, isNearby = false }) {
     <div className="p-4 sm:p-5">
       <div className="flex items-center gap-1.5">
         <h3 className="truncate font-bold text-forest">{shop.name}</h3>
-        {(shop.verified || (typeof window !== "undefined" && localStorage.getItem("ls_verified_owner_" + (shop.owner?._id || shop.owner)) === "true")) && (
-          <BadgeCheck size={16} className="shrink-0 text-sky-500" title="Verified Shop" />
+        {isVerified(shop) && (
+          <VerifiedBadge size={16} title="Verified Shop" />
         )}
       </div>
       <p className="mt-2 flex items-center gap-1.5 text-xs text-slate-500"><MapPin size={13} />{[shop.address?.city, shop.address?.region].filter(Boolean).join(", ") || "Around your neighborhood"}</p>

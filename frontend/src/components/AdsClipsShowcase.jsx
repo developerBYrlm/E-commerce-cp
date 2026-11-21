@@ -19,6 +19,7 @@ import {
 import toast from "react-hot-toast";
 import { useAuth } from "../contexts/AuthContext";
 import { getImageUrl } from "../utils/imageUrl";
+import { VerifiedBadge } from "../utils/verification";
 
 // 4 High Quality Sample Video Clips (using reliable verified 200 OK HTML5 streaming video assets)
 const DEFAULT_CLIPS = [
@@ -340,7 +341,7 @@ export default function AdsClipsShowcase() {
                     <p className="truncate text-xs font-black text-white flex items-center gap-1 drop-shadow-sm">
                       <span className="truncate">{clip.shopName}</span>
                       {clip.verified && (
-                        <BadgeCheck size={14} className="text-sky-400 shrink-0 inline" title="Verified Seller" />
+                        <VerifiedBadge size={14} title="Verified Seller" />
                       )}
                     </p>
                   </div>
@@ -488,7 +489,7 @@ export default function AdsClipsShowcase() {
                   <div className="min-w-0">
                     <p className="flex items-center gap-1 text-sm font-black text-white truncate">
                       <span>{activeClip.shopName}</span>
-                      {activeClip.verified && <BadgeCheck size={16} className="text-sky-400 shrink-0" />}
+                      {activeClip.verified && <VerifiedBadge size={16} title="Verified Seller" />}
                     </p>
                     <span className="text-[10px] text-emerald-300 font-bold">● Active Local Seller</span>
                   </div>
