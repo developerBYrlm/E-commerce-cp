@@ -35,17 +35,17 @@ export default function Navbar() {
         <span className="grid h-10 w-10 place-items-center rounded-2xl bg-forest text-lime"><Compass size={22} /></span>
         <span className="text-xl font-extrabold tracking-tight">local<span className="text-emerald-600">sphere</span></span>
       </Link>
-      <nav className="hidden items-center gap-6 lg:gap-8 md:flex">
+      <nav className="hidden items-center gap-1.5 lg:gap-2.5 md:flex">
         {links.map(([label, path]) => (
           <NavLink
             key={path}
             to={path}
             end={path === "/"}
             className={({ isActive }) =>
-              `relative inline-flex items-center justify-center py-1 select-none transition-all duration-300 ease-out origin-center ${
+              `relative inline-flex items-center justify-center px-4 py-1.5 rounded-full text-sm font-semibold tracking-tight select-none transition-all duration-200 ease-out ${
                 isActive
-                  ? "text-[15px] font-extrabold text-forest scale-110 drop-shadow-xs dark:text-emerald-400"
-                  : "text-sm font-medium text-slate-600 scale-95 opacity-80 hover:opacity-100 hover:text-forest hover:scale-105 dark:text-slate-300 dark:hover:text-white"
+                  ? "text-forest font-bold bg-forest/[0.08] border border-forest/15 shadow-[0_2px_8px_-2px_rgba(36,77,61,0.12)] scale-[1.03] dark:bg-emerald-400/[0.12] dark:text-emerald-300 dark:border-emerald-400/20"
+                  : "text-slate-600 border border-transparent hover:text-forest hover:bg-forest/[0.05] hover:scale-[1.02] dark:text-slate-300 dark:hover:text-white dark:hover:bg-white/[0.06]"
               }`
             }
           >
@@ -106,10 +106,10 @@ export default function Navbar() {
             to={path}
             end={path === "/"}
             className={({ isActive }) =>
-              `flex items-center justify-between py-2 text-sm select-none transition-all duration-200 ${
+              `flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold tracking-tight select-none transition-all duration-200 ${
                 isActive
-                  ? "text-base font-extrabold text-forest scale-105 origin-left dark:text-emerald-400"
-                  : "font-medium text-slate-600 hover:text-forest hover:scale-102 origin-left dark:text-slate-300 dark:hover:text-white"
+                  ? "text-forest font-bold bg-forest/[0.08] border border-forest/15 dark:bg-emerald-400/[0.12] dark:text-emerald-300 dark:border-emerald-400/20"
+                  : "text-slate-600 hover:text-forest hover:bg-forest/[0.04] dark:text-slate-300 dark:hover:text-white"
               }`
             }
           >

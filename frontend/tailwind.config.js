@@ -14,7 +14,10 @@ export default {
   theme: {
     extend: {
       colors: { forest: "#244d3d", lime: "#d2f36b", cream: "#f5f7f2" },
-      fontFamily: { sans: ["Inter", "ui-sans-serif", "system-ui"] },
+      fontFamily: {
+        sans: ["Plus Jakarta Sans", "Outfit", "system-ui", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
+        display: ["Plus Jakarta Sans", "Outfit", "sans-serif"],
+      },
     },
   },
   plugins: [daisyui],
