@@ -349,6 +349,14 @@ export default function Home() {
     return [...prods, ...servs, ...shps];
   }, [activeCategory, categoryFilterType, matchingProducts, matchingServices, matchingShops]);
 
+  // Featured shop logos for hero social proof (randomized on each reload/refresh)
+  const featuredShopAvatars = useMemo(() => {
+    if (!allCatalogShops || allCatalogShops.length === 0) return [];
+    const withLogo = allCatalogShops.filter((s) => s.logo || s.coverImage);
+    const pool = withLogo.length >= 4 ? withLogo : allCatalogShops;
+    return [...pool].sort(() => 0.5 - Math.random()).slice(0, 4);
+  }, [allCatalogShops]);
+
   function handleItemMessage(item) {
     const ownerId = item.owner?._id || item.owner || item.shop?.owner?._id || item.shop?.owner;
     if (!ownerId) {
@@ -423,21 +431,58 @@ export default function Home() {
               <span className="font-semibold text-slate-600">✦ Verified Local Sellers</span>
             </div>
 
-            {/* Neighbor avatar social proof */}
-            <div className="mt-9 flex items-center gap-3">
-              <div className="flex -space-x-2">
-                {["A", "M", "S", "J"].map((letter, i) => (
-                  <span
-                    key={letter}
-                    className={`grid h-9 w-9 place-items-center rounded-full border-2 border-cream text-xs font-bold ${["bg-lime text-forest", "bg-orange-200 text-orange-900", "bg-sky-200 text-sky-900", "bg-rose-200 text-rose-900"][i]
-                      }`}
-                  >
-                    {letter}
-                  </span>
-                ))}
+            {/* Neighbor shop avatar social proof */}
+            <div className="mt-9 flex items-center gap-3.5">
+              <div className="flex -space-x-3">
+                {(featuredShopAvatars.length > 0
+                  ? featuredShopAvatars
+                  : [
+                      { name: "Alpha Store", color: "bg-lime text-forest" },
+                      { name: "Metro Market", color: "bg-amber-200 text-amber-950" },
+                      { name: "Super Deals", color: "bg-sky-200 text-sky-950" },
+                      { name: "Joy Crafts", color: "bg-emerald-200 text-emerald-950" },
+                    ]
+                ).map((shop, i) => {
+                  const hasImg = Boolean(shop.logo || shop.coverImage);
+                  const initial = (shop.name || "S").slice(0, 1).toUpperCase();
+                  const fallbackColors = [
+                    "bg-lime text-forest",
+                    "bg-amber-200 text-amber-950",
+                    "bg-sky-200 text-sky-950",
+                    "bg-emerald-200 text-emerald-950",
+                  ];
+                  return (
+                    <Link
+                      key={shop._id || shop.name || i}
+                      to={shop._id ? `/shops/${shop._id}` : "/shops"}
+                      title={shop.name || "Verified Local Shop"}
+                      className="group/avatar relative grid h-11 w-11 sm:h-12 sm:w-12 place-items-center rounded-full border-2 border-white bg-white shadow-md shadow-slate-200/50 transition-all duration-300 hover:z-20 hover:scale-115 hover:shadow-xl dark:border-slate-800 dark:bg-slate-800 overflow-hidden"
+                    >
+                      {hasImg ? (
+                        <img
+                          src={getImageUrl(shop.logo || shop.coverImage)}
+                          alt={shop.name || "Shop"}
+                          className="h-full w-full object-cover transition-transform duration-300 group-hover/avatar:scale-110"
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                            const fallback = e.currentTarget.parentElement?.querySelector(".avatar-fallback-initial");
+                            if (fallback) fallback.classList.remove("hidden");
+                          }}
+                        />
+                      ) : null}
+                      <span
+                        className={`avatar-fallback-initial grid h-full w-full place-items-center text-sm font-extrabold ${
+                          fallbackColors[i % fallbackColors.length]
+                        } ${hasImg ? "hidden" : ""}`}
+                      >
+                        {initial}
+                      </span>
+                    </Link>
+                  );
+                })}
               </div>
-              <p className="text-xs text-slate-500">
-                <strong className="text-forest">Your community</strong> is already here exploring
+              <p className="text-sm sm:text-[15px] font-medium text-slate-600 dark:text-slate-300">
+                <strong className="font-bold text-forest dark:text-emerald-400">Your community</strong> is already here exploring
               </p>
             </div>
           </motion.div>
