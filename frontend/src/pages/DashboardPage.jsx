@@ -4525,62 +4525,17 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
   const [campCaption, setCampCaption] = useState("");
 
-  // Active campaigns list
+  // Active campaigns list (No hardcoded demo campaigns, starts empty if none launched)
   const [campaigns, setCampaigns] = useState(() => {
     const saved = localStorage.getItem("ls_ad_campaigns");
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        // Exclude old demo campaigns camp-101 and camp-102
+        return parsed.filter((c) => c.id !== "camp-101" && c.id !== "camp-102");
       } catch (e) { }
     }
-    return [
-      {
-        id: "camp-101",
-        name: "Weekend Local Shopper Rush",
-        targetTitle: shops[0]?.name || "Main Neighborhood Shop",
-        targetId: shops[0]?._id || "shop-bakery-1",
-        ownerId: user?._id || "owner-bakery",
-        placements: ["3d_spotlight", "ads_clips"],
-        placement: "3d_spotlight",
-        placementLabel: "3D Diorama + Ads Clips",
-        videoUrl: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
-        caption: "আজকের স্পেশাল অফারে যেকোনো কফির সাথে ক্রসাঁ মাত্র ৳১২০! হোম ডেলিভারি এভেইলেবল।",
-        radius: "1 km",
-        dailyBudget: 50,
-        paidDays: 7,
-        bonusDays: 7,
-        days: 14,
-        status: "active",
-        impressions: 5420,
-        clicks: 489,
-        likes: 1420,
-        shares: 312,
-        spent: 350,
-        createdAt: "2 days ago",
-      },
-      {
-        id: "camp-102",
-        name: "Top Search Keyword Booster",
-        targetTitle: products[0]?.name || "Featured Product",
-        targetId: products[0]?._id || "prod-feat-1",
-        ownerId: user?._id || "owner-demo",
-        placements: ["search_top"],
-        placement: "search_top",
-        placementLabel: "Top Search Results",
-        radius: "3 km",
-        dailyBudget: 25,
-        paidDays: 5,
-        bonusDays: 7,
-        days: 12,
-        status: "active",
-        impressions: 3120,
-        clicks: 304,
-        likes: 245,
-        shares: 58,
-        spent: 125,
-        createdAt: "4 days ago",
-      },
-    ];
+    return [];
   });
 
   // Save campaigns to localStorage
@@ -4589,6 +4544,21 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
       localStorage.setItem("ls_ad_campaigns", JSON.stringify(campaigns));
     } catch (e) { }
   }, [campaigns]);
+
+  // Sync state if campaigns update from views or clicks in other components
+  useEffect(() => {
+    const syncCampaigns = () => {
+      try {
+        const saved = localStorage.getItem("ls_ad_campaigns");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          setCampaigns(parsed.filter((c) => c.id !== "camp-101" && c.id !== "camp-102"));
+        }
+      } catch (e) { }
+    };
+    window.addEventListener("storage", syncCampaigns);
+    return () => window.removeEventListener("storage", syncCampaigns);
+  }, []);
 
   // Subscription plans definitions
   const plans = [
@@ -4819,8 +4789,8 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
       bonusDays: planExtraDays,
       days: totalCampaignDays,
       status: "active",
-      impressions: 140,
-      clicks: 12,
+      impressions: 0,
+      clicks: 0,
       likes: 0,
       shares: 0,
       spent: 0,
@@ -5551,8 +5521,8 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
                     <th className="px-5 py-3.5">Placements</th>
                     <th className="px-5 py-3.5">Radius</th>
                     <th className="px-5 py-3.5">Daily Budget</th>
-                    <th className="px-5 py-3.5">Reach / Clicks</th>
-                    <th className="px-5 py-3.5">Likes / Shares</th>
+                    <th className="px-5 py-3.5">Reach (Views) / Clicks (Messages)</th>
+                    <th className="px-5 py-3.5">Likes</th>
                     <th className="px-5 py-3.5">Status</th>
                     <th className="px-5 py-3.5 text-right">Actions</th>
                   </tr>
@@ -5611,14 +5581,10 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
                           </div>
                         </td>
                         <td className="px-5 py-4">
-                          <div className="flex items-center gap-2.5 text-xs">
+                          <div className="flex items-center gap-1.5 text-xs">
                             <span className="inline-flex items-center gap-1 font-bold text-rose-600 dark:text-rose-400" title="Likes">
-                              <Heart size={12} className="fill-rose-500 text-rose-500" />
+                              <Heart size={13} className="fill-rose-500 text-rose-500" />
                               {(camp.likes || 0).toLocaleString()}
-                            </span>
-                            <span className="inline-flex items-center gap-1 font-bold text-blue-600 dark:text-blue-400" title="Shares">
-                              <Share2 size={12} />
-                              {(camp.shares || 0).toLocaleString()}
                             </span>
                           </div>
                         </td>

@@ -12,6 +12,7 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  ArrowLeft,
   Store,
   Flame,
   Eye,
@@ -33,11 +34,13 @@ export default function AdsClipsShowcase() {
       const saved = localStorage.getItem("ls_ad_campaigns");
       if (saved) {
         const campaigns = JSON.parse(saved);
-        // Only include active campaigns that have a real videoUrl uploaded
+        // Only include active campaigns that have a real videoUrl uploaded and are NOT demo campaigns
         return campaigns
           .filter(
             (c) =>
               c.status === "active" &&
+              c.id !== "camp-101" &&
+              c.id !== "camp-102" &&
               c.videoUrl &&
               typeof c.videoUrl === "string" &&
               c.videoUrl.trim().length > 0
@@ -64,6 +67,43 @@ export default function AdsClipsShowcase() {
     } catch (e) {}
     return [];
   });
+
+  // Track viewed clip IDs in current session to increment real views once per session per clip
+  const viewedClipsRef = useRef(new Set());
+
+  // Register real ad view whenever the video is rendered/played on user screen
+  const registerAdView = (clipId) => {
+    if (!clipId || viewedClipsRef.current.has(clipId)) return;
+    viewedClipsRef.current.add(clipId);
+
+    // Update view count in local state
+    setClips((prev) =>
+      prev.map((c) =>
+        c.id === clipId ? { ...c, views: (c.views || 0) + 1 } : c
+      )
+    );
+
+    // Update impressions in localStorage ls_ad_campaigns
+    try {
+      const saved = localStorage.getItem("ls_ad_campaigns");
+      if (saved) {
+        const campaigns = JSON.parse(saved);
+        const updated = campaigns.map((camp) => {
+          if (camp.id === clipId) {
+            return {
+              ...camp,
+              impressions: (camp.impressions || 0) + 1,
+            };
+          }
+          return camp;
+        });
+        localStorage.setItem("ls_ad_campaigns", JSON.stringify(updated));
+        window.dispatchEvent(new Event("storage"));
+      }
+    } catch (err) {
+      console.error("View count increment error:", err);
+    }
+  };
 
   // Track liked status per clip in localStorage
   const [likedMap, setLikedMap] = useState(() => {
@@ -113,6 +153,7 @@ export default function AdsClipsShowcase() {
           return camp;
         });
         localStorage.setItem("ls_ad_campaigns", JSON.stringify(updatedCamps));
+        window.dispatchEvent(new Event("storage"));
       }
     } catch (err) {}
 
@@ -121,7 +162,7 @@ export default function AdsClipsShowcase() {
     }
   };
 
-  // Handle Share Button click
+  // Handle Share Button click (copies link without incrementing numeric counter)
   const handleShare = (e, clip) => {
     e.stopPropagation();
     const shareUrl = window.location.origin + `?clip=${clip.id}`;
@@ -129,31 +170,35 @@ export default function AdsClipsShowcase() {
       navigator.clipboard.writeText(shareUrl);
       toast.success("🔗 অ্যাড ক্লিপস লিঙ্ক কপি করা হয়েছে!", { id: "clip-share" });
     } else {
-      toast.success("অ্যাড ক্লিপস শেয়ার করা হয়েছে!");
+      toast.success("🔗 ক্লিপস লিঙ্ক কপি করা হয়েছে!", { id: "clip-share" });
     }
+  };
 
-    setClips((prev) =>
-      prev.map((c) => (c.id === clip.id ? { ...c, shares: c.shares + 1 } : c))
-    );
+  // Handle Direct Message to Owner (Counts as 1 Click for this ad)
+  const handleDirectMessage = (e, clip) => {
+    e.stopPropagation();
 
+    // Increment click count for this ad campaign
     try {
       const saved = localStorage.getItem("ls_ad_campaigns");
       if (saved) {
-        const camps = JSON.parse(saved);
-        const updatedCamps = camps.map((camp) => {
+        const campaigns = JSON.parse(saved);
+        const updatedCamps = campaigns.map((camp) => {
           if (camp.id === clip.id) {
-            return { ...camp, shares: (camp.shares || 0) + 1 };
+            return {
+              ...camp,
+              clicks: (camp.clicks || 0) + 1,
+            };
           }
           return camp;
         });
         localStorage.setItem("ls_ad_campaigns", JSON.stringify(updatedCamps));
+        window.dispatchEvent(new Event("storage"));
       }
-    } catch (err) {}
-  };
+    } catch (err) {
+      console.error("Click count increment error:", err);
+    }
 
-  // Handle Direct Message to Owner
-  const handleDirectMessage = (e, clip) => {
-    e.stopPropagation();
     if (!user) {
       toast.error("শপ ওনারকে মেসেজ পাঠাতে দয়া করে সাইন-ইন করুন");
       navigate("/login");
@@ -164,6 +209,13 @@ export default function AdsClipsShowcase() {
   };
 
   const activeClip = activeModalClipIndex !== null ? clips[activeModalClipIndex] : null;
+
+  // Whenever modal opens, register view
+  useEffect(() => {
+    if (activeClip) {
+      registerAdView(activeClip.id);
+    }
+  }, [activeClip]);
 
   return (
     <section className="relative z-10 mx-auto max-w-7xl px-5 py-6 sm:py-8 lg:px-8">
@@ -216,7 +268,7 @@ export default function AdsClipsShowcase() {
                 onClick={() => setActiveModalClipIndex(index)}
                 className="group relative flex aspect-[9/16] cursor-pointer flex-col justify-between overflow-hidden rounded-3xl bg-slate-900 p-3 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/25 sm:p-4"
               >
-                {/* HTML5 Autoplay Looping Video */}
+                {/* HTML5 Autoplay Looping Video with View Tracking */}
                 <video
                   src={clip.videoUrl}
                   poster={clip.poster}
@@ -224,6 +276,7 @@ export default function AdsClipsShowcase() {
                   loop
                   muted={isMuted}
                   playsInline
+                  onPlay={() => registerAdView(clip.id)}
                   className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
 
@@ -237,9 +290,9 @@ export default function AdsClipsShowcase() {
                     <span>Sponsored</span>
                   </span>
 
-                  <span className="inline-flex items-center gap-1 rounded-full bg-black/50 px-2 py-0.5 text-[10px] font-bold text-white/90 backdrop-blur-md">
-                    <Eye size={11} />
-                    <span>{clip.views > 1000 ? `${(clip.views / 1000).toFixed(1)}k` : clip.views || 0}</span>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-black/55 px-2.5 py-0.5 text-[10px] font-bold text-white/95 backdrop-blur-md border border-white/10">
+                    <Eye size={11} className="text-emerald-400" />
+                    <span>{(clip.views || 0).toLocaleString()}</span>
                   </span>
                 </div>
 
@@ -312,13 +365,13 @@ export default function AdsClipsShowcase() {
                       type="button"
                       onClick={(e) => handleShare(e, clip)}
                       className="group/btn flex flex-col items-center transition-transform active:scale-110"
-                      title="অ্যাড ক্লিপস শেয়ার করুন"
+                      title="অ্যাড ক্লিপস শেয়ার করুন (লিঙ্ক কপি)"
                     >
                       <span className="grid h-8 w-8 place-items-center rounded-full bg-black/50 text-white backdrop-blur-md hover:bg-white hover:text-slate-900 transition-colors">
                         <Share2 size={15} />
                       </span>
                       <span className="mt-0.5 text-[9px] font-bold text-white drop-shadow-md">
-                        {clip.shares > 0 ? clip.shares : "শেয়ার"}
+                        শেয়ার
                       </span>
                     </button>
                   </div>
@@ -405,7 +458,7 @@ export default function AdsClipsShowcase() {
 
           {/* 9:16 Vertical Modal Card */}
           <div
-            className="relative flex aspect-[9/16] h-[92vh] max-h-[820px] w-auto max-w-full flex-col justify-between overflow-hidden rounded-3xl bg-black shadow-2xl"
+            className="relative flex aspect-[9/16] h-[90vh] max-h-[820px] w-auto max-w-full flex-col justify-between overflow-hidden rounded-3xl bg-black shadow-2xl border border-white/10"
             onClick={(e) => e.stopPropagation()}
           >
             <video
@@ -414,26 +467,51 @@ export default function AdsClipsShowcase() {
               loop
               muted={isMuted}
               playsInline
-              controls
+              onPlay={() => registerAdView(activeClip.id)}
               className="absolute inset-0 h-full w-full object-cover"
             />
 
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/95 via-transparent to-black/60" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/95 via-transparent to-black/70" />
 
-            {/* Top Bar inside Modal */}
-            <div className="relative z-10 flex items-center justify-between p-4">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-black/60 px-3 py-1 text-xs font-black uppercase text-amber-300 backdrop-blur-md">
-                <Sparkles size={12} className="text-amber-400" />
+            {/* High-Contrast Top Bar inside Modal with Prominent Back Button */}
+            <div className="relative z-30 flex items-center justify-between border-b border-white/10 bg-black/80 px-4 py-3 backdrop-blur-md shadow-md">
+              {/* Back Button */}
+              <button
+                type="button"
+                onClick={() => setActiveModalClipIndex(null)}
+                className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1.5 text-xs font-bold text-white shadow-xs backdrop-blur-md transition-all hover:bg-white/35 active:scale-95"
+                title="ফিরে যান (Back)"
+              >
+                <ArrowLeft size={16} />
+                <span>ব্যাক</span>
+              </button>
+
+              {/* Center Title Badge */}
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-rose-500/80 via-pink-500/80 to-amber-500/80 px-3 py-1 text-[11px] font-black uppercase tracking-wider text-white shadow-xs backdrop-blur-md border border-white/20">
+                <Sparkles size={12} className="text-amber-200" />
                 <span>Ads Clips · Reels</span>
               </span>
 
-              <button
-                type="button"
-                onClick={() => setIsMuted(!isMuted)}
-                className="grid h-8 w-8 place-items-center rounded-full bg-black/60 text-white backdrop-blur-md hover:bg-black/80"
-              >
-                {isMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
-              </button>
+              {/* Right Controls: Sound Toggle + Close Button */}
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsMuted(!isMuted)}
+                  className="grid h-8 w-8 place-items-center rounded-full bg-white/20 text-white backdrop-blur-md transition hover:bg-white/35"
+                  title={isMuted ? "সাউন্ড অন করুন" : "সাউন্ড মিউট করুন"}
+                >
+                  {isMuted ? <VolumeX size={15} className="text-rose-400" /> : <Volume2 size={15} className="text-emerald-400" />}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveModalClipIndex(null)}
+                  className="grid h-8 w-8 place-items-center rounded-full bg-white/20 text-white backdrop-blur-md transition hover:bg-rose-600 hover:text-white"
+                  title="বন্ধ করুন (Close)"
+                >
+                  <X size={16} />
+                </button>
+              </div>
             </div>
 
             {/* Bottom Info & Action Controls */}
@@ -470,7 +548,7 @@ export default function AdsClipsShowcase() {
                   <button
                     type="button"
                     onClick={(e) => handleDirectMessage(e, activeClip)}
-                    className="btn btn-sm rounded-full border-0 bg-emerald-600 px-4 text-xs font-bold text-white hover:bg-emerald-700 shadow-md"
+                    className="btn btn-sm rounded-full border-0 bg-emerald-600 px-4 text-xs font-bold text-white hover:bg-emerald-700 shadow-md transition-all active:scale-95"
                   >
                     <MessageCircle size={14} />
                     <span>ম্যাসেজ পাঠান</span>
@@ -478,7 +556,7 @@ export default function AdsClipsShowcase() {
                   <Link
                     to="/shops"
                     onClick={() => setActiveModalClipIndex(null)}
-                    className="btn btn-sm rounded-full border border-white/20 bg-white/10 px-3.5 text-xs font-bold text-white backdrop-blur-md hover:bg-white/20"
+                    className="btn btn-sm rounded-full border border-white/20 bg-white/10 px-3.5 text-xs font-bold text-white backdrop-blur-md hover:bg-white/20 transition-all active:scale-95"
                   >
                     <Store size={14} />
                     <span>শপ দেখুন</span>
@@ -491,7 +569,7 @@ export default function AdsClipsShowcase() {
                 <button
                   type="button"
                   onClick={(e) => handleToggleLike(e, activeClip.id)}
-                  className="flex flex-col items-center"
+                  className="flex flex-col items-center transition-transform active:scale-125"
                 >
                   <span
                     className={`grid h-10 w-10 place-items-center rounded-full backdrop-blur-md transition-all ${
@@ -510,13 +588,14 @@ export default function AdsClipsShowcase() {
                 <button
                   type="button"
                   onClick={(e) => handleShare(e, activeClip)}
-                  className="flex flex-col items-center"
+                  className="flex flex-col items-center group transition-transform active:scale-110"
+                  title="অ্যাড লিঙ্ক কপি করুন"
                 >
                   <span className="grid h-10 w-10 place-items-center rounded-full bg-black/60 text-white backdrop-blur-md hover:bg-white hover:text-slate-900 transition-colors">
                     <Share2 size={18} />
                   </span>
-                  <span className="mt-1 text-xs font-black text-white drop-shadow">
-                    {activeClip.shares > 0 ? activeClip.shares : "Share"}
+                  <span className="mt-1 text-xs font-bold text-white drop-shadow">
+                    শেয়ার
                   </span>
                 </button>
               </div>
