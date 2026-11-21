@@ -66,7 +66,7 @@ export default function Navbar() {
             <li><Link to="/dashboard"><ShoppingBag size={16} /> Dashboard</Link></li>
             <li><Link to="/messages"><Compass size={16} /> Messages</Link></li>
             <li><Link to="/notifications"><Bell size={16} /> Notifications</Link></li>
-            {user.role === "owner" && <li><Link to="/dashboard"><Store size={16} /> Manage my shop</Link></li>}
+            {user.role === "owner" && <li><Link to="/dashboard?tab=shop"><Store size={16} /> Manage my shop</Link></li>}
             <li><button onClick={handleLogout}>Sign out</button></li>
           </ul>
         </div> : <><Link to="/login" className="btn btn-ghost btn-sm rounded-full px-4 normal-case">Log in</Link><Link to="/register" className="btn btn-sm rounded-full border-0 bg-forest px-5 text-white hover:bg-forest/90">Join LocalSphere</Link></>}

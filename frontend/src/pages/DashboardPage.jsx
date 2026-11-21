@@ -35,6 +35,15 @@ import {
   Users,
   Wrench,
   X,
+  Crown,
+  Megaphone,
+  Zap,
+  Check,
+  TrendingUp,
+  Target,
+  ShieldCheck,
+  Play,
+  Pause,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useQueryClient } from "@tanstack/react-query";
@@ -268,6 +277,7 @@ export default function DashboardPage({ initialTab = "overview" }) {
         ["customers", "Customers", Users],
         ["reviews", "Reviews", Star],
         ["profile", "Profile & settings", Settings2],
+        ["pro", "Pro Mode", Crown],
       ];
 
   if (!user) {
@@ -290,11 +300,20 @@ export default function DashboardPage({ initialTab = "overview" }) {
           </span>
           <div className="min-w-0">
             <p className="truncate font-bold text-forest">{user.name}</p>
-            <p className="text-xs capitalize text-slate-500">{user.role} account</p>
+            <div className="flex items-center gap-1.5">
+              <p className="text-xs capitalize text-slate-500">{user.role} account</p>
+              {user.role === "owner" && (
+                <span className="inline-flex items-center gap-0.5 rounded-full bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 px-1.5 py-0.2 text-[9px] font-black uppercase text-white shadow-xs">
+                  <Crown size={9} /> PRO
+                </span>
+              )}
+            </div>
           </div>
         </div>
         <nav className="mt-4 space-y-1">
-          {tabs.map(([id, label, Icon]) => {
+          {tabs
+            .filter(([id]) => id !== "pro")
+            .map(([id, label, Icon]) => {
             let badge = null;
             if (id === "inbox" && unreadMessagesCount > 0) {
               badge = (
@@ -341,6 +360,74 @@ export default function DashboardPage({ initialTab = "overview" }) {
               </button>
             );
           })}
+
+          {user.role === "owner" && (
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setTab("pro");
+                  setTargetShopFilter("");
+                }}
+                className={`group relative flex w-full items-center gap-3 overflow-hidden rounded-2xl p-[2.5px] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] animate-pro-glow ${tab === "pro"
+                  ? "ring-2 ring-amber-400 ring-offset-2 ring-offset-white dark:ring-offset-slate-900 shadow-xl shadow-amber-500/30"
+                  : ""
+                  }`}
+              >
+                {/* Colorful dynamic background gradient with constant glowing effect */}
+                <span className="absolute inset-0 bg-gradient-to-r from-amber-500 via-rose-500 to-emerald-500 rounded-2xl opacity-90 transition-opacity group-hover:opacity-100" />
+
+                {/* Inner button surface */}
+                <div
+                  className={`relative flex w-full items-center justify-between gap-2.5 rounded-[13px] px-3.5 py-3 font-bold transition-all ${tab === "pro"
+                    ? "bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 text-white shadow-inner"
+                    : "bg-white/95 text-slate-800 hover:bg-white dark:bg-slate-900/95 dark:text-slate-100"
+                    }`}
+                >
+                  {/* Continuous glowing shimmer sweep */}
+                  <span className="pointer-events-none absolute -inset-full bg-gradient-to-r from-transparent via-white/40 to-transparent -skew-x-12 animate-shimmer-sweep" />
+
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span
+                      className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl shadow-xs transition-transform group-hover:scale-110 ${tab === "pro"
+                        ? "bg-white/25 text-white"
+                        : "bg-gradient-to-tr from-amber-500 to-orange-400 text-white shadow-amber-500/30"
+                        }`}
+                    >
+                      <Crown size={17} className="animate-bounce" style={{ animationDuration: "2s" }} />
+                    </span>
+                    <div className="text-left leading-tight truncate">
+                      <div className="flex items-center gap-1.5">
+                        <span
+                          className={`text-sm font-black tracking-wide ${tab === "pro"
+                            ? "text-white"
+                            : "bg-gradient-to-r from-amber-600 via-rose-600 to-purple-600 bg-clip-text text-transparent dark:from-amber-400 dark:via-rose-400 dark:to-purple-400"
+                            }`}
+                        >
+                          Pro Mode
+                        </span>
+                        <span className="inline-flex items-center rounded-full bg-amber-400/25 px-1.5 py-0.5 text-[9px] font-black uppercase text-amber-700 dark:text-amber-300">
+                          PRO ⚡
+                        </span>
+                      </div>
+                      <p
+                        className={`text-[10px] font-medium truncate ${tab === "pro" ? "text-amber-100" : "text-slate-500 dark:text-slate-400"
+                          }`}
+                      >
+                        Ads & Subscription
+                      </p>
+                    </div>
+                  </div>
+
+                  <Sparkles
+                    size={15}
+                    className={`shrink-0 transition-transform group-hover:rotate-12 ${tab === "pro" ? "text-amber-200" : "text-amber-500"
+                      }`}
+                  />
+                </div>
+              </button>
+            </div>
+          )}
         </nav>
       </aside>
 
@@ -462,6 +549,14 @@ export default function DashboardPage({ initialTab = "overview" }) {
           <FollowingPanel followShop={followShop} followService={followService} />
         )}
         {tab === "profile" && <ProfileSettings user={user} updateProfile={updateProfile} />}
+        {tab === "pro" && (
+          <ProModeSection
+            user={user}
+            shops={shops.data?.items || []}
+            products={products.data?.items || []}
+            services={services.data?.items || []}
+          />
+        )}
         {tab === "inbox" && <MessagesPage />}
         {tab === "customers" && user.role === "owner" && (
           <CustomersPanel ordersQuery={orders} bookingsQuery={bookings} setTab={setTab} />
@@ -4359,6 +4454,1127 @@ function DataList({ title, query, type, user, onUpdate, onRefund, onReconcileRef
           ) : (
             "Nothing to show here yet. Explore LocalSphere to get started."
           )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ----------------- PRO MODE SECTION (SUBSCRIPTIONS & RUN ADS) -----------------
+
+function ProModeSection({ user, shops = [], products = [], services = [] }) {
+  const [proTab, setProTab] = useState("subscription"); // 'subscription' | 'ads'
+  const [billingCycle, setBillingCycle] = useState("monthly"); // 'monthly' | 'yearly'
+
+  // Current active plan
+  const [currentPlanId, setCurrentPlanId] = useState(() => {
+    return localStorage.getItem("ls_subscription_plan") || "starter";
+  });
+
+  // Modal checkout state
+  const [checkoutPlan, setCheckoutPlan] = useState(null);
+  const [mfsProvider, setMfsProvider] = useState("bkash"); // 'bkash' | 'nagad'
+  const [mfsNumber, setMfsNumber] = useState("");
+  const [trxId, setTrxId] = useState("");
+  const [isPaying, setIsPaying] = useState(false);
+
+  // Ad wallet credits
+  const [adCredits, setAdCredits] = useState(() => {
+    return parseInt(localStorage.getItem("ls_ad_credits") || "750", 10);
+  });
+  const [rechargeModalOpen, setRechargeModalOpen] = useState(false);
+  const [rechargeAmount, setRechargeAmount] = useState(500);
+
+  // Campaign creation state
+  const [showCreateCampaign, setShowCreateCampaign] = useState(false);
+  const [campName, setCampName] = useState("");
+  const [campTarget, setCampTarget] = useState("");
+  const [campPlacement, setCampPlacement] = useState("3d_spotlight");
+  const [campRadius, setCampRadius] = useState("1 km");
+  const [campBudget, setCampBudget] = useState(300);
+  const [campDays, setCampDays] = useState(7);
+
+  // Active campaigns list
+  const [campaigns, setCampaigns] = useState(() => {
+    const saved = localStorage.getItem("ls_ad_campaigns");
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) { }
+    }
+    return [
+      {
+        id: "camp-101",
+        name: "Weekend Local Shopper Rush",
+        targetTitle: shops[0]?.name || "Main Neighborhood Shop",
+        placement: "3d_spotlight",
+        placementLabel: "3D Diorama Spotlight",
+        radius: "1 km",
+        dailyBudget: 500,
+        days: 7,
+        status: "active",
+        impressions: 5420,
+        clicks: 489,
+        spent: 1500,
+        createdAt: "2 days ago",
+      },
+      {
+        id: "camp-102",
+        name: "Top Search Keyword Booster",
+        targetTitle: products[0]?.name || "Featured Product",
+        placement: "search_top",
+        placementLabel: "Top of Search Results",
+        radius: "3 km",
+        dailyBudget: 300,
+        days: 5,
+        status: "active",
+        impressions: 3120,
+        clicks: 304,
+        spent: 900,
+        createdAt: "4 days ago",
+      },
+    ];
+  });
+
+  // Save campaigns to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem("ls_ad_campaigns", JSON.stringify(campaigns));
+    } catch (e) { }
+  }, [campaigns]);
+
+  // Subscription plans definitions
+  const plans = [
+    {
+      id: "starter",
+      name: "Starter",
+      badge: "Free Tier",
+      monthlyPrice: 0,
+      yearlyPrice: 0,
+      description: "সব শপ ও সেলারদের জন্য বেসিক ডিরেক্টরি লিস্টিং সুবিধা।",
+      features: [
+        "১টি সক্রিয় শপ লিস্টিং (1 Active Shop)",
+        "১০টি প্রোডাক্ট ও সার্ভিস পর্যন্ত লিস্টিং",
+        "লোকাল ৩ডি ম্যাপে স্ট্যান্ডার্ড পিন",
+        "স্ট্যান্ডার্ড ৫% প্ল্যাটফর্ম ফি",
+        "কমিউনিটি সাপোর্ট ও বেসিক ড্যাশবোর্ড",
+      ],
+      disabledFeatures: [
+        "৩ডি ডায়োরামা স্পটলাইট ও গ্লোয়িং পিন",
+        "ব্লু ভেরিফাইড ব্যাজ (Blue Tick)",
+        "সরাসরি হোয়াটসঅ্যাপ কাস্টমার চ্যাট",
+        "মাসিক ফ্রি অ্যাড ক্রেডিট",
+      ],
+      btnText: "Current Plan / রানিং প্ল্যান",
+    },
+    {
+      id: "growth",
+      name: "Growth Pro",
+      popular: true,
+      badge: "MOST POPULAR ⭐",
+      monthlyPrice: 999,
+      yearlyPrice: 9590,
+      description: "বেশি কাস্টমার, বেশি সেলস এবং ভেরিফাইড ট্রাস্টের জন্য সেরা প্যাকেজ।",
+      features: [
+        "৩টি সক্রিয় শপ ও আউটলেট লিস্টিং",
+        "আনলিমিটেড প্রোডাক্ট ও সার্ভিস লিস্টিং",
+        "🌟 ৩ডি ডায়োরামা গ্লোয়িং স্পটলাইট পিন",
+        "💎 শপ ও প্রোডাক্টে ব্লু ভেরিফাইড ব্যাজ",
+        "📉 মাত্র ২% প্ল্যাটফর্ম কমিশন (৮০% ছাড়)",
+        "🎁 প্রতি মাসে ৳৫০০ ফ্রি অ্যাড ক্রেডিট",
+        "⚡ ওয়ান-ক্লিক সরাসরি হোয়াটসঅ্যাপ কাস্টমার চ্যাট",
+        "📊 রিয়েল-টাইম ভিজিটর অ্যানালিটিক্স ও হিটম্যাপ",
+        "🚀 ২৪/৭ প্রায়োরিটি কাস্টমার সাপোর্ট",
+      ],
+      disabledFeatures: [
+        "লোকাল এরিয়ায় গ্যারান্টেড #১ টপ সার্চ র‍্যাংকিং",
+        "৩ডি ডায়োরামা বিলবোর্ড ব্যানার",
+      ],
+      btnText: "Upgrade to Growth Pro",
+    },
+    {
+      id: "elite",
+      name: "Business Elite",
+      badge: "VIP SCALE 👑",
+      monthlyPrice: 2499,
+      yearlyPrice: 23990,
+      description: "পুরো এলাকায় আপনার শপকে ব্র্যান্ড হিসেবে প্রতিষ্ঠিত করার ভিআইপি সল্যুশন।",
+      features: [
+        "আনলিমিটেড শপ ও মাল্টি-ব্রাঞ্চ আউটলেট",
+        "আনলিমিটেড প্রোডাক্ট ও সার্ভিস লিস্টিং",
+        "👑 পুরো এলাকায় গ্যারান্টেড #১ টপ সার্চ র‍্যাংকিং",
+        "🏢 ৩ডি ডায়োরামা বিলবোর্ড ব্যানার স্পনসরশিপ",
+        "🔥 ০% প্ল্যাটফর্ম কমিশন (১০০% আয় আপনার)",
+        "🎁 প্রতি মাসে ৳২,০০০ ফ্রি অ্যাড ক্রেডিট",
+        "🎯 স্বয়ংক্রিয় লোকাল এরিয়া এসএমএস মার্কেটিং",
+        "🤝 ডেডিকেটেড ভিআইপি অ্যাকাউন্ট ম্যানেজার",
+        "⚡ ইন্সট্যান্ট ব্যাংক ও বিকাশ পে-আউট সেটেলমেন্ট",
+      ],
+      disabledFeatures: [],
+      btnText: "Upgrade to Business Elite",
+    },
+  ];
+
+  const handleStartUpgrade = (plan) => {
+    if (plan.id === currentPlanId) {
+      toast("আপনি ইতিমধ্যে এই প্ল্যানে আছেন!");
+      return;
+    }
+    setCheckoutPlan(plan);
+    setMfsNumber("");
+    setTrxId("");
+  };
+
+  const handleConfirmPayment = () => {
+    if (!mfsNumber || mfsNumber.length < 11) {
+      toast.error("অনুগ্রহ করে একটি সঠিক ১১ ডিজিটের মোবাইল নম্বর দিন");
+      return;
+    }
+    setIsPaying(true);
+    setTimeout(() => {
+      setIsPaying(false);
+      setCurrentPlanId(checkoutPlan.id);
+      localStorage.setItem("ls_subscription_plan", checkoutPlan.id);
+
+      // Add bonus ad credits
+      const bonus = checkoutPlan.id === "elite" ? 2000 : 500;
+      setAdCredits((prev) => {
+        const updated = prev + bonus;
+        localStorage.setItem("ls_ad_credits", String(updated));
+        return updated;
+      });
+
+      toast.success(
+        `🎉 অভিনন্দন! আপনার শপ সফলভাবে ${checkoutPlan.name} সাবস্ক্রিপশনে আপগ্রেড হয়েছে! প্রো ফিচারসমূহ চালু হয়েছে।`,
+        { duration: 5000 }
+      );
+      setCheckoutPlan(null);
+    }, 1200);
+  };
+
+  const handleLaunchCampaign = (e) => {
+    e.preventDefault();
+    if (!campName.trim()) {
+      toast.error("অনুগ্রহ করে একটি ক্যাম্পেইনের নাম দিন");
+      return;
+    }
+    const targetTitle = campTarget || shops[0]?.name || products[0]?.name || "My Storefront";
+    let placementLabel = "3D Diorama Spotlight";
+    if (campPlacement === "search_top") placementLabel = "Top Search Results";
+    if (campPlacement === "feed_sponsored") placementLabel = "Community Feed Sponsored";
+
+    const newCamp = {
+      id: "camp-" + Date.now(),
+      name: campName.trim(),
+      targetTitle,
+      placement: campPlacement,
+      placementLabel,
+      radius: campRadius,
+      dailyBudget: Number(campBudget),
+      days: Number(campDays),
+      status: "active",
+      impressions: 12,
+      clicks: 1,
+      spent: 0,
+      createdAt: "Just now",
+    };
+
+    setCampaigns((prev) => [newCamp, ...prev]);
+    setShowCreateCampaign(false);
+    setCampName("");
+    toast.success("🚀 অ্যাড ক্যাম্পেইন সফলভাবে চালু হয়েছে! এখন ৩ডি ম্যাপ ও লোকাল সার্চে প্রদর্শিত হচ্ছে।");
+  };
+
+  const handleToggleStatus = (id) => {
+    setCampaigns((prev) =>
+      prev.map((c) =>
+        c.id === id ? { ...c, status: c.status === "active" ? "paused" : "active" } : c
+      )
+    );
+    toast.success("ক্যাম্পেইন স্ট্যাটাস আপডেট হয়েছে");
+  };
+
+  const handleDeleteCampaign = (id) => {
+    setCampaigns((prev) => prev.filter((c) => c.id !== id));
+    toast.success("ক্যাম্পেইন ডিলিট করা হয়েছে");
+  };
+
+  const currentPlanObj = plans.find((p) => p.id === currentPlanId) || plans[0];
+
+  return (
+    <div className="space-y-8">
+      {/* Top Banner with Glow and Sub-tab Switcher */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-forest to-slate-900 p-6 text-white shadow-xl sm:p-8">
+        <span className="pointer-events-none absolute -right-16 -top-16 h-72 w-72 rounded-full bg-amber-500/15 blur-3xl" />
+        <span className="pointer-events-none absolute -bottom-16 -left-16 h-72 w-72 rounded-full bg-emerald-500/20 blur-3xl" />
+
+        <div className="relative z-10 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1 text-xs font-bold text-amber-300 backdrop-blur-md">
+              <Sparkles size={14} className="text-amber-400" />
+              <span>LocalSphere Pro Growth Suite</span>
+              <span className="rounded-full bg-amber-400 px-1.5 py-0.2 text-[9px] font-black text-slate-900">PRO ⚡</span>
+            </div>
+            <h2 className="mt-3 text-2xl font-black tracking-tight text-white sm:text-3xl">
+              Pro Mode: Grow Your Local Business
+            </h2>
+            <p className="mt-1 text-sm text-slate-300">
+              সাবস্ক্রিপশন প্যাকেজ আপগ্রেড করুন এবং হাইপার-লোকাল অ্যাড ক্যাম্পেইন চালিয়ে হাজারো কাস্টমার আকর্ষণ করুন।
+            </p>
+          </div>
+
+          {/* Sub-tab Pills Switcher */}
+          <div className="flex shrink-0 items-center rounded-2xl bg-white/10 p-1.5 backdrop-blur-md">
+            <button
+              type="button"
+              onClick={() => setProTab("subscription")}
+              className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-extrabold transition-all duration-200 ${
+                proTab === "subscription"
+                  ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md shadow-amber-500/30"
+                  : "text-slate-300 hover:text-white"
+              }`}
+            >
+              <Crown size={15} />
+              <span>সাবস্ক্রিপশন (Subscription)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setProTab("ads")}
+              className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-extrabold transition-all duration-200 ${
+                proTab === "ads"
+                  ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md shadow-emerald-500/30"
+                  : "text-slate-300 hover:text-white"
+              }`}
+            >
+              <Megaphone size={15} />
+              <span>রান অ্যাডস (Run Ads)</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ===================== 1. SUBSCRIPTION SUB-TAB ===================== */}
+      {proTab === "subscription" && (
+        <div className="space-y-8 animate-fadeIn">
+          {/* Current Plan Summary Card */}
+          <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-amber-200/60 bg-gradient-to-r from-amber-50 via-white to-amber-50/50 p-5 shadow-xs dark:border-amber-500/20 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+            <div className="flex items-center gap-4">
+              <span className="grid h-12 w-12 place-items-center rounded-2xl bg-amber-500 text-white shadow-md shadow-amber-500/25">
+                <Crown size={24} />
+              </span>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-base font-black text-slate-800 dark:text-white">
+                    Current Active Plan: {currentPlanObj.name}
+                  </h3>
+                  <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] font-black text-emerald-700 dark:text-emerald-400">
+                    ● Active Status
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  {currentPlanId === "starter"
+                    ? "আপনার শপ এখন ফ্রি স্টারটার প্ল্যানে আছে। বেশি অর্ডার ও ভেরিফাইড ট্রাস্টের জন্য প্রো প্ল্যানে আপগ্রেড করুন।"
+                    : "আপনার শপে প্রো ভেরিফাইড ব্যাজ, প্রায়োরিটি ৩ডি পিন এবং রিডিউসড প্ল্যাটফর্ম কমিশন সক্রিয় রয়েছে।"}
+                </p>
+              </div>
+            </div>
+
+            {currentPlanId !== "starter" && (
+              <div className="flex items-center gap-2">
+                <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
+                  Renews next month
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCurrentPlanId("starter");
+                    localStorage.setItem("ls_subscription_plan", "starter");
+                    toast.success("সাবস্ক্রিপশন ক্যানসেল করা হয়েছে");
+                  }}
+                  className="btn btn-ghost btn-xs text-xs text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                >
+                  Cancel Plan
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Billing Cycle Toggle */}
+          <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <span className="text-sm font-bold text-slate-600 dark:text-slate-300">বিলিং সাইকেল সিলেক্ট করুন:</span>
+            <div className="inline-flex items-center rounded-full bg-slate-100 p-1 dark:bg-slate-800">
+              <button
+                type="button"
+                onClick={() => setBillingCycle("monthly")}
+                className={`rounded-full px-4 py-1.5 text-xs font-extrabold transition-all ${
+                  billingCycle === "monthly"
+                    ? "bg-forest text-white shadow-xs"
+                    : "text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
+                }`}
+              >
+                মাসিক (Monthly)
+              </button>
+              <button
+                type="button"
+                onClick={() => setBillingCycle("yearly")}
+                className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-extrabold transition-all ${
+                  billingCycle === "yearly"
+                    ? "bg-forest text-white shadow-xs"
+                    : "text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
+                }`}
+              >
+                <span>বাৎসরিক (Yearly)</span>
+                <span className="rounded-full bg-amber-400 px-1.5 py-0.2 text-[10px] font-black text-slate-900">
+                  Save 20%
+                </span>
+              </button>
+            </div>
+          </div>
+
+          {/* 3 Pricing Cards Grid */}
+          <div className="grid gap-6 md:grid-cols-3">
+            {plans.map((p) => {
+              const isCurrent = p.id === currentPlanId;
+              const price = billingCycle === "monthly" ? p.monthlyPrice : p.yearlyPrice;
+              const period = billingCycle === "monthly" ? "/month" : "/year";
+
+              return (
+                <div
+                  key={p.id}
+                  className={`relative flex flex-col justify-between rounded-3xl p-6 transition-all duration-300 ${
+                    p.popular
+                      ? "border-2 border-amber-400 bg-white shadow-xl shadow-amber-500/10 dark:border-amber-400 dark:bg-slate-900"
+                      : "border border-slate-200 bg-white/80 shadow-sm dark:border-slate-800 dark:bg-slate-900/80"
+                  } ${isCurrent ? "ring-2 ring-emerald-500" : ""}`}
+                >
+                  {/* Top Badge */}
+                  {p.popular && (
+                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-3.5 py-1 text-[11px] font-black uppercase tracking-wider text-white shadow-md shadow-amber-500/25">
+                      {p.badge}
+                    </div>
+                  )}
+
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-xl font-black text-slate-900 dark:text-white">{p.name}</h4>
+                      {isCurrent && (
+                        <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-black text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400">
+                          Active Plan
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 min-h-[32px]">
+                      {p.description}
+                    </p>
+
+                    {/* Price display */}
+                    <div className="my-5 flex items-baseline gap-1">
+                      <span className="text-4xl font-black tracking-tight text-forest dark:text-white">
+                        ৳{price.toLocaleString()}
+                      </span>
+                      <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">{period}</span>
+                    </div>
+
+                    <div className="h-px bg-slate-100 dark:bg-slate-800" />
+
+                    {/* Features checklist */}
+                    <div className="my-5 space-y-2.5">
+                      <p className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+                        ইনক্লুডেড সুবিধাসমূহ:
+                      </p>
+                      {p.features.map((feat, idx) => (
+                        <div key={idx} className="flex items-start gap-2.5 text-xs font-medium text-slate-700 dark:text-slate-200">
+                          <span className="mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded-full bg-emerald-500/15 text-emerald-600 dark:bg-emerald-500/25 dark:text-emerald-400">
+                            <Check size={11} strokeWidth={3} />
+                          </span>
+                          <span>{feat}</span>
+                        </div>
+                      ))}
+                      {p.disabledFeatures.map((feat, idx) => (
+                        <div key={idx} className="flex items-start gap-2.5 text-xs font-medium text-slate-400 line-through opacity-60">
+                          <span className="mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded-full bg-slate-200 text-slate-400 dark:bg-slate-800">
+                            <X size={10} />
+                          </span>
+                          <span>{feat}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* CTA button */}
+                  <div className="mt-6">
+                    {isCurrent ? (
+                      <button
+                        type="button"
+                        disabled
+                        className="btn w-full rounded-2xl border border-emerald-500/30 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400 font-bold"
+                      >
+                        ✓ রানিং প্ল্যান (Active)
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => handleStartUpgrade(p)}
+                        className={`group relative btn w-full overflow-hidden rounded-2xl border-0 font-black text-white shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] ${
+                          p.popular
+                            ? "bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 shadow-amber-500/25"
+                            : "bg-forest hover:bg-forest/90 shadow-forest/20"
+                        }`}
+                      >
+                        <span className="relative z-10 flex items-center justify-center gap-2">
+                          <Zap size={16} />
+                          <span>{p.btnText}</span>
+                        </span>
+                        {p.popular && (
+                          <span className="pointer-events-none absolute -inset-full bg-gradient-to-r from-transparent via-white/30 to-transparent -skew-x-12 animate-shimmer-sweep" />
+                        )}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Value comparison table */}
+          <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+            <h4 className="text-base font-black text-slate-900 dark:text-white">
+              প্রো প্যাকেজ নিলে আপনার শপের কী কী লাভ হবে?
+            </h4>
+            <div className="mt-4 grid gap-4 sm:grid-cols-3">
+              <div className="rounded-2xl bg-cream/50 p-4 dark:bg-slate-800/60">
+                <span className="grid h-8 w-8 place-items-center rounded-xl bg-amber-500/20 text-amber-700 dark:text-amber-300">
+                  <TrendingUp size={16} />
+                </span>
+                <h5 className="mt-3 text-sm font-bold text-slate-900 dark:text-white">৪ গুণ বেশি কাস্টমার রিচ</h5>
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  ৩ডি ডায়োরামা ম্যাপ ও লোকাল সার্চে সবার উপরে স্পটলাইট পাওয়ায় কাস্টমার অর্ডার বৃদ্ধি পায় দ্রুত।
+                </p>
+              </div>
+              <div className="rounded-2xl bg-cream/50 p-4 dark:bg-slate-800/60">
+                <span className="grid h-8 w-8 place-items-center rounded-xl bg-emerald-500/20 text-emerald-700 dark:text-emerald-300">
+                  <ShieldCheck size={16} />
+                </span>
+                <h5 className="mt-3 text-sm font-bold text-slate-900 dark:text-white">ব্লু ভেরিফাইড বিশ্বাসযোগ্যতা</h5>
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  ভেরিফাইড ব্যাজ থাকার কারণে কাস্টমার নির্দ্বিধায় সরাসরি বিকাশ/ক্যাশে বড় অঙ্কের অর্ডার করে।
+                </p>
+              </div>
+              <div className="rounded-2xl bg-cream/50 p-4 dark:bg-slate-800/60">
+                <span className="grid h-8 w-8 place-items-center rounded-xl bg-blue-500/20 text-blue-700 dark:text-blue-300">
+                  <CircleDollarSign size={16} />
+                </span>
+                <h5 className="mt-3 text-sm font-bold text-slate-900 dark:text-white">কমিশনে বড় সাশ্রয়</h5>
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  স্ট্যান্ডার্ড ৫% কমিশনের জায়গায় মাত্র ২% বা ০% কমিশন, অর্থাৎ প্রতি মাসে হাজার টাকা সাশ্রয়।
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===================== 2. RUN ADS SUB-TAB ===================== */}
+      {proTab === "ads" && (
+        <div className="space-y-8 animate-fadeIn">
+          {/* Quick Metrics Cards */}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Ad Reach</p>
+                <span className="grid h-8 w-8 place-items-center rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+                  <Eye size={16} />
+                </span>
+              </div>
+              <p className="mt-3 text-2xl font-black text-slate-900 dark:text-white">14,290</p>
+              <div className="mt-1 flex items-center gap-1 text-xs font-semibold text-emerald-600">
+                <TrendingUp size={13} />
+                <span>+24.8% this week</span>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Ad Clicks</p>
+                <span className="grid h-8 w-8 place-items-center rounded-xl bg-blue-500/15 text-blue-600 dark:text-blue-400">
+                  <ArrowUpRight size={16} />
+                </span>
+              </div>
+              <p className="mt-3 text-2xl font-black text-slate-900 dark:text-white">1,420</p>
+              <p className="mt-1 text-xs font-semibold text-slate-500 dark:text-slate-400">Avg. CTR 9.9%</p>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Direct Inquiries</p>
+                <span className="grid h-8 w-8 place-items-center rounded-xl bg-purple-500/15 text-purple-600 dark:text-purple-400">
+                  <MessageSquare size={16} />
+                </span>
+              </div>
+              <p className="mt-3 text-2xl font-black text-slate-900 dark:text-white">184</p>
+              <p className="mt-1 text-xs font-semibold text-purple-600">12.9% Conversion</p>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Ad Wallet Credits</p>
+                <span className="grid h-8 w-8 place-items-center rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400">
+                  <CircleDollarSign size={16} />
+                </span>
+              </div>
+              <div className="mt-3 flex items-baseline justify-between">
+                <p className="text-2xl font-black text-slate-900 dark:text-white">৳{adCredits}</p>
+                <button
+                  type="button"
+                  onClick={() => setRechargeModalOpen(true)}
+                  className="rounded-full bg-forest px-2.5 py-1 text-[11px] font-bold text-white hover:bg-forest/90"
+                >
+                  + Recharge
+                </button>
+              </div>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Available ad budget</p>
+            </div>
+          </div>
+
+          {/* Action Header & Launch New Campaign button */}
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h3 className="text-lg font-black text-slate-900 dark:text-white">Active Ad Campaigns (সক্রিয় বিজ্ঞাপনসমূহ)</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                আপনার শপ ও প্রোডাক্ট নির্দিষ্ট এরিয়ার কাস্টমারদের কাছে বিজ্ঞাপনের মাধ্যমে দ্রুত পৌঁছে দিন।
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowCreateCampaign(!showCreateCampaign)}
+              className="btn rounded-full border-0 bg-forest text-white shadow-sm hover:bg-forest/90"
+            >
+              <Plus size={16} />
+              <span>{showCreateCampaign ? "ক্যাম্পেইন ফর্ম বন্ধ করুন" : "নতুন বিজ্ঞাপন রান করুন (New Campaign)"}</span>
+            </button>
+          </div>
+
+          {/* Create Campaign Drawer / Form */}
+          {showCreateCampaign && (
+            <form
+              onSubmit={handleLaunchCampaign}
+              className="rounded-3xl border border-emerald-500/30 bg-gradient-to-br from-emerald-50/40 via-white to-white p-6 shadow-md dark:border-emerald-500/20 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800"
+            >
+              <div className="flex items-center gap-2 border-b border-slate-100 pb-4 dark:border-slate-800">
+                <span className="grid h-8 w-8 place-items-center rounded-xl bg-forest text-white">
+                  <Megaphone size={16} />
+                </span>
+                <div>
+                  <h4 className="text-base font-black text-slate-900 dark:text-white">
+                    নতুন হাইপার-লোকাল অ্যাড ক্যাম্পেইন কনফিগার করুন
+                  </h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    টার্গেট এরিয়া ও প্লেসমেন্ট সিলেক্ট করে এখনই ক্যাম্পেইন লাইভ করুন।
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-5 grid gap-5 md:grid-cols-2">
+                <div>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    বিজ্ঞাপনের নাম (Campaign Title) *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={campName}
+                    onChange={(e) => setCampName(e.target.value)}
+                    placeholder="e.g., Weekend 20% Discount Offer, Dhaka Special Sweet Rush"
+                    className="mt-1.5 w-full rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium focus:border-forest focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    বিজ্ঞাপনের টার্গেট (Target Shop or Product) *
+                  </label>
+                  <select
+                    value={campTarget}
+                    onChange={(e) => setCampTarget(e.target.value)}
+                    className="mt-1.5 w-full rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium focus:border-forest focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  >
+                    <optgroup label="Shops">
+                      {shops.length > 0 ? (
+                        shops.map((s) => (
+                          <option key={s._id || s.id} value={s.name}>
+                            Shop: {s.name}
+                          </option>
+                        ))
+                      ) : (
+                        <option value="Main Storefront">Main Storefront</option>
+                      )}
+                    </optgroup>
+                    {products.length > 0 && (
+                      <optgroup label="Products">
+                        {products.slice(0, 10).map((p) => (
+                          <option key={p._id || p.id} value={p.name}>
+                            Product: {p.name}
+                          </option>
+                        ))}
+                      </optgroup>
+                    )}
+                    {services.length > 0 && (
+                      <optgroup label="Services">
+                        {services.slice(0, 10).map((sv) => (
+                          <option key={sv._id || sv.id} value={sv.name}>
+                            Service: {sv.name}
+                          </option>
+                        ))}
+                      </optgroup>
+                    )}
+                  </select>
+                </div>
+              </div>
+
+              {/* Placement Options Radio Cards */}
+              <div className="mt-5">
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                  বিজ্ঞাপন প্রদর্শনের স্থান (Ad Placement) *
+                </label>
+                <div className="mt-2 grid gap-3 sm:grid-cols-3">
+                  {[
+                    {
+                      id: "3d_spotlight",
+                      title: "3D Diorama Spotlight",
+                      desc: "৩ডি ম্যাপে আপনার দোকানটি জ্বলজ্বল করবে এবং গোল্ডেন লাইট শো করবে।",
+                      badge: "High Visual Impact",
+                    },
+                    {
+                      id: "search_top",
+                      title: "Top of Search Results",
+                      desc: "কাস্টমার ক্যাটাগরি বা কিওয়ার্ড লিখে সার্চ দিলে ১ নাম্বারে দেখাবে।",
+                      badge: "Highest Intent",
+                    },
+                    {
+                      id: "feed_sponsored",
+                      title: "Community Feed Sponsored",
+                      desc: "কমিউনিটি সেকশনে কাস্টমারদের ফিডে স্পনসরড কার্ড আকারে পৌঁছাবে।",
+                      badge: "High Engagement",
+                    },
+                  ].map((pl) => (
+                    <div
+                      key={pl.id}
+                      onClick={() => setCampPlacement(pl.id)}
+                      className={`cursor-pointer rounded-2xl border p-3.5 transition-all ${
+                        campPlacement === pl.id
+                          ? "border-forest bg-forest/5 ring-1 ring-forest dark:border-emerald-400 dark:bg-emerald-950/20"
+                          : "border-slate-200 bg-white hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-slate-900 dark:text-white">{pl.title}</span>
+                        <input
+                          type="radio"
+                          name="placement"
+                          checked={campPlacement === pl.id}
+                          onChange={() => setCampPlacement(pl.id)}
+                          className="radio radio-xs radio-success"
+                        />
+                      </div>
+                      <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">{pl.desc}</p>
+                      <span className="mt-2 inline-block rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-bold text-slate-600 dark:bg-slate-700 dark:text-slate-300">
+                        {pl.badge}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Radius and Budget */}
+              <div className="mt-5 grid gap-5 sm:grid-cols-3">
+                <div>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    টার্গেট ব্যাসার্ধ (Target Radius)
+                  </label>
+                  <div className="mt-1.5 flex gap-2">
+                    {["1 km", "3 km", "5 km+"].map((rad) => (
+                      <button
+                        key={rad}
+                        type="button"
+                        onClick={() => setCampRadius(rad)}
+                        className={`flex-1 rounded-xl py-2 text-xs font-bold transition-all ${
+                          campRadius === rad
+                            ? "bg-forest text-white"
+                            : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                        }`}
+                      >
+                        {rad}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    দৈনিক বাজেট (Daily Budget ৳)
+                  </label>
+                  <div className="mt-1.5 flex gap-2">
+                    {[200, 500, 1000].map((b) => (
+                      <button
+                        key={b}
+                        type="button"
+                        onClick={() => setCampBudget(b)}
+                        className={`flex-1 rounded-xl py-2 text-xs font-bold transition-all ${
+                          campBudget === b
+                            ? "bg-forest text-white"
+                            : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                        }`}
+                      >
+                        ৳{b}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">মেয়াদ (Duration)</label>
+                  <select
+                    value={campDays}
+                    onChange={(e) => setCampDays(Number(e.target.value))}
+                    className="mt-1.5 w-full rounded-2xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold focus:border-forest focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  >
+                    <option value={3}>3 Days (৳{campBudget * 3})</option>
+                    <option value={7}>7 Days (৳{campBudget * 7})</option>
+                    <option value={14}>14 Days (৳{campBudget * 14})</option>
+                    <option value={30}>30 Days (৳{campBudget * 30})</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Estimate preview & Submit button */}
+              <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-slate-50 p-4 dark:bg-slate-800/80">
+                <div className="flex items-center gap-3">
+                  <span className="grid h-9 w-9 place-items-center rounded-xl bg-emerald-500/20 text-emerald-700 dark:text-emerald-300">
+                    <Target size={18} />
+                  </span>
+                  <div>
+                    <p className="text-xs font-bold text-slate-900 dark:text-white">
+                      আনুমানিক পৌঁছাবে: ~{(campBudget * campDays * 12).toLocaleString()} -{" "}
+                      {(campBudget * campDays * 22).toLocaleString()} স্থানীয় কাস্টমারের কাছে
+                    </p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                      মোট খরচ: ৳{(campBudget * campDays).toLocaleString()} (বাজেট থেকে স্বয়ংক্রিয়ভাবে ব্যালেন্স অ্যাডজাস্ট হবে)
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowCreateCampaign(false)}
+                    className="btn btn-ghost btn-sm rounded-full"
+                  >
+                    বাতিল করুন
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn btn-sm rounded-full border-0 bg-forest text-white hover:bg-forest/90"
+                  >
+                    <Zap size={14} />
+                    <span>ক্যাম্পেইন শুরু করুন (Launch Ad)</span>
+                  </button>
+                </div>
+              </div>
+            </form>
+          )}
+
+          {/* Campaigns Table */}
+          <div className="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="border-b border-slate-100 bg-slate-50/75 text-[11px] font-black uppercase tracking-wider text-slate-500 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-400">
+                  <tr>
+                    <th className="px-5 py-3.5">Campaign Name & Target</th>
+                    <th className="px-5 py-3.5">Placement</th>
+                    <th className="px-5 py-3.5">Radius</th>
+                    <th className="px-5 py-3.5">Daily Budget</th>
+                    <th className="px-5 py-3.5">Reach / Clicks</th>
+                    <th className="px-5 py-3.5">Status</th>
+                    <th className="px-5 py-3.5 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                  {campaigns.length > 0 ? (
+                    campaigns.map((camp) => (
+                      <tr key={camp.id} className="transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                        <td className="px-5 py-4">
+                          <p className="font-bold text-slate-900 dark:text-white">{camp.name}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">🎯 {camp.targetTitle}</p>
+                        </td>
+                        <td className="px-5 py-4">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                            {camp.placement === "3d_spotlight" && <Sparkles size={12} className="text-amber-500" />}
+                            {camp.placement === "search_top" && <Search size={12} className="text-blue-500" />}
+                            {camp.placement === "feed_sponsored" && <Users size={12} className="text-emerald-500" />}
+                            <span>{camp.placementLabel}</span>
+                          </span>
+                        </td>
+                        <td className="px-5 py-4 text-xs font-bold text-slate-600 dark:text-slate-300">
+                          {camp.radius}
+                        </td>
+                        <td className="px-5 py-4">
+                          <span className="font-extrabold text-forest dark:text-emerald-400">৳{camp.dailyBudget}</span>
+                          <span className="text-[11px] text-slate-400">/day</span>
+                        </td>
+                        <td className="px-5 py-4">
+                          <div className="text-xs">
+                            <span className="font-bold text-slate-800 dark:text-white">{camp.impressions.toLocaleString()}</span>{" "}
+                            <span className="text-slate-400">views</span>
+                            <span className="mx-1 text-slate-300">|</span>
+                            <span className="font-bold text-emerald-600">{camp.clicks.toLocaleString()}</span>{" "}
+                            <span className="text-slate-400">clicks</span>
+                          </div>
+                        </td>
+                        <td className="px-5 py-4">
+                          {camp.status === "active" ? (
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400">
+                              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                              Running
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700 dark:bg-amber-950/50 dark:text-amber-400">
+                              <span className="h-2 w-2 rounded-full bg-amber-500" />
+                              Paused
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-5 py-4 text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => handleToggleStatus(camp.id)}
+                              className="btn btn-ghost btn-xs rounded-lg"
+                              title={camp.status === "active" ? "Pause campaign" : "Resume campaign"}
+                            >
+                              {camp.status === "active" ? <Pause size={14} /> : <Play size={14} />}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteCampaign(camp.id)}
+                              className="btn btn-ghost btn-xs rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                              title="Delete campaign"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={7} className="p-8 text-center text-sm text-slate-500">
+                        এখনো কোনো ক্যাম্পেইন চালানো হয়নি। উপরের বাটন ক্লিক করে প্রথম বিজ্ঞাপন রান করুন!
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===================== CHECKOUT MODAL (BKASH / NAGAD) ===================== */}
+      {checkoutPlan && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
+          <div className="relative w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl dark:bg-slate-900 animate-fadeIn">
+            {/* Close Button */}
+            <button
+              type="button"
+              onClick={() => setCheckoutPlan(null)}
+              className="absolute right-4 top-4 grid h-8 w-8 place-items-center rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+            >
+              <X size={18} />
+            </button>
+
+            {/* Modal Header */}
+            <div className="flex items-center gap-3">
+              <span className="grid h-11 w-11 place-items-center rounded-2xl bg-amber-500 text-white shadow-md shadow-amber-500/25">
+                <Crown size={22} />
+              </span>
+              <div>
+                <h3 className="text-lg font-black text-slate-900 dark:text-white">
+                  Upgrade to {checkoutPlan.name}
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  ইন্সট্যান্ট মোবাইল পেমেন্টের মাধ্যমে প্রো মেম্বারশিপ সক্রিয় করুন
+                </p>
+              </div>
+            </div>
+
+            {/* Price pill */}
+            <div className="my-5 flex items-center justify-between rounded-2xl bg-cream/70 p-4 dark:bg-slate-800">
+              <span className="text-xs font-bold text-slate-600 dark:text-slate-300">পরিশোধের পরিমাণ:</span>
+              <span className="text-xl font-black text-forest dark:text-emerald-400">
+                ৳{(billingCycle === "monthly" ? checkoutPlan.monthlyPrice : checkoutPlan.yearlyPrice).toLocaleString()}{" "}
+                <span className="text-xs font-normal text-slate-500">
+                  ({billingCycle === "monthly" ? "মাসিক" : "বাৎসরিক"})
+                </span>
+              </span>
+            </div>
+
+            {/* Payment method selector */}
+            <div>
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">পেমেন্ট মেথড বেছে নিন:</label>
+              <div className="mt-2 grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setMfsProvider("bkash")}
+                  className={`flex items-center justify-center gap-2 rounded-2xl border-2 py-3 text-xs font-extrabold transition-all ${
+                    mfsProvider === "bkash"
+                      ? "border-pink-500 bg-pink-50 text-pink-700 dark:bg-pink-950/20 dark:text-pink-400 shadow-xs"
+                      : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                  }`}
+                >
+                  <span className="h-3 w-3 rounded-full bg-pink-600" />
+                  <span>bKash (বিকাশ)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMfsProvider("nagad")}
+                  className={`flex items-center justify-center gap-2 rounded-2xl border-2 py-3 text-xs font-extrabold transition-all ${
+                    mfsProvider === "nagad"
+                      ? "border-orange-500 bg-orange-50 text-orange-700 dark:bg-orange-950/20 dark:text-orange-400 shadow-xs"
+                      : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                  }`}
+                >
+                  <span className="h-3 w-3 rounded-full bg-orange-500" />
+                  <span>Nagad (নগদ)</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Mobile number input */}
+            <div className="mt-4">
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                আপনার {mfsProvider === "bkash" ? "বিকাশ" : "নগদ"} নম্বর *
+              </label>
+              <div className="relative mt-1">
+                <input
+                  type="text"
+                  maxLength={11}
+                  value={mfsNumber}
+                  onChange={(e) => setMfsNumber(e.target.value.replace(/\D/g, ""))}
+                  placeholder="017XXXXXXXX"
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold tracking-wider focus:border-forest focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                />
+                <button
+                  type="button"
+                  onClick={() => setMfsNumber("01712345678")}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-forest underline dark:text-emerald-400"
+                >
+                  Use Demo
+                </button>
+              </div>
+            </div>
+
+            {/* TrxID / Security note */}
+            <div className="mt-3 text-[11px] text-slate-500 dark:text-slate-400">
+              🔒 সুরক্ষিত স্যান্ডবক্স পেমেন্ট গেটওয়ে। নম্বর দিয়ে নিচের বাটনে ক্লিক করলে স্বয়ংক্রিয়ভাবে প্রমোশন ভেরিফাই হয়ে প্রো মোড চালু হবে।
+            </div>
+
+            {/* Confirm upgrade button */}
+            <div className="mt-6 flex gap-3">
+              <button
+                type="button"
+                onClick={() => setCheckoutPlan(null)}
+                className="btn btn-ghost flex-1 rounded-2xl"
+              >
+                বাতিল
+              </button>
+              <button
+                type="button"
+                disabled={isPaying}
+                onClick={handleConfirmPayment}
+                className={`btn flex-1 rounded-2xl border-0 font-bold text-white ${
+                  mfsProvider === "bkash"
+                    ? "bg-pink-600 hover:bg-pink-700"
+                    : "bg-orange-600 hover:bg-orange-700"
+                }`}
+              >
+                {isPaying ? (
+                  <span className="loading loading-spinner loading-xs" />
+                ) : (
+                  <span>পেমেন্ট নিশ্চিত করুন (Pay Now)</span>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===================== AD CREDITS RECHARGE MODAL ===================== */}
+      {rechargeModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
+          <div className="relative w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl dark:bg-slate-900 animate-fadeIn">
+            <button
+              type="button"
+              onClick={() => setRechargeModalOpen(false)}
+              className="absolute right-4 top-4 grid h-8 w-8 place-items-center rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+            >
+              <X size={18} />
+            </button>
+
+            <div className="flex items-center gap-2.5">
+              <span className="grid h-10 w-10 place-items-center rounded-2xl bg-emerald-500 text-white shadow-xs">
+                <CircleDollarSign size={20} />
+              </span>
+              <div>
+                <h4 className="text-base font-black text-slate-900 dark:text-white">রিচার্জ অ্যাড ক্রেডিট</h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400">বিজ্ঞাপন বাজেট বাড়াতে ব্যালেন্স যোগ করুন</p>
+              </div>
+            </div>
+
+            <div className="mt-5 space-y-2">
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">অ্যামাউন্ট সিলেক্ট করুন:</label>
+              <div className="grid grid-cols-3 gap-2">
+                {[300, 500, 1000].map((amt) => (
+                  <button
+                    key={amt}
+                    type="button"
+                    onClick={() => setRechargeAmount(amt)}
+                    className={`rounded-xl py-2 text-xs font-bold transition-all ${
+                      rechargeAmount === amt
+                        ? "bg-forest text-white"
+                        : "border border-slate-200 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                    }`}
+                  >
+                    ৳{amt}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-6 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setRechargeModalOpen(false)}
+                className="btn btn-ghost btn-sm flex-1 rounded-full"
+              >
+                বাতিল
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setAdCredits((prev) => {
+                    const next = prev + rechargeAmount;
+                    localStorage.setItem("ls_ad_credits", String(next));
+                    return next;
+                  });
+                  toast.success(`🎉 সফলভাবে ৳${rechargeAmount} অ্যাড ক্রেডিট যোগ হয়েছে!`);
+                  setRechargeModalOpen(false);
+                }}
+                className="btn btn-sm flex-1 rounded-full border-0 bg-forest text-white hover:bg-forest/90"
+              >
+                রিচার্জ করুন
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
