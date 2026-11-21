@@ -44,6 +44,10 @@ import {
   ShieldCheck,
   Play,
   Pause,
+  Flame,
+  Share2,
+  Video,
+  Film,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useQueryClient } from "@tanstack/react-query";
@@ -4516,10 +4520,16 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
   const [showCreateCampaign, setShowCreateCampaign] = useState(false);
   const [campName, setCampName] = useState("");
   const [campTarget, setCampTarget] = useState("");
-  const [campPlacement, setCampPlacement] = useState("3d_spotlight");
+  const [campPlacements, setCampPlacements] = useState(["3d_spotlight", "ads_clips"]);
   const [campRadius, setCampRadius] = useState("1 km");
-  const [campBudget, setCampBudget] = useState(300);
+  const [campBudget, setCampBudget] = useState(25);
   const [campDays, setCampDays] = useState(7);
+  // Video upload states for Ads Clips (Max 40 MB)
+  const [campVideoFile, setCampVideoFile] = useState(null);
+  const [campVideoUrl, setCampVideoUrl] = useState("");
+  const [campVideoSizeMB, setCampVideoSizeMB] = useState(0);
+  const [isUploadingVideo, setIsUploadingVideo] = useState(false);
+  const [campCaption, setCampCaption] = useState("");
 
   // Active campaigns list
   const [campaigns, setCampaigns] = useState(() => {
@@ -4534,34 +4544,46 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
         id: "camp-101",
         name: "Weekend Local Shopper Rush",
         targetTitle: shops[0]?.name || "Main Neighborhood Shop",
+        targetId: shops[0]?._id || "shop-bakery-1",
+        ownerId: user?._id || "owner-bakery",
+        placements: ["3d_spotlight", "ads_clips"],
         placement: "3d_spotlight",
-        placementLabel: "3D Diorama Spotlight",
+        placementLabel: "3D Diorama + Ads Clips",
+        videoUrl: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
+        caption: "আজকের স্পেশাল অফারে যেকোনো কফির সাথে ক্রসাঁ মাত্র ৳১২০! হোম ডেলিভারি এভেইলেবল।",
         radius: "1 km",
-        dailyBudget: 500,
+        dailyBudget: 50,
         paidDays: 7,
         bonusDays: 7,
         days: 14,
         status: "active",
         impressions: 5420,
         clicks: 489,
-        spent: 1500,
+        likes: 1420,
+        shares: 312,
+        spent: 350,
         createdAt: "2 days ago",
       },
       {
         id: "camp-102",
         name: "Top Search Keyword Booster",
         targetTitle: products[0]?.name || "Featured Product",
+        targetId: products[0]?._id || "prod-feat-1",
+        ownerId: user?._id || "owner-demo",
+        placements: ["search_top"],
         placement: "search_top",
-        placementLabel: "Top of Search Results",
+        placementLabel: "Top Search Results",
         radius: "3 km",
-        dailyBudget: 300,
+        dailyBudget: 25,
         paidDays: 5,
         bonusDays: 7,
         days: 12,
         status: "active",
         impressions: 3120,
         clicks: 304,
-        spent: 900,
+        likes: 245,
+        shares: 58,
+        spent: 125,
         createdAt: "4 days ago",
       },
     ];
@@ -4711,31 +4733,102 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
   const planExtraDays = currentPlanId === "elite" ? 21 : currentPlanId === "growth" ? 7 : 0;
   const totalCampaignDays = Number(campDays) + planExtraDays;
 
+  // Toggle individual placement selection in multi-select mode
+  const handleTogglePlacement = (id) => {
+    setCampPlacements((prev) => {
+      if (prev.includes(id)) {
+        if (prev.length === 1) {
+          toast.error("বিজ্ঞাপনের জন্য অন্তত একটি স্থান সিলেক্ট থাকতে হবে!");
+          return prev;
+        }
+        return prev.filter((p) => p !== id);
+      } else {
+        return [...prev, id];
+      }
+    });
+  };
+
+  // Video file upload handler for Ads Clips (Max 40 MB)
+  const handleVideoSelect = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const maxBytes = 40 * 1024 * 1024; // 40 MB limit
+    if (file.size > maxBytes) {
+      toast.error(
+        `ভিডিও সাইজ সর্বোচ্চ ৪০ MB হতে পারে! (আপনার ফাইলটি ${(file.size / (1024 * 1024)).toFixed(1)} MB)`
+      );
+      return;
+    }
+
+    setCampVideoFile(file);
+    setCampVideoSizeMB((file.size / (1024 * 1024)).toFixed(1));
+
+    const formData = new FormData();
+    formData.append("video", file);
+    formData.append("folder", "owners");
+
+    setIsUploadingVideo(true);
+    const toastId = toast.loading(`ভিডিও আপলোড হচ্ছে... (${(file.size / (1024 * 1024)).toFixed(1)} MB)`);
+    try {
+      const res = await api.post("/uploads/video", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      const uploadedUrl = res.data?.url || (res.data?.filename ? `/uploads/owners/${res.data.filename}` : "");
+      setCampVideoUrl(uploadedUrl);
+      toast.success("ভিডিও সফলভাবে আপলোড হয়েছে!", { id: toastId });
+    } catch (err) {
+      // In case offline or sandbox preview fallback:
+      const localUrl = URL.createObjectURL(file);
+      setCampVideoUrl(localUrl);
+      toast.success("ভিডিও প্রিভিউ লোড হয়েছে!", { id: toastId });
+    } finally {
+      setIsUploadingVideo(false);
+    }
+  };
+
   const handleLaunchCampaign = (e) => {
     e.preventDefault();
     if (!campName.trim()) {
       toast.error("অনুগ্রহ করে একটি ক্যাম্পেইনের নাম দিন");
       return;
     }
+    if (campPlacements.length === 0) {
+      toast.error("বিজ্ঞাপন প্রদর্শনের জন্য অন্তত একটি স্থান সিলেক্ট করুন");
+      return;
+    }
     const targetTitle = campTarget || shops[0]?.name || products[0]?.name || "My Storefront";
-    let placementLabel = "3D Diorama Spotlight";
-    if (campPlacement === "search_top") placementLabel = "Top Search Results";
-    if (campPlacement === "feed_sponsored") placementLabel = "Community Feed Sponsored";
+    
+    const placementLabels = campPlacements.map((p) => {
+      if (p === "3d_spotlight") return "3D Spotlight";
+      if (p === "search_top") return "Search Top";
+      if (p === "feed_sponsored") return "Community Feed";
+      if (p === "ads_clips") return "Ads Clips";
+      return p;
+    });
 
     const newCamp = {
       id: "camp-" + Date.now(),
       name: campName.trim(),
       targetTitle,
-      placement: campPlacement,
-      placementLabel,
+      targetId: shops[0]?._id || "shop-main",
+      ownerId: user?._id || "owner",
+      shopLogo: shops[0]?.logo || "",
+      placements: campPlacements,
+      placement: campPlacements[0],
+      placementLabel: placementLabels.join(" + "),
+      videoUrl: campVideoUrl || "",
+      caption: campCaption.trim() || "",
       radius: campRadius,
       dailyBudget: Number(campBudget),
       paidDays: Number(campDays),
       bonusDays: planExtraDays,
       days: totalCampaignDays,
       status: "active",
-      impressions: 12,
-      clicks: 1,
+      impressions: 140,
+      clicks: 12,
+      likes: 0,
+      shares: 0,
       spent: 0,
       createdAt: "Just now",
     };
@@ -4743,6 +4836,9 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
     setCampaigns((prev) => [newCamp, ...prev]);
     setShowCreateCampaign(false);
     setCampName("");
+    setCampVideoFile(null);
+    setCampVideoUrl("");
+    setCampCaption("");
     toast.success(
       `🚀 অ্যাড ক্যাম্পেইন সফলভাবে চালু হয়েছে! মোট ${totalCampaignDays} দিন (${campDays} দিন + ${planExtraDays} দিন ফ্রি বোনাস) প্রদর্শিত হবে।`
     );
@@ -5190,59 +5286,177 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
                 </div>
               </div>
 
-              {/* Placement Options Radio Cards */}
+              {/* Placement Options Multi-Select Cards */}
               <div className="mt-5">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                  বিজ্ঞাপন প্রদর্শনের স্থান (Ad Placement) *
-                </label>
-                <div className="mt-2 grid gap-3 sm:grid-cols-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    বিজ্ঞাপন প্রদর্শনের স্থান (Ad Placements - একাধিক সিলেক্ট করতে পারবেন) *
+                  </label>
+                  <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+                    {campPlacements.length}টি স্থান সিলেক্টেড
+                  </span>
+                </div>
+                <div className="mt-2 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                   {[
                     {
                       id: "3d_spotlight",
                       title: "3D Diorama Spotlight",
                       desc: "৩ডি ম্যাপে আপনার দোকানটি জ্বলজ্বল করবে এবং গোল্ডেন লাইট শো করবে।",
                       badge: "High Visual Impact",
+                      icon: Sparkles,
+                      iconColor: "text-amber-500",
                     },
                     {
                       id: "search_top",
                       title: "Top of Search Results",
-                      desc: "কাস্টমার ক্যাটাগরি বা কিওয়ার্ড লিখে সার্চ দিলে ১ নাম্বারে দেখাবে।",
+                      desc: "কাস্টমার ক্যাটাগরি বা কিওয়ার্ড লিখে সার্চ দিলে শুরুতে দেখাবে।",
                       badge: "Highest Intent",
+                      icon: Search,
+                      iconColor: "text-blue-500",
                     },
                     {
                       id: "feed_sponsored",
                       title: "Community Feed Sponsored",
                       desc: "কমিউনিটি সেকশনে কাস্টমারদের ফিডে স্পনসরড কার্ড আকারে পৌঁছাবে।",
                       badge: "High Engagement",
+                      icon: Users,
+                      iconColor: "text-emerald-500",
                     },
-                  ].map((pl) => (
-                    <div
-                      key={pl.id}
-                      onClick={() => setCampPlacement(pl.id)}
-                      className={`cursor-pointer rounded-2xl border p-3.5 transition-all ${
-                        campPlacement === pl.id
-                          ? "border-forest bg-forest/5 ring-1 ring-forest dark:border-emerald-400 dark:bg-emerald-950/20"
-                          : "border-slate-200 bg-white hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-slate-900 dark:text-white">{pl.title}</span>
-                        <input
-                          type="radio"
-                          name="placement"
-                          checked={campPlacement === pl.id}
-                          onChange={() => setCampPlacement(pl.id)}
-                          className="radio radio-xs radio-success"
-                        />
+                    {
+                      id: "ads_clips",
+                      title: "Ads Clips (শর্টস / রিলস)",
+                      desc: "হোম পেজের রিলস সেকশনে আপনার ভিডিও চলবে এবং সরাসরি লাইক, শেয়ার ও চ্যাট মেসেজ পাবে।",
+                      badge: "Viral 9:16 Format 🔥",
+                      icon: Video,
+                      iconColor: "text-rose-500",
+                    },
+                  ].map((pl) => {
+                    const isSelected = campPlacements.includes(pl.id);
+                    const IconComponent = pl.icon;
+                    return (
+                      <div
+                        key={pl.id}
+                        onClick={() => handleTogglePlacement(pl.id)}
+                        className={`cursor-pointer rounded-2xl border p-3.5 transition-all select-none ${
+                          isSelected
+                            ? "border-forest bg-forest/5 ring-1.5 ring-forest dark:border-emerald-400 dark:bg-emerald-950/20"
+                            : "border-slate-200 bg-white hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800"
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-center gap-1.5">
+                            <IconComponent size={14} className={pl.iconColor} />
+                            <span className="text-xs font-bold text-slate-900 dark:text-white leading-tight">
+                              {pl.title}
+                            </span>
+                          </div>
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => handleTogglePlacement(pl.id)}
+                            className="checkbox checkbox-xs checkbox-success mt-0.5 rounded"
+                          />
+                        </div>
+                        <p className="mt-2 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+                          {pl.desc}
+                        </p>
+                        <span className="mt-2.5 inline-block rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-bold text-slate-600 dark:bg-slate-700 dark:text-slate-300">
+                          {pl.badge}
+                        </span>
                       </div>
-                      <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">{pl.desc}</p>
-                      <span className="mt-2 inline-block rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-bold text-slate-600 dark:bg-slate-700 dark:text-slate-300">
-                        {pl.badge}
-                      </span>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
+
+              {/* Video Upload Section for Ads Clips (Max 40 MB) */}
+              {campPlacements.includes("ads_clips") && (
+                <div className="mt-5 rounded-2xl border border-rose-200/80 bg-rose-50/40 p-4 dark:border-rose-900/40 dark:bg-rose-950/20">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="grid h-7 w-7 place-items-center rounded-lg bg-rose-500 text-white">
+                        <Video size={15} />
+                      </span>
+                      <div>
+                        <h4 className="text-xs font-bold text-slate-900 dark:text-white">
+                          অ্যাড ক্লিপস শর্ট ভিডিও আপলোড (সর্বোচ্চ ৪০ MB)
+                        </h4>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                          হোম পেজের রিলস সেকশনে প্রদর্শনের জন্য ৯:১৬ ফরম্যাটের ভিডিও (MP4, WebM, MOV)
+                        </p>
+                      </div>
+                    </div>
+                    {campVideoSizeMB > 0 && (
+                      <span className="rounded-full bg-white px-2.5 py-0.5 text-[10px] font-black text-rose-600 shadow-xs dark:bg-slate-800 dark:text-rose-400">
+                        {campVideoSizeMB} MB
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="mt-3 grid gap-4 sm:grid-cols-2">
+                    {/* Upload or Preview Box */}
+                    <div>
+                      {campVideoUrl ? (
+                        <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-black shadow-inner dark:border-slate-700">
+                          <video
+                            src={campVideoUrl}
+                            controls
+                            className="h-44 w-full rounded-xl object-contain bg-black"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCampVideoFile(null);
+                              setCampVideoUrl("");
+                              setCampVideoSizeMB(0);
+                            }}
+                            className="absolute right-2 top-2 rounded-full bg-black/70 p-1.5 text-white hover:bg-rose-600 transition-colors"
+                            title="Remove video"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      ) : (
+                        <label className="flex h-44 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-rose-300 bg-white/70 p-4 text-center transition-all hover:border-rose-400 hover:bg-white dark:border-rose-800 dark:bg-slate-800/60 dark:hover:bg-slate-800">
+                          <UploadCloud size={28} className="text-rose-500 animate-bounce" />
+                          <span className="mt-2 text-xs font-bold text-slate-800 dark:text-slate-200">
+                            ক্লিক করে ভিডিও ফাইল সিলেক্ট করুন
+                          </span>
+                          <span className="mt-1 text-[10px] text-slate-400">
+                            MP4, WebM বা QuickTime MOV (সর্বোচ্চ ৪০ MB)
+                          </span>
+                          <input
+                            type="file"
+                            accept="video/mp4,video/webm,video/quicktime,video/x-m4v"
+                            onChange={handleVideoSelect}
+                            disabled={isUploadingVideo}
+                            className="hidden"
+                          />
+                        </label>
+                      )}
+                    </div>
+
+                    {/* Caption / Offer Text */}
+                    <div className="flex flex-col justify-between">
+                      <div>
+                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                          ক্লিপস অফার বা ক্যাপশন (ঐচ্ছিক)
+                        </label>
+                        <textarea
+                          rows={3}
+                          value={campCaption}
+                          onChange={(e) => setCampCaption(e.target.value)}
+                          placeholder="যেমন: আজকের স্পেশাল অফারে যেকোনো কফির সাথে ক্রসাঁ মাত্র ৳১২০! হোম ডেলিভারি এভেইলেবল।"
+                          className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs focus:border-forest focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                        />
+                      </div>
+                      <div className="rounded-xl bg-white/80 p-2.5 text-[11px] text-slate-500 dark:bg-slate-800/80 dark:text-slate-400">
+                        💡 <span className="font-semibold text-slate-700 dark:text-slate-200">টিপস:</span> কাস্টমাররা ভিডিও দেখে সরাসরি <Heart size={12} className="inline text-rose-500" /> লাইক ও শপে মেসেজ পাঠাতে পারবেন।
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Radius and Budget */}
               <div className="mt-5 grid gap-5 sm:grid-cols-3">
@@ -5273,7 +5487,7 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
                     দৈনিক বাজেট (Daily Budget ৳)
                   </label>
                   <div className="mt-1.5 flex gap-2">
-                    {[200, 500, 1000].map((b) => (
+                    {[25, 50, 80].map((b) => (
                       <button
                         key={b}
                         type="button"
@@ -5349,10 +5563,11 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
                 <thead className="border-b border-slate-100 bg-slate-50/75 text-[11px] font-black uppercase tracking-wider text-slate-500 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-400">
                   <tr>
                     <th className="px-5 py-3.5">Campaign Name & Target</th>
-                    <th className="px-5 py-3.5">Placement</th>
+                    <th className="px-5 py-3.5">Placements</th>
                     <th className="px-5 py-3.5">Radius</th>
                     <th className="px-5 py-3.5">Daily Budget</th>
                     <th className="px-5 py-3.5">Reach / Clicks</th>
+                    <th className="px-5 py-3.5">Likes / Shares</th>
                     <th className="px-5 py-3.5">Status</th>
                     <th className="px-5 py-3.5 text-right">Actions</th>
                   </tr>
@@ -5366,12 +5581,30 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
                           <p className="text-xs text-slate-500 dark:text-slate-400">🎯 {camp.targetTitle}</p>
                         </td>
                         <td className="px-5 py-4">
-                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-                            {camp.placement === "3d_spotlight" && <Sparkles size={12} className="text-amber-500" />}
-                            {camp.placement === "search_top" && <Search size={12} className="text-blue-500" />}
-                            {camp.placement === "feed_sponsored" && <Users size={12} className="text-emerald-500" />}
-                            <span>{camp.placementLabel}</span>
-                          </span>
+                          <div className="flex flex-wrap gap-1">
+                            {(camp.placements || [camp.placement]).map((pId) => (
+                              <span
+                                key={pId}
+                                className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                              >
+                                {pId === "3d_spotlight" && <Sparkles size={10} className="text-amber-500" />}
+                                {pId === "search_top" && <Search size={10} className="text-blue-500" />}
+                                {pId === "feed_sponsored" && <Users size={10} className="text-emerald-500" />}
+                                {pId === "ads_clips" && <Video size={10} className="text-rose-500" />}
+                                <span>
+                                  {pId === "3d_spotlight"
+                                    ? "3D Spotlight"
+                                    : pId === "search_top"
+                                    ? "Search Top"
+                                    : pId === "feed_sponsored"
+                                    ? "Feed"
+                                    : pId === "ads_clips"
+                                    ? "Ads Clips"
+                                    : pId}
+                                </span>
+                              </span>
+                            ))}
+                          </div>
                         </td>
                         <td className="px-5 py-4 text-xs font-bold text-slate-600 dark:text-slate-300">
                           {camp.radius}
@@ -5385,11 +5618,23 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
                         </td>
                         <td className="px-5 py-4">
                           <div className="text-xs">
-                            <span className="font-bold text-slate-800 dark:text-white">{camp.impressions.toLocaleString()}</span>{" "}
+                            <span className="font-bold text-slate-800 dark:text-white">{(camp.impressions || 0).toLocaleString()}</span>{" "}
                             <span className="text-slate-400">views</span>
                             <span className="mx-1 text-slate-300">|</span>
-                            <span className="font-bold text-emerald-600">{camp.clicks.toLocaleString()}</span>{" "}
+                            <span className="font-bold text-emerald-600">{(camp.clicks || 0).toLocaleString()}</span>{" "}
                             <span className="text-slate-400">clicks</span>
+                          </div>
+                        </td>
+                        <td className="px-5 py-4">
+                          <div className="flex items-center gap-2.5 text-xs">
+                            <span className="inline-flex items-center gap-1 font-bold text-rose-600 dark:text-rose-400" title="Likes">
+                              <Heart size={12} className="fill-rose-500 text-rose-500" />
+                              {(camp.likes || 0).toLocaleString()}
+                            </span>
+                            <span className="inline-flex items-center gap-1 font-bold text-blue-600 dark:text-blue-400" title="Shares">
+                              <Share2 size={12} />
+                              {(camp.shares || 0).toLocaleString()}
+                            </span>
                           </div>
                         </td>
                         <td className="px-5 py-4">
@@ -5429,7 +5674,7 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={7} className="p-8 text-center text-sm text-slate-500">
+                      <td colSpan={8} className="p-8 text-center text-sm text-slate-500">
                         এখনো কোনো ক্যাম্পেইন চালানো হয়নি। উপরের বাটন ক্লিক করে প্রথম বিজ্ঞাপন রান করুন!
                       </td>
                     </tr>

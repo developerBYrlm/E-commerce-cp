@@ -6,7 +6,7 @@ export function errorHandler(error, req, res, _next) {
   let message = error.message;
   if (error.name === "MulterError") {
     if (error.code === "LIMIT_FILE_SIZE") {
-      message = "Image size exceeds the 10 MB limit. Please upload a file under 10 MB.";
+      message = "File size exceeds the allowed limit (Images: 10 MB, Video Clips: 40 MB).";
     } else if (error.code === "LIMIT_FILE_COUNT") {
       message = "Too many files uploaded. Maximum 5 images allowed.";
     } else {

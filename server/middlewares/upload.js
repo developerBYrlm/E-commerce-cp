@@ -93,3 +93,40 @@ export const uploadImages = [
     });
   },
 ];
+
+// Video upload configuration for Ads Clips (Max 40 MB as requested)
+const videoMulter = multer({
+  storage,
+  limits: { fileSize: 40 * 1024 * 1024 }, // 40 MB
+  fileFilter(_req, file, callback) {
+    if (!["video/mp4", "video/webm", "video/quicktime", "video/x-m4v", "video/ogg"].includes(file.mimetype)) {
+      const error = new Error("Only MP4, WebM, and MOV video clips under 40 MB are accepted");
+      error.status = 400;
+      return callback(error);
+    }
+    callback(null, true);
+  },
+});
+
+export const uploadVideo = [
+  (req, res, next) => {
+    videoMulter.fields([{ name: "video", maxCount: 1 }, { name: "file", maxCount: 1 }])(req, res, (err) => {
+      if (err) return next(err);
+      const file = req.files?.video?.[0] || req.files?.file?.[0] || req.file;
+      if (!file) return res.status(400).json({ message: "Select a video under 40 MB to upload" });
+      req.file = file;
+      next();
+    });
+  },
+  (req, res) => {
+    const subfolder = req.uploadSubfolder || (req.user?.role === "owner" ? "owners" : "customers");
+    const filename = req.file.filename;
+    const url = `/uploads/${subfolder}/${filename}`;
+    res.status(201).json({
+      filename,
+      url,
+      size: req.file.size,
+      folder: subfolder,
+    });
+  },
+];

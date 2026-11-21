@@ -40,6 +40,7 @@ import ServiceDealsShowcase from "../components/ServiceDealsShowcase";
 import SpatialNeighborhoodRadar from "../components/3d/SpatialNeighborhoodRadar";
 import Card3DTilt from "../components/3d/Card3DTilt";
 import Background3DParticles from "../components/3d/Background3DParticles";
+import AdsClipsShowcase from "../components/AdsClipsShowcase";
 
 const CATEGORIES_DATA = [
   {
@@ -498,6 +499,9 @@ export default function Home() {
           </motion.div>
         </div>
       </section>
+
+      {/* ADS CLIPS (REELS / SHORTS STYLE VIDEO SHOWCASE) */}
+      <AdsClipsShowcase />
 
       {/* 3D CATEGORIES CAROUSEL WITH INTERACTIVE 3D DROPDOWN DRAWER */}
       <section className="relative z-10 bg-white py-16 sm:py-20">

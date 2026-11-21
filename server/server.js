@@ -14,7 +14,7 @@ import { connectDatabase } from "./config/db.js";
 import { protect, authorize } from "./middlewares/authMiddleware.js";
 import { sanitizeInput } from "./middlewares/sanitizeInput.js";
 import { errorHandler, notFound } from "./middlewares/errorHandler.js";
-import { uploadImage, uploadImages } from "./middlewares/upload.js";
+import { uploadImage, uploadImages, uploadVideo } from "./middlewares/upload.js";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import {
@@ -101,6 +101,7 @@ app.use("/api/reports", reportRoutes);
 app.get("/api/payments/bkash/callback", bkashCallback);
 app.post("/api/uploads/image", protect, uploadImage);
 app.post("/api/uploads/images", protect, uploadImages);
+app.post("/api/uploads/video", protect, uploadVideo);
 app.get("/api/admin/stats", protect, authorize("admin"), asyncHandler(async (_req, res) => {
   const [users, shops, products] = await Promise.all([User.countDocuments(), Shop.countDocuments(), Product.countDocuments()]);
   res.json({ users, shops, products });
