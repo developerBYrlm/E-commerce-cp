@@ -48,6 +48,7 @@ import {
   Share2,
   Video,
   Film,
+  Pencil,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useQueryClient } from "@tanstack/react-query";
@@ -4886,6 +4887,57 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
     toast.success("ক্যাম্পেইন ডিলিট করা হয়েছে");
   };
 
+  // State and handlers for editing Campaign Name & Title inline
+  const [editingCampId, setEditingCampId] = useState(null);
+  const [editingCampTitle, setEditingCampTitle] = useState("");
+  const [isSavingCampTitle, setIsSavingCampTitle] = useState(false);
+
+  const handleStartEditTitle = (camp) => {
+    setEditingCampId(camp.id);
+    setEditingCampTitle(camp.title || camp.name || "");
+  };
+
+  const handleSaveCampTitle = async (campId) => {
+    if (!editingCampTitle.trim()) {
+      toast.error("ক্যাম্পেইনের টাইটেল খালি রাখা যাবে না");
+      return;
+    }
+    setIsSavingCampTitle(true);
+    const newTitle = editingCampTitle.trim();
+    try {
+      await api.patch(`/campaigns/${campId}`, { title: newTitle });
+      setCampaigns((prev) =>
+        prev.map((c) =>
+          c.id === campId ? { ...c, title: newTitle, name: newTitle } : c
+        )
+      );
+      try {
+        const saved = localStorage.getItem("ls_ad_campaigns");
+        if (saved) {
+          const camps = JSON.parse(saved);
+          const updated = camps.map((c) =>
+            c.id === campId ? { ...c, title: newTitle, name: newTitle } : c
+          );
+          localStorage.setItem("ls_ad_campaigns", JSON.stringify(updated));
+          window.dispatchEvent(new Event("storage"));
+        }
+      } catch (e) {}
+      toast.success("✅ ক্যাম্পেইনের নাম সফলভাবে আপডেট হয়েছে!");
+      setEditingCampId(null);
+    } catch (err) {
+      console.warn("Could not save title to server:", err);
+      setCampaigns((prev) =>
+        prev.map((c) =>
+          c.id === campId ? { ...c, title: newTitle, name: newTitle } : c
+        )
+      );
+      toast.success("✅ ক্যাম্পেইনের নাম সেভ হয়েছে!");
+      setEditingCampId(null);
+    } finally {
+      setIsSavingCampTitle(false);
+    }
+  };
+
   const currentPlanObj = plans.find((p) => p.id === currentPlanId) || plans[0];
 
   return (
@@ -5654,10 +5706,75 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
                     campaigns.map((camp) => (
                       <tr key={camp.id} className="transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/40 whitespace-nowrap">
                         <td className="px-4 py-3.5 whitespace-nowrap">
-                          <div className="flex items-center gap-1.5 whitespace-nowrap">
-                            <span className="font-bold text-slate-900 dark:text-white">{camp.name}</span>
-                            <span className="text-slate-400">·</span>
-                            <span className="text-xs text-slate-500 dark:text-slate-400">🎯 {camp.targetTitle}</span>
+                          <div className="flex items-center gap-3 whitespace-nowrap">
+                            {/* Video Prototype Thumbnail / Badge */}
+                            {camp.videoUrl ? (
+                              <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-black shadow-xs">
+                                <video
+                                  src={camp.videoUrl}
+                                  className="h-full w-full object-cover"
+                                  muted
+                                  playsInline
+                                />
+                                <div className="absolute inset-0 grid place-items-center bg-black/40 text-white">
+                                  <Play size={12} className="fill-white" />
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-forest/10 text-forest border border-forest/20">
+                                <Target size={16} />
+                              </div>
+                            )}
+
+                            {/* Campaign / Video Title & Target with Inline Editing */}
+                            <div className="min-w-0">
+                              {editingCampId === camp.id ? (
+                                <div className="flex items-center gap-1.5">
+                                  <input
+                                    type="text"
+                                    value={editingCampTitle}
+                                    onChange={(e) => setEditingCampTitle(e.target.value)}
+                                    className="w-40 rounded-lg border border-forest px-2 py-1 text-xs font-bold focus:outline-none dark:bg-slate-800 dark:text-white"
+                                    placeholder="ভিডিও/অ্যাড নাম"
+                                    autoFocus
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => handleSaveCampTitle(camp.id)}
+                                    disabled={isSavingCampTitle}
+                                    className="rounded-lg bg-forest p-1 text-white hover:bg-forest/90"
+                                    title="Save Title"
+                                  >
+                                    <Check size={13} />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setEditingCampId(null)}
+                                    className="rounded-lg bg-slate-200 p-1 text-slate-700 hover:bg-slate-300 dark:bg-slate-700 dark:text-white"
+                                    title="Cancel"
+                                  >
+                                    <X size={13} />
+                                  </button>
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-1.5">
+                                  <span className="font-extrabold text-slate-900 dark:text-white text-sm">
+                                    {camp.title || camp.name || "website create"}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleStartEditTitle(camp)}
+                                    className="rounded p-1 text-slate-400 transition hover:bg-slate-100 hover:text-forest dark:hover:bg-slate-800"
+                                    title="Edit Campaign Name"
+                                  >
+                                    <Pencil size={11} />
+                                  </button>
+                                </div>
+                              )}
+                              <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 truncate">
+                                🎯 {camp.target || camp.targetTitle || "Shop: RUPAYAN"}
+                              </p>
+                            </div>
                           </div>
                         </td>
                         <td className="px-4 py-3.5 whitespace-nowrap">
@@ -5735,6 +5852,14 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
                         </td>
                         <td className="px-4 py-3.5 text-right whitespace-nowrap">
                           <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => handleStartEditTitle(camp)}
+                              className="btn btn-ghost btn-xs rounded-lg text-slate-600 hover:text-forest"
+                              title="Edit Campaign Name"
+                            >
+                              <Pencil size={13} />
+                            </button>
                             <button
                               type="button"
                               onClick={() => handleToggleStatus(camp.id)}

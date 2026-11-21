@@ -12,6 +12,8 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  ChevronUp,
+  ChevronDown,
   ArrowLeft,
   Store,
   Flame,
@@ -139,8 +141,69 @@ export default function AdsClipsShowcase() {
   // Sound muted state (default true for web autoplay compliance)
   const [isMuted, setIsMuted] = useState(true);
 
+  // Track liked status per clip in localStorage
+  const [likedMap, setLikedMap] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("ls_clips_liked_map") || "{}");
+    } catch (e) {
+      return {};
+    }
+  });
+
   // Full-screen Shorts/Clips Modal state
   const [activeModalClipIndex, setActiveModalClipIndex] = useState(null);
+
+  // Navigate to Next Clip (Facebook Reels style scroll down)
+  const handleNextClip = () => {
+    if (activeModalClipIndex !== null && activeModalClipIndex < clips.length - 1) {
+      handleOpenClip(activeModalClipIndex + 1);
+    }
+  };
+
+  // Navigate to Previous Clip (Facebook Reels style scroll up)
+  const handlePrevClip = () => {
+    if (activeModalClipIndex !== null && activeModalClipIndex > 0) {
+      handleOpenClip(activeModalClipIndex - 1);
+    }
+  };
+
+  // Wheel and keyboard arrow navigation for Facebook Reels style one-after-another scrolling
+  useEffect(() => {
+    if (activeModalClipIndex === null) return;
+
+    let wheelDebounce = false;
+    const handleKeyDown = (e) => {
+      if (e.key === "ArrowDown" || e.key === "PageDown") {
+        e.preventDefault();
+        handleNextClip();
+      } else if (e.key === "ArrowUp" || e.key === "PageUp") {
+        e.preventDefault();
+        handlePrevClip();
+      } else if (e.key === "Escape") {
+        setActiveModalClipIndex(null);
+      }
+    };
+
+    const handleWheel = (e) => {
+      if (wheelDebounce) return;
+      if (e.deltaY > 30) {
+        wheelDebounce = true;
+        handleNextClip();
+        setTimeout(() => { wheelDebounce = false; }, 400);
+      } else if (e.deltaY < -30) {
+        wheelDebounce = true;
+        handlePrevClip();
+        setTimeout(() => { wheelDebounce = false; }, 400);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("wheel", handleWheel, { passive: true });
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("wheel", handleWheel);
+    };
+  }, [activeModalClipIndex, clips.length]);
 
   // Open modal and increment real view count on click (whenever video is opened on user screen)
   const handleOpenClip = (index) => {
@@ -475,7 +538,38 @@ export default function AdsClipsShowcase() {
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-3 sm:p-5 backdrop-blur-md animate-fadeIn"
           onClick={() => setActiveModalClipIndex(null)}
         >
-          {/* Previous Clip Button */}
+          {/* Floating Facebook Reels / TikTok style Vertical Reel-switch buttons */}
+          <div className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-50 flex flex-col items-center gap-3 select-none">
+            {activeModalClipIndex > 0 && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handlePrevClip();
+                }}
+                className="grid h-11 w-11 place-items-center rounded-full bg-black/60 text-white backdrop-blur-md border border-white/20 shadow-xl transition-all hover:bg-emerald-600 hover:scale-110 active:scale-95"
+                title="Previous Reel (Scroll Up)"
+              >
+                <ChevronUp size={22} />
+              </button>
+            )}
+
+            {activeModalClipIndex < clips.length - 1 && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleNextClip();
+                }}
+                className="grid h-11 w-11 place-items-center rounded-full bg-black/60 text-white backdrop-blur-md border border-white/20 shadow-xl transition-all hover:bg-emerald-600 hover:scale-110 active:scale-95"
+                title="Next Reel (Scroll Down)"
+              >
+                <ChevronDown size={22} />
+              </button>
+            )}
+          </div>
+
+          {/* Previous Clip Button (Desktop Horizontal Left) */}
           {activeModalClipIndex > 0 && (
             <button
               type="button"
@@ -483,14 +577,14 @@ export default function AdsClipsShowcase() {
                 e.stopPropagation();
                 handleOpenClip(Math.max(0, activeModalClipIndex - 1));
               }}
-              className="absolute left-2 top-1/2 z-50 -translate-y-1/2 rounded-full bg-white/10 p-3 text-white backdrop-blur-md transition hover:bg-white/25 active:scale-95 sm:left-6"
+              className="absolute left-2 top-1/2 z-50 -translate-y-1/2 rounded-full bg-white/10 p-3 text-white backdrop-blur-md transition hover:bg-white/25 active:scale-95 sm:left-6 hidden md:grid"
               title="Previous clip"
             >
               <ChevronLeft size={24} />
             </button>
           )}
 
-          {/* Next Clip Button */}
+          {/* Next Clip Button (Desktop Horizontal Right) */}
           {activeModalClipIndex < clips.length - 1 && (
             <button
               type="button"
@@ -498,7 +592,7 @@ export default function AdsClipsShowcase() {
                 e.stopPropagation();
                 handleOpenClip(Math.min(clips.length - 1, activeModalClipIndex + 1));
               }}
-              className="absolute right-2 top-1/2 z-50 -translate-y-1/2 rounded-full bg-white/10 p-3 text-white backdrop-blur-md transition hover:bg-white/25 active:scale-95 sm:right-6"
+              className="absolute right-16 top-1/2 z-50 -translate-y-1/2 rounded-full bg-white/10 p-3 text-white backdrop-blur-md transition hover:bg-white/25 active:scale-95 sm:right-20 hidden md:grid"
               title="Next clip"
             >
               <ChevronRight size={24} />

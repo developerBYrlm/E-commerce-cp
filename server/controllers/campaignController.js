@@ -180,6 +180,31 @@ export const recordInteraction = asyncHandler(async (req, res) => {
   });
 });
 
+export const updateCampaign = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { title, name, caption, targetArea, dailyBudget } = req.body;
+  const campaign = await Campaign.findById(id);
+  if (!campaign) {
+    return res.status(404).json({ message: "Campaign not found" });
+  }
+
+  if (title) campaign.title = title.trim();
+  if (name) campaign.title = name.trim();
+  if (caption !== undefined) campaign.caption = caption.trim();
+  if (targetArea) campaign.targetArea = targetArea;
+  if (dailyBudget) campaign.dailyBudget = Number(dailyBudget);
+
+  await campaign.save();
+
+  res.json({
+    campaign: {
+      ...campaign.toObject(),
+      id: String(campaign._id),
+      name: campaign.title,
+    },
+  });
+});
+
 export const updateCampaignStatus = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const campaign = await Campaign.findById(id);
