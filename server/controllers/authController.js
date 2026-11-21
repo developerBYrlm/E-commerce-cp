@@ -20,7 +20,7 @@ function setSession(res, user) {
 }
 function publicUser(user) {
   return {
-    id: user.id, name: user.name, email: user.email, role: user.role, avatar: user.avatar,
+    id: user.id, _id: user.id, name: user.name, email: user.email, role: user.role, avatar: user.avatar,
     isVerified: user.isVerified, subscriptionPlan: user.subscriptionPlan || "starter", following: user.following || [], followingServices: user.followingServices || [], wishlist: user.wishlist || [],
     phone: user.phone || "", district: user.district || "", subDistrict: user.subDistrict || "",
     area: user.area || "", address: user.address || "", extendedAddress: user.extendedAddress || "",

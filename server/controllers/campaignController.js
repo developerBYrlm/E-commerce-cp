@@ -48,8 +48,17 @@ export const listCampaigns = asyncHandler(async (req, res) => {
   await ensureSeedCampaign();
 
   const filter = {};
-  // If not requested from owner's private dashboard with ?all=true, return active campaigns
-  if (req.query.all !== "true" && req.query.scope !== "all") {
+  const isMine = req.query.mine === "true" || req.query.mine === "1" || req.query.scope === "mine";
+
+  if (isMine) {
+    if (!req.user) {
+      return res.json({ campaigns: [] });
+    }
+    // Only return campaigns belonging to the authenticated owner
+    filter.owner = req.user._id;
+  } else if (req.query.all !== "true" && req.query.scope !== "all") {
+    // For homepage clips ads and public visitor feeds:
+    // Display all active campaigns from all owners across the entire platform
     filter.status = "active";
   }
 
@@ -62,6 +71,7 @@ export const listCampaigns = asyncHandler(async (req, res) => {
     campaigns: campaigns.map((c) => ({
       ...c,
       id: String(c._id),
+      _id: String(c._id),
       // Ensure verified flag is properly reflected from shop or default
       verified: c.shop?.verified !== undefined ? c.shop.verified : c.verified !== false,
       shopName: c.shop?.name || c.shopName || "Local Shop",
@@ -97,7 +107,10 @@ export const createCampaign = asyncHandler(async (req, res) => {
   let targetShop = null;
 
   if (shopId) {
-    targetShop = await Shop.findById(shopId);
+    targetShop = await Shop.findOne({ _id: shopId, owner: req.user?._id });
+    if (!targetShop && req.user?.role === "admin") {
+      targetShop = await Shop.findById(shopId);
+    }
   } else {
     // Try to find user's shop
     targetShop = await Shop.findOne({ owner: req.user?._id });
@@ -188,6 +201,11 @@ export const updateCampaign = asyncHandler(async (req, res) => {
     return res.status(404).json({ message: "Campaign not found" });
   }
 
+  // Strict ownership check: Owner can only edit their own campaigns, unless admin
+  if (req.user?.role !== "admin" && (!campaign.owner || String(campaign.owner) !== String(req.user?._id))) {
+    return res.status(403).json({ message: "You can only edit your own campaigns" });
+  }
+
   if (title) campaign.title = title.trim();
   if (name) campaign.title = name.trim();
   if (caption !== undefined) campaign.caption = caption.trim();
@@ -200,6 +218,7 @@ export const updateCampaign = asyncHandler(async (req, res) => {
     campaign: {
       ...campaign.toObject(),
       id: String(campaign._id),
+      _id: String(campaign._id),
       name: campaign.title,
     },
   });
@@ -212,18 +231,30 @@ export const updateCampaignStatus = asyncHandler(async (req, res) => {
     return res.status(404).json({ message: "Campaign not found" });
   }
 
+  // Strict ownership check: Owner can only toggle their own campaigns, unless admin
+  if (req.user?.role !== "admin" && (!campaign.owner || String(campaign.owner) !== String(req.user?._id))) {
+    return res.status(403).json({ message: "You can only manage your own campaigns" });
+  }
+
   campaign.status = campaign.status === "active" ? "paused" : "active";
   await campaign.save();
 
-  res.json({ campaign: { ...campaign.toObject(), id: String(campaign._id) } });
+  res.json({ campaign: { ...campaign.toObject(), id: String(campaign._id), _id: String(campaign._id) } });
 });
 
 export const deleteCampaign = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const campaign = await Campaign.findByIdAndDelete(id);
+  const campaign = await Campaign.findById(id);
   if (!campaign) {
     return res.status(404).json({ message: "Campaign not found" });
   }
+
+  // Strict ownership check: Owner can only delete their own campaigns, unless admin
+  if (req.user?.role !== "admin" && (!campaign.owner || String(campaign.owner) !== String(req.user?._id))) {
+    return res.status(403).json({ message: "You can only delete your own campaigns" });
+  }
+
+  await Campaign.findByIdAndDelete(id);
 
   res.json({ message: "Campaign deleted successfully", id });
 });

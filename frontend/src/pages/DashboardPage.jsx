@@ -90,7 +90,7 @@ async function uploadFilesToBackend(files, folder = "owners") {
 }
 
 export default function DashboardPage({ initialTab = "overview" }) {
-  const { user, toggleWishlist, updateProfile, followShop, followService } = useAuth();
+  const { user, toggleWishlist, updateProfile, followShop, followService, refreshUser } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const urlTab = searchParams.get("tab");
   const [tab, setTabState] = useState(urlTab || initialTab);
@@ -135,10 +135,13 @@ export default function DashboardPage({ initialTab = "overview" }) {
 
   const unreadMessagesCount = inboxQuery.data?.counts?.unread || 0;
 
-  // Active subscription plan and Pro status
+  // Active subscription plan and Pro status - strictly isolated per owner
   const [currentPlanId, setCurrentPlanId] = useState(() => {
-    return localStorage.getItem("ls_subscription_plan") || "starter";
+    return user?.subscriptionPlan || "starter";
   });
+  useEffect(() => {
+    setCurrentPlanId(user?.subscriptionPlan || "starter");
+  }, [user?._id, user?.id, user?.subscriptionPlan]);
   const isProActive = Boolean(user?.role === "owner" && currentPlanId && currentPlanId !== "starter");
 
   // Real-time total followers count for owner
@@ -583,6 +586,7 @@ export default function DashboardPage({ initialTab = "overview" }) {
             services={services.data?.items || []}
             currentPlanId={currentPlanId}
             setCurrentPlanId={setCurrentPlanId}
+            refreshUser={refreshUser}
           />
         )}
         {tab === "inbox" && <MessagesPage />}
@@ -4493,7 +4497,7 @@ function DataList({ title, query, type, user, onUpdate, onRefund, onReconcileRef
 
 // ----------------- PRO MODE SECTION (SUBSCRIPTIONS & RUN ADS) -----------------
 
-function ProModeSection({ user, shops = [], products = [], services = [], currentPlanId = "starter", setCurrentPlanId }) {
+function ProModeSection({ user, shops = [], products = [], services = [], currentPlanId = "starter", setCurrentPlanId, refreshUser }) {
   const [proTab, setProTab] = useState("subscription"); // 'subscription' | 'ads'
   const [billingCycle, setBillingCycle] = useState("monthly"); // 'monthly' | 'yearly'
 
@@ -4527,59 +4531,64 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
   const [campCaption, setCampCaption] = useState("");
 
-  // Active campaigns list (No hardcoded demo campaigns, starts empty if none launched)
+  const ownerId = user?._id || user?.id;
+  const ownerCampaignsStorageKey = ownerId ? `ls_ad_campaigns_${ownerId}` : "ls_ad_campaigns_guest";
+
+  // Active campaigns list - strictly isolated per owner (starts empty if none launched)
   const [campaigns, setCampaigns] = useState(() => {
-    const saved = localStorage.getItem("ls_ad_campaigns");
+    if (typeof window === "undefined" || !ownerId) return [];
+    const saved = localStorage.getItem(ownerCampaignsStorageKey);
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        // Exclude old demo campaigns camp-101 and camp-102, and reset initial views to 0 as requested
-        const sanitized = parsed
-          .filter((c) => c.id !== "camp-101" && c.id !== "camp-102")
-          .map((c) => ({ ...c, impressions: 0 }));
-        localStorage.setItem("ls_ad_campaigns", JSON.stringify(sanitized));
-        return sanitized;
+        return parsed.filter((c) => c.id !== "camp-101" && c.id !== "camp-102");
       } catch (e) { }
     }
     return [];
   });
 
-  // Save campaigns to localStorage
+  // Re-sync campaigns when owner account switches
   useEffect(() => {
-    try {
-      localStorage.setItem("ls_ad_campaigns", JSON.stringify(campaigns));
-    } catch (e) { }
-  }, [campaigns]);
-
-  // Sync state if campaigns update from views or clicks in other components
-  useEffect(() => {
-    const syncCampaigns = () => {
+    if (!ownerId) {
+      setCampaigns([]);
+      return;
+    }
+    const saved = localStorage.getItem(`ls_ad_campaigns_${ownerId}`);
+    if (saved) {
       try {
-        const saved = localStorage.getItem("ls_ad_campaigns");
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          setCampaigns(parsed.filter((c) => c.id !== "camp-101" && c.id !== "camp-102"));
-        }
+        const parsed = JSON.parse(saved);
+        setCampaigns(parsed.filter((c) => c.id !== "camp-101" && c.id !== "camp-102"));
       } catch (e) { }
-    };
-    window.addEventListener("storage", syncCampaigns);
-    return () => window.removeEventListener("storage", syncCampaigns);
-  }, []);
+    } else {
+      setCampaigns([]);
+    }
+  }, [ownerId]);
 
-  // Fetch campaigns from backend API so all browsers and sessions share real campaign state
+  // Save campaigns to owner-specific localStorage key
+  useEffect(() => {
+    if (!ownerId) return;
+    try {
+      localStorage.setItem(`ls_ad_campaigns_${ownerId}`, JSON.stringify(campaigns));
+    } catch (e) { }
+  }, [campaigns, ownerId]);
+
+  // Fetch campaigns from backend API filtered strictly by current owner (?mine=true)
   useEffect(() => {
     let isMounted = true;
     async function loadBackendCampaigns() {
+      if (!ownerId) return;
       try {
-        const res = await api.get("/campaigns?all=true");
-        if (res.data?.campaigns?.length > 0 && isMounted) {
+        const res = await api.get("/campaigns?mine=true");
+        if (isMounted && Array.isArray(res.data?.campaigns)) {
           setCampaigns(res.data.campaigns);
         }
-      } catch (e) { }
+      } catch (e) {
+        console.warn("Could not load owner campaigns from server:", e);
+      }
     }
     loadBackendCampaigns();
     return () => { isMounted = false; };
-  }, []);
+  }, [ownerId]);
 
   // Subscription plans definitions
   const plans = [
@@ -4677,14 +4686,18 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
     setTimeout(async () => {
       setIsPaying(false);
       setCurrentPlanId(checkoutPlan.id);
-      localStorage.setItem("ls_subscription_plan", checkoutPlan.id);
-      if (user?._id) {
-        localStorage.setItem("ls_verified_owner_" + user._id, "true");
+      if (ownerId) {
+        localStorage.setItem(`ls_subscription_plan_${ownerId}`, checkoutPlan.id);
+        localStorage.setItem(`ls_verified_owner_${ownerId}`, "true");
       }
+      localStorage.removeItem("ls_subscription_plan");
 
       // Persist subscription plan and verified status to server database
       try {
         await api.put("/users/subscription", { plan: checkoutPlan.id });
+        if (typeof refreshUser === "function") {
+          await refreshUser();
+        }
       } catch (e) {
         console.warn("Could not sync subscription to server:", e);
       }
@@ -4699,12 +4712,16 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
 
   const handleCancelSubscription = async () => {
     setCurrentPlanId("starter");
-    localStorage.setItem("ls_subscription_plan", "starter");
-    if (user?._id) {
-      localStorage.removeItem("ls_verified_owner_" + user._id);
+    if (ownerId) {
+      localStorage.setItem(`ls_subscription_plan_${ownerId}`, "starter");
+      localStorage.removeItem(`ls_verified_owner_${ownerId}`);
     }
+    localStorage.removeItem("ls_subscription_plan");
     try {
       await api.put("/users/subscription", { plan: "starter" });
+      if (typeof refreshUser === "function") {
+        await refreshUser();
+      }
     } catch (e) {
       console.warn("Could not cancel subscription on server:", e);
     }
@@ -4912,14 +4929,13 @@ function ProModeSection({ user, shops = [], products = [], services = [], curren
         )
       );
       try {
-        const saved = localStorage.getItem("ls_ad_campaigns");
+        const saved = localStorage.getItem(ownerCampaignsStorageKey);
         if (saved) {
           const camps = JSON.parse(saved);
           const updated = camps.map((c) =>
             c.id === campId ? { ...c, title: newTitle, name: newTitle } : c
           );
-          localStorage.setItem("ls_ad_campaigns", JSON.stringify(updated));
-          window.dispatchEvent(new Event("storage"));
+          localStorage.setItem(ownerCampaignsStorageKey, JSON.stringify(updated));
         }
       } catch (e) {}
       toast.success("✅ ক্যাম্পেইনের নাম সফলভাবে আপডেট হয়েছে!");

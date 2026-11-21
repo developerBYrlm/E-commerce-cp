@@ -32,59 +32,8 @@ export default function AdsClipsShowcase() {
   const navigate = useNavigate();
 
   // Load only real active campaign clips from localStorage (NO demo/fake clips)
-  const [clips, setClips] = useState(() => {
-    try {
-      const saved = localStorage.getItem("ls_ad_campaigns");
-      if (saved) {
-        const campaigns = JSON.parse(saved);
-        // User's current location district/area for targeted ads
-        const userArea = (user?.address?.district || user?.address?.area || user?.district || "").toLowerCase().trim();
-
-        // Ensure all campaigns start with 0 views as instructed
-        const resetViews = campaigns.map((c) => ({
-          ...c,
-          impressions: 0,
-        }));
-        localStorage.setItem("ls_ad_campaigns", JSON.stringify(resetViews));
-
-        // Only include active campaigns that have a real videoUrl uploaded and are NOT demo campaigns
-        return resetViews
-          .filter((c) => {
-            if (c.status !== "active" || c.id === "camp-101" || c.id === "camp-102") return false;
-            if (!c.videoUrl || typeof c.videoUrl !== "string" || c.videoUrl.trim().length === 0) return false;
-
-            // Target area matching: if camp specifies an area other than "সকল এলাকা", show to users matching that area
-            if (c.targetArea && c.targetArea !== "সকল এলাকা" && userArea) {
-              const campArea = c.targetArea.toLowerCase().trim();
-              if (!campArea.includes(userArea) && !userArea.includes(campArea)) {
-                return false;
-              }
-            }
-            return true;
-          })
-          .map((c, idx) => ({
-            id: c.id || `camp-clip-${idx}`,
-            shopName: c.targetTitle || "Local Business",
-            shopId: c.targetId || "shop-custom",
-            ownerId: c.ownerId || user?._id || "owner-demo",
-            shopLogo: c.shopLogo || "",
-            verified: true,
-            title: c.name || "Special Neighborhood Offer",
-            caption: c.caption || "",
-            productName: c.targetTitle || "Featured Item",
-            productLink: "/shops",
-            videoUrl: c.videoUrl,
-            poster: c.poster || "",
-            likes: Number(c.likes || 0),
-            shares: Number(c.shares || 0),
-            views: 0, // Reset initial view count to 0
-            targetArea: c.targetArea || "সকল এলাকা",
-            status: "active",
-          }));
-      }
-    } catch (e) {}
-    return [];
-  });
+  // Active clips fetched from backend server API (aggregating all active campaigns from all owners)
+  const [clips, setClips] = useState([]);
 
   // Fetch active campaigns from backend API so all users & browsers (logged in or guests) see live ad clips
   useEffect(() => {
@@ -222,27 +171,6 @@ export default function AdsClipsShowcase() {
     if (clip.id) {
       api.patch(`/campaigns/${clip.id}/interaction`, { action: "view" }).catch(() => {});
     }
-
-    // Increment impressions in localStorage ls_ad_campaigns
-    try {
-      const saved = localStorage.getItem("ls_ad_campaigns");
-      if (saved) {
-        const campaigns = JSON.parse(saved);
-        const updated = campaigns.map((camp) => {
-          if (camp.id === clip.id) {
-            return {
-              ...camp,
-              impressions: (camp.impressions || 0) + 1,
-            };
-          }
-          return camp;
-        });
-        localStorage.setItem("ls_ad_campaigns", JSON.stringify(updated));
-        window.dispatchEvent(new Event("storage"));
-      }
-    } catch (err) {
-      console.error("View count increment error:", err);
-    }
   };
 
   // Handle Like Button click
@@ -265,25 +193,6 @@ export default function AdsClipsShowcase() {
 
     // Call backend API to record like/unlike persistently on server
     api.patch(`/campaigns/${clipId}/interaction`, { action: isCurrentlyLiked ? "unlike" : "like" }).catch(() => {});
-
-    // Sync likes to campaign in localStorage if it exists
-    try {
-      const saved = localStorage.getItem("ls_ad_campaigns");
-      if (saved) {
-        const camps = JSON.parse(saved);
-        const updatedCamps = camps.map((camp) => {
-          if (camp.id === clipId) {
-            return {
-              ...camp,
-              likes: isCurrentlyLiked ? Math.max(0, (camp.likes || 0) - 1) : (camp.likes || 0) + 1,
-            };
-          }
-          return camp;
-        });
-        localStorage.setItem("ls_ad_campaigns", JSON.stringify(updatedCamps));
-        window.dispatchEvent(new Event("storage"));
-      }
-    } catch (err) {}
 
     if (!isCurrentlyLiked) {
       toast.success("❤️ অ্যাড ক্লিপসটিতে লাইক দেওয়া হয়েছে!", { id: "clip-like" });
@@ -312,25 +221,9 @@ export default function AdsClipsShowcase() {
   const handleDirectMessage = (e, clip) => {
     e.stopPropagation();
 
-    // Increment click count for this ad campaign
-    try {
-      const saved = localStorage.getItem("ls_ad_campaigns");
-      if (saved) {
-        const campaigns = JSON.parse(saved);
-        const updatedCamps = campaigns.map((camp) => {
-          if (camp.id === clip.id) {
-            return {
-              ...camp,
-              clicks: (camp.clicks || 0) + 1,
-            };
-          }
-          return camp;
-        });
-        localStorage.setItem("ls_ad_campaigns", JSON.stringify(updatedCamps));
-        window.dispatchEvent(new Event("storage"));
-      }
-    } catch (err) {
-      console.error("Click count increment error:", err);
+    // Increment click count for this ad campaign on server
+    if (clip.id) {
+      api.patch(`/campaigns/${clip.id}/interaction`, { action: "click" }).catch(() => {});
     }
 
     if (!user) {

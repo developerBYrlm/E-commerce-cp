@@ -53,12 +53,11 @@ export function isVerified(target) {
   // 3. Rupayan (Growth Pro seller) universal verified status across all browsers & devices
   const isRupayan = isRupayanTarget(target);
   if (isRupayan) {
-    // If the currently logged-in owner in this exact browser actively chose the Starter plan, respect it
     if (typeof window !== "undefined") {
-      const localPlan = localStorage.getItem("ls_subscription_plan");
       const currentUserId = localStorage.getItem("ls_current_user_id");
       const isCurrentOwner = target.role === "owner" && target._id && String(target._id) === String(currentUserId);
-      if (localPlan === "starter" && isCurrentOwner) {
+      const userPlan = currentUserId ? localStorage.getItem("ls_subscription_plan_" + currentUserId) : null;
+      if (userPlan === "starter" && isCurrentOwner) {
         return false;
       }
     }
@@ -66,28 +65,30 @@ export function isVerified(target) {
     return true;
   }
 
-  // 4. Local storage checks for current session owner
+  // 4. Per-owner local storage checks for immediate optimistic UI updates
   if (typeof window !== "undefined") {
-    const currentPlan = localStorage.getItem("ls_subscription_plan") || "starter";
-    const isPaid = currentPlan === "growth" || currentPlan === "elite";
-    const currentUserId = localStorage.getItem("ls_current_user_id");
-
     let ownerId = null;
     if (typeof target === "string") {
       ownerId = target;
-    } else if (target.role === "owner" || (target.email && target._id)) {
-      ownerId = String(target._id);
+    } else if (target.role === "owner" || (target.email && (target._id || target.id))) {
+      ownerId = String(target._id || target.id);
     } else if (target.shop) {
       ownerId = typeof target.shop === "object" ? (target.shop.owner?._id || target.shop.owner) : null;
     } else {
       ownerId = target.owner?._id || target.owner;
     }
 
-    if (ownerId && isPaid && String(ownerId) === String(currentUserId)) {
-      return true;
-    }
-    if (ownerId && localStorage.getItem("ls_verified_owner_" + ownerId) === "true") {
-      return true;
+    if (ownerId) {
+      const userPlan = localStorage.getItem("ls_subscription_plan_" + ownerId);
+      if (userPlan === "growth" || userPlan === "elite") {
+        return true;
+      }
+      if (userPlan === "starter") {
+        return false;
+      }
+      if (localStorage.getItem("ls_verified_owner_" + ownerId) === "true") {
+        return true;
+      }
     }
   }
 

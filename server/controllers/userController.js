@@ -51,8 +51,9 @@ export const updateProfile = asyncHandler(async (req, res) => {
     });
   }
   res.json({ user: {
-    id: req.user.id, name: req.user.name, email: req.user.email, role: req.user.role,
+    id: req.user.id, _id: req.user.id, name: req.user.name, email: req.user.email, role: req.user.role,
     avatar: req.user.avatar, isVerified: req.user.isVerified,
+    subscriptionPlan: req.user.subscriptionPlan || "starter",
     following: req.user.following || [], followingServices: req.user.followingServices || [], wishlist: req.user.wishlist || [],
     phone: req.user.phone || "", district: req.user.district || "", subDistrict: req.user.subDistrict || "",
     area: req.user.area || "", address: req.user.address || "", extendedAddress: req.user.extendedAddress || "",
@@ -213,6 +214,7 @@ export const updateSubscription = asyncHandler(async (req, res) => {
     message: `Plan successfully updated to ${plan}`,
     user: {
       id: req.user.id,
+      _id: req.user.id,
       name: req.user.name,
       email: req.user.email,
       role: req.user.role,

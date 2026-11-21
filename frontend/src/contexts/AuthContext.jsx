@@ -78,7 +78,20 @@ export function AuthProvider({ children }) {
     return data.saved;
   }, []);
 
-  return <AuthContext.Provider value={{ user, login, googleLogin, register, logout, loading, updateProfile, followShop, followService, toggleWishlist }}>{children}</AuthContext.Provider>;
+  const refreshUser = useCallback(async () => {
+    try {
+      const { data } = await api.get("/auth/me");
+      setUser(data.user);
+      if (data.user?._id) {
+        localStorage.setItem("ls_current_user_id", String(data.user._id));
+      }
+      return data.user;
+    } catch {
+      return null;
+    }
+  }, []);
+
+  return <AuthContext.Provider value={{ user, setUser, refreshUser, login, googleLogin, register, logout, loading, updateProfile, followShop, followService, toggleWishlist }}>{children}</AuthContext.Provider>;
 }
 export function useAuth() {
   const value = useContext(AuthContext);
