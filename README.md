@@ -1,6 +1,7 @@
 # LocalSphere
 
 LocalSphere is a MERN hyperlocal marketplace starter: discover local shops, browse products and services, follow shop posts, place pickup/delivery orders, request appointments, and manage a business dashboard.
+**Live :** `https://e-commerce-cp.onrender.com`  
 
 ## Requirements
 
