@@ -39,26 +39,49 @@ if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
 
 const app = express();
 const server = http.createServer(app);
-const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173").split(",").map((origin) => origin.trim());
-const io = new Server(server, { cors: { origin: allowedOrigins, credentials: true } });
+const clientUrlEnv = process.env.CLIENT_URL || process.env.CLIENT_APP_URL || "";
+const renderExternalUrl = process.env.RENDER_EXTERNAL_URL || "";
+const rawOrigins = [
+  clientUrlEnv,
+  renderExternalUrl,
+  "http://localhost:5173",
+  "http://localhost:3320",
+  "http://localhost:3000",
+].filter(Boolean);
+
+const allowedOrigins = [...new Set(rawOrigins.flatMap((o) => o.split(",").map((s) => s.trim().replace(/\/$/, ""))))];
+
+function isAllowedOrigin(origin) {
+  if (!origin) return true;
+  const normalized = origin.replace(/\/$/, "");
+  if (allowedOrigins.includes(normalized)) return true;
+  if (normalized.endsWith(".onrender.com")) return true;
+  if (normalized.includes("localhost") || normalized.includes("127.0.0.1")) return true;
+  return false;
+}
+
+const io = new Server(server, {
+  cors: {
+    origin(origin, callback) {
+      if (isAllowedOrigin(origin)) return callback(null, true);
+      callback(null, false);
+    },
+    credentials: true,
+  },
+});
 
 app.set("trust proxy", 1);
 app.set("io", io);
 app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-      "script-src": ["'self'", "https://accounts.google.com"],
-      "frame-src": ["'self'", "https://accounts.google.com"],
-      "connect-src": ["'self'", "https://accounts.google.com", "https://accounts.googleapis.com", "ws:", "wss:"],
-    },
-  },
+  contentSecurityPolicy: false,
+  crossOriginResourcePolicy: { policy: "cross-origin" },
 }));
 app.use(cors({
   origin(origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
-    callback(new Error("Origin is not allowed by CORS"));
-  }, credentials: true
+    if (isAllowedOrigin(origin)) return callback(null, true);
+    callback(null, false);
+  },
+  credentials: true,
 }));
 app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: false, limit: "1mb" }));
